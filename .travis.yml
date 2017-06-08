@@ -1,32 +1,79 @@
 dist: trusty
 sudo: false
-language: python
-os:
-  - linux
-python:
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  - "3.6-dev"
-  - "3.7-dev"
+language: generic
 matrix:
+  include:
+    - os: linux
+      language: python
+      python: "3.3"
+    - os: linux
+      language: python
+      python: "3.4"
+    - os: linux
+      language: python
+      python: "3.5"
+    - os: linux
+      language: python
+      python: "3.6"
+    - os: linux
+      language: python
+      python: "3.6-dev"
+    - os: linux
+      language: python
+      python: "3.7-dev"
+    - os: linux
+      language: python
+      python: "pypy3.3-5.5-alpha"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.3.6"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.4.6"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.5.3"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.6.1"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.6-dev"
+    - os: osx
+      language: generic
+      env: TRAVIS_PYTHON_VERSION="3.7-dev"
   allow_failures:
     - python: "3.6-dev"
     - python: "3.7-dev"
+    - env: TRAVIS_PYTHON_VERSION="3.6-dev"
+    - env: TRAVIS_PYTHON_VERSION="3.7-dev"
+
+before_install: |
+  set -e
+  if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+    brew update
+    brew install pyenv || brew upgrade pyenv
+    pyenv install "${TRAVIS_PYTHON_VERSION}"
+    export PATH="$HOME/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin:${PATH}"
+  fi
+  set +e
 
 install:
+  - python --version
+  - pip --version
   - pip install -U pip
   - pip install -U -r dev_requirements.txt
   - python setup.py sdist --formats=gztar,zip
   - python setup.py bdist_wheel
+  - ls -lah dist
   - pip install .
 
 script:
   - python -m unittest discover
 
 after_success:
-  - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -name "*.py")
+  - find . -not \( -path ./build -prune \) -name "*.py"
+  - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -not \( -path ./build -prune \) -name "*.py")
   - python -m coverage run --branch -m unittest discover --verbose
   - python -m coverage report --show-missing
   - coveralls
