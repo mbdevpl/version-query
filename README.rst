@@ -62,6 +62,17 @@ limitations
 
 Either git repository or ``PKG-INFO`` file must be present for the script to work.
 
+The current implementation aims at, but is not yet fully compatible with:
+
+*   `PEP 440 -- Version Identification and Dependency Specification <https://www.python.org/dev/peps/pep-0440/>`_
+
+*   `PEP 345 -- Metadata for Python Software Packages 1.2 <https://www.python.org/dev/peps/pep-0345/>`_
+    (which might be replaced by
+    `PEP 426 -- Metadata for Python Software Packages 2.0 <https://www.python.org/dev/peps/pep-0426/>`_
+    later)
+
+*   `PEP 508 -- Dependency specification for Python Software Packages <https://www.python.org/dev/peps/pep-0508/>`_
+
 
 requirements
 ------------
