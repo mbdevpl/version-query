@@ -5,6 +5,7 @@ import inspect
 import json
 import logging
 import pathlib
+import typing as t
 
 import git
 import packaging
@@ -21,6 +22,7 @@ DATETIME_FORMAT = '%Y%m%d%H%M%S'
 def determine_version_from_git_repo(
         repo_path: pathlib.Path, search_parent_directories=True) -> tuple:
     """Determine package version from tags and index status of a git repository."""
+    _LOG.debug('detecting applicable version from commit history')
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
     _LOG.debug('found repository in "%s"', repo.working_dir)
 
@@ -95,11 +97,20 @@ def determine_version_from_manifest(path_prefix: pathlib.Path) -> tuple:
     return Version.parse_str(version)
 
 
-def determine_version():
-    """Generate version string by querying various available information sources."""
-    _LOG.debug('detecting applicable version from commit history')
+def determine_version_from_path(path: str):
+    """Generate version tuple by querying information sources in the filesystem."""
+    try:
+        version_tuple = determine_version_from_git_repo(path)
+    except git.exc.InvalidGitRepositoryError:
+        _LOG.debug('no repository found in "%s"', path)
+        version_tuple = determine_version_from_manifest(path)
 
-    frame_info = inspect.getouterframes(inspect.currentframe())[1]
+    return version_tuple
+
+
+def determine_caller_version(inspect_level: int):
+    """Generate version string by querying all available information sources."""
+    frame_info = inspect.getouterframes(inspect.currentframe())[inspect_level]
     caller_path = frame_info[1] # frame_info.filename
 
     here = pathlib.Path(caller_path).absolute().resolve()
@@ -110,10 +121,8 @@ def determine_version():
         raise RuntimeError('path "{}" was expected to be a directory'.format(here))
     _LOG.debug('found directory "%s"', here)
 
-    try:
-        version_tuple = determine_version_from_git_repo(here)
-    except git.exc.InvalidGitRepositoryError:
-        _LOG.debug('no repository found in "%s"', here)
-        version_tuple = determine_version_from_manifest(here)
+    return determine_version_from_path(here)
 
-    return version_tuple
+
+def determine_version() -> tuple:
+    return determine_caller_version(1)
