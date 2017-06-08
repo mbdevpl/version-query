@@ -8,13 +8,13 @@ import typing as t
 
 import setuptools
 
-
-__updated__ = "2017-06-07"
+__updated__ = "2017-06-08"
 
 HERE = pathlib.Path(__file__).resolve().parent
 
 SRC_DIR = '.'
 """Directory with source code, relative to the setup.py file location."""
+
 
 def setup():
     raise NotImplementedError()
@@ -37,7 +37,7 @@ def find_version(
 
 def find_packages() -> t.List[str]:
     """Find packages to pack."""
-    exclude = ['test', 'test.*'] if 'bdist_wheel' in sys.argv else []
+    exclude = ['test', 'test.*'] if ('bdist_wheel' in sys.argv or 'bdist' in sys.argv) else []
     packages_list = setuptools.find_packages(SRC_DIR, exclude=exclude)
     return packages_list
 

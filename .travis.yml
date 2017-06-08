@@ -63,8 +63,9 @@ install:
   - pip --version
   - pip install -U pip
   - pip install -U -r dev_requirements.txt
-  - python setup.py sdist --formats=gztar,zip
+  - python setup.py bdist
   - python setup.py bdist_wheel
+  - python setup.py sdist --formats=gztar,zip
   - ls -lah dist
   - pip install .
 
@@ -72,8 +73,7 @@ script:
   - python -m unittest discover
 
 after_success:
-  - find . -not \( -path ./build -prune \) -name "*.py"
-  - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -not \( -path ./build -prune \) -name "*.py")
-  - python -m coverage run --branch -m unittest discover --verbose
+  - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -name "*.py")
+  - python -m coverage run --branch --source . -m unittest discover --verbose
   - python -m coverage report --show-missing
   - coveralls

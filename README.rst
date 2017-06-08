@@ -16,7 +16,7 @@ Package version query toolkit for Python
     :alt: build status from AppVeyor
 
 .. image:: https://coveralls.io/repos/github/mbdevpl/version-query/badge.svg?branch=master
-    :target: https://coveralls.io/github/mbdevpl/version-query?branch=master
+    :target: https://coveralls.io/github/mbdevpl/version-query
     :alt: test coverage from Coveralls
 
 This script is motivated by wish to avoid hardcoding the version number when maintaining
