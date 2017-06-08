@@ -1,6 +1,7 @@
 /.coverage
 /.*project
 /.settings
+/build
 /dist
 /htmlcov
 /*.egg-info

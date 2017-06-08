@@ -18,7 +18,9 @@ _LOG = logging.getLogger(__name__)
 DATETIME_FORMAT = '%Y%m%d%H%M%S'
 
 
-def determine_version_from_repo(repo_path: pathlib.Path, search_parent_directories=True) -> tuple:
+def determine_version_from_git_repo(
+        repo_path: pathlib.Path, search_parent_directories=True) -> tuple:
+    """Determine package version from tags and index status of a git repository."""
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
     _LOG.debug('found repository in "%s"', repo.working_dir)
 
@@ -64,7 +66,7 @@ def determine_version_from_repo(repo_path: pathlib.Path, search_parent_directori
 
 
 def determine_version_from_manifest(path_prefix: pathlib.Path) -> tuple:
-
+    """Determine version from found PKG-INFO file."""
     _LOG.debug('looking for manifest in %s', path_prefix)
     version_tuple = None, None, None, None, None, None
     version = None
@@ -95,7 +97,6 @@ def determine_version_from_manifest(path_prefix: pathlib.Path) -> tuple:
 
 def determine_version():
     """Generate version string by querying various available information sources."""
-
     _LOG.debug('detecting applicable version from commit history')
 
     frame_info = inspect.getouterframes(inspect.currentframe())[1]
@@ -110,7 +111,7 @@ def determine_version():
     _LOG.debug('found directory "%s"', here)
 
     try:
-        version_tuple = determine_version_from_repo(here)
+        version_tuple = determine_version_from_git_repo(here)
     except git.exc.InvalidGitRepositoryError:
         _LOG.debug('no repository found in "%s"', here)
         version_tuple = determine_version_from_manifest(here)

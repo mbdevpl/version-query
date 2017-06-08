@@ -1,7 +1,9 @@
+"""Tests for version determination functions."""
 
 import unittest
 
 from version_query.determine import determine_version
+
 
 class Tests(unittest.TestCase):
 

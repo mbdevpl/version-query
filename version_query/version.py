@@ -10,6 +10,8 @@ _LOG = logging.getLogger(__name__)
 
 class Version:
 
+    """Version information parser and unparser."""
+
     _num = r'0|[123456789][0123456789]*'
     _major = r'(?P<major>{})'.format(_num)
     _minor = r'\.(?P<minor>{})'.format(_num)
@@ -24,6 +26,7 @@ class Version:
 
     @classmethod
     def parse_str(cls, version_str: str):
+        """Parse given version string into actionable version information."""
         assert isinstance(version_str, str), (type(version_str), version_str)
 
         #version = pkg_resources.parse_version(version_str) # type: packaging.version.Version
@@ -47,7 +50,8 @@ class Version:
         return version_tuple
 
     @classmethod
-    def generate_str(cls, major: int = None, minor: int = None, release: int = None,
+    def generate_str(
+            cls, major: int = None, minor: int = None, release: int = None,
             suffix: str = None, patch: int = None, commit_sha: str = None) -> str:
         """Convert given version information to version string."""
         assert major is None or isinstance(major, int), (type(major), major)

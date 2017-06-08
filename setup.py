@@ -1,3 +1,4 @@
+"""Build script for version_query package."""
 
 import setuptools
 
@@ -50,8 +51,9 @@ def setup() -> None:
         author=author, author_email=author_email,
         maintainer=author, maintainer_email=author_email,
         license=license_str, classifiers=classifiers, keywords=keywords,
-        packages=setup_boilerplate.find_packages(), package_dir={'': setup_boilerplate.SRC_DIR}, include_package_data=True,
-        package_data=package_data, exclude_package_data=exclude_package_data,
+        packages=setup_boilerplate.find_packages(), package_dir={'': setup_boilerplate.SRC_DIR},
+        include_package_data=True, package_data=package_data,
+        exclude_package_data=exclude_package_data,
         install_requires=setup_boilerplate.parse_requirements(), extras_require=extras_require,
         python_requires=setup_boilerplate.find_required_python_version(classifiers),
         entry_points=entry_points, test_suite=test_suite)
