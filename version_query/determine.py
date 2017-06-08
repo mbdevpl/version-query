@@ -52,6 +52,10 @@ def determine_version_from_git_repo(
     major, minor, release, patch, suffix, commit_sha = latest_version
 
     if repo.head.commit != latest_version_commit or repo.is_dirty(untracked_files=True):
+        if minor is None:
+            minor = 0
+        if release is None:
+            release = 0
         release += 1
         suffix = 'dev'
         patch = 0
