@@ -39,10 +39,10 @@ class Version:
                 'version string "{}" is invalid'.format(version_str))
 
         major = int(match['major'])
-        minor = int(match['minor'])
-        release = int(match['release'])
-        patch = int(match['patch'])
+        minor = None if match['minor'] is None else int(match['minor'])
+        release = None if match['release'] is None else int(match['release'])
         suffix = match['suffix']
+        patch = None if match['patch'] is None else int(match['patch'])
         commit_sha = match['sha']
 
         version_tuple = major, minor, release, suffix, patch, commit_sha
