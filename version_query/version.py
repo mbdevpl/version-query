@@ -38,12 +38,12 @@ class Version:
             raise packaging.version.InvalidVersion(
                 'version string "{}" is invalid'.format(version_str))
 
-        major = int(match['major'])
-        minor = None if match['minor'] is None else int(match['minor'])
-        release = None if match['release'] is None else int(match['release'])
-        suffix = match['suffix']
-        patch = None if match['patch'] is None else int(match['patch'])
-        commit_sha = match['sha']
+        major = int(match.group('major'))
+        minor = None if match.group('minor') is None else int(match.group('minor'))
+        release = None if match.group('release') is None else int(match.group('release'))
+        suffix = match.group('suffix')
+        patch = None if match.group('patch') is None else int(match.group('patch'))
+        commit_sha = match.group('sha')
 
         version_tuple = major, minor, release, suffix, patch, commit_sha
         _LOG.debug('parsed metadata version into tuple: %s', version_tuple)
