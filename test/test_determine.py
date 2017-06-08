@@ -1,4 +1,4 @@
-"""Tests for version determination functions."""
+"""Tests of version determination functions."""
 
 import unittest
 

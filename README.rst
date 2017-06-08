@@ -11,7 +11,7 @@ Package version query toolkit for Python
     :target: https://travis-ci.org/mbdevpl/version-query
     :alt: build status from Travis CI
 
-.. image:: https://ci.appveyor.com/api/projects/status/github/mbdevpl/version-query/branch/master?svg=true
+.. image:: https://ci.appveyor.com/api/projects/status/github/mbdevpl/version-query?branch=master&svg=true
     :target: https://ci.appveyor.com/project/mbdevpl/version-query
     :alt: build status from AppVeyor
 
