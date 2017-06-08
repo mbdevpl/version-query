@@ -4,6 +4,7 @@ import logging
 import re
 
 import packaging
+import pkg_resources
 
 _LOG = logging.getLogger(__name__)
 
@@ -29,8 +30,8 @@ class Version:
         """Parse given version string into actionable version information."""
         assert isinstance(version_str, str), (type(version_str), version_str)
 
-        #version = pkg_resources.parse_version(version_str) # type: packaging.version.Version
-        #print(type(version))
+        version = pkg_resources.parse_version(version_str) # type: packaging.version.Version
+        _LOG.debug('preliminarily parsed version string into %s: %s', type(version), version)
 
         match = cls.version_pattern.match(version_str)
 
@@ -46,7 +47,7 @@ class Version:
         commit_sha = match.group('sha')
 
         version_tuple = major, minor, release, suffix, patch, commit_sha
-        _LOG.debug('parsed metadata version into tuple: %s', version_tuple)
+        _LOG.debug('parsed version string into tuple: %s', version_tuple)
         return version_tuple
 
     @classmethod
@@ -64,19 +65,29 @@ class Version:
         version_tuple = major, minor, release, suffix, patch, commit_sha
         _LOG.debug('generating version string from tuple %s', version_tuple)
 
+        version_str = None
         if cls.version_tuple_checker(version_tuple, (True, False, False, False, False, False)):
-            return '{}'.format(major)
-        if cls.version_tuple_checker(version_tuple, (True, True, False, False, False, False)):
-            return '{}.{}'.format(major, minor)
-        if cls.version_tuple_checker(version_tuple, (True, True, True, False, False, False)):
-            return '{}.{}.{}'.format(major, minor, release)
-        if cls.version_tuple_checker(version_tuple, (True, True, True, True, False, False)):
-            return '{}.{}.{}.{}'.format(major, minor, release, suffix)
-        if cls.version_tuple_checker(version_tuple, (True, True, True, False, True, False)):
-            return '{}.{}.{}.{}'.format(major, minor, release, patch)
-        if cls.version_tuple_checker(version_tuple, (True, True, True, True, True, False)):
-            return '{}.{}.{}.{}{}'.format(major, minor, release, suffix, patch)
-        if cls.version_tuple_checker(version_tuple, (True, True, True, True, True, True)):
-            return '{}.{}.{}.{}{}+{}'.format(major, minor, release, suffix, patch, commit_sha)
+            version_str = '{}'.format(major)
+        elif cls.version_tuple_checker(version_tuple, (True, True, False, False, False, False)):
+            version_str = '{}.{}'.format(major, minor)
+        elif cls.version_tuple_checker(version_tuple, (True, False, False, False, False, True)):
+            version_str = '{}.+{}'.format(major, commit_sha)
+        elif cls.version_tuple_checker(version_tuple, (True, True, True, False, False, False)):
+            version_str = '{}.{}.{}'.format(major, minor, release)
+        elif cls.version_tuple_checker(version_tuple, (True, True, False, False, False, True)):
+            version_str = '{}.{}.+{}'.format(major, minor, commit_sha)
+        elif cls.version_tuple_checker(version_tuple, (True, True, True, True, False, False)):
+            version_str = '{}.{}.{}.{}'.format(major, minor, release, suffix)
+        elif cls.version_tuple_checker(version_tuple, (True, True, True, False, True, False)):
+            version_str = '{}.{}.{}.{}'.format(major, minor, release, patch)
+        elif cls.version_tuple_checker(version_tuple, (True, True, True, False, False, True)):
+            version_str = '{}.{}.{}+{}'.format(major, minor, release, commit_sha)
+        elif cls.version_tuple_checker(version_tuple, (True, True, True, True, True, False)):
+            version_str = '{}.{}.{}.{}{}'.format(major, minor, release, suffix, patch)
+        elif cls.version_tuple_checker(version_tuple, (True, True, True, True, True, True)):
+            version_str = '{}.{}.{}.{}{}+{}'.format(major, minor, release, suffix, patch, commit_sha)
 
-        raise NotImplementedError(*version_tuple)
+        if version_str is None:
+            raise NotImplementedError(*version_tuple)
+        _LOG.debug('generated version string: "%s"', version_str)
+        return version_str

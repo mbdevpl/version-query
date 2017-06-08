@@ -22,9 +22,9 @@ DATETIME_FORMAT = '%Y%m%d%H%M%S'
 def determine_version_from_git_repo(
         repo_path: pathlib.Path, search_parent_directories=True) -> tuple:
     """Determine package version from tags and index status of a git repository."""
-    _LOG.debug('detecting applicable version from commit history')
+    _LOG.debug('looking for git repository in "%s"', repo_path)
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
-    _LOG.debug('found repository in "%s"', repo.working_dir)
+    _LOG.debug('found git repository in "%s"', repo.working_dir)
 
     version_tags = {} # type: t.Mapping[str, t.Tuple[int, int, int, int]]
     for tag in repo.tags:
@@ -32,16 +32,16 @@ def determine_version_from_git_repo(
             version_tags[tag] = Version.parse_str(str(tag))
         except packaging.version.InvalidVersion:
             continue
-    _LOG.debug('found version tags: %s', version_tags)
-    version_tags = sorted(version_tags, key=lambda _: version_tags[_])
-    try:
+    if version_tags:
+        _LOG.debug('found version tags: %s', version_tags)
+        version_tags = sorted(version_tags, key=lambda _: version_tags[_])
         latest_version_tag = version_tags[-1]
-        latest_version = version_tags[latest_version_tag]
         latest_version_commit = latest_version_tag.commit
+        latest_version = version_tags[latest_version_tag]
         _LOG.debug(
             'latest version is: %s, sha %s, tuple %s',
             latest_version_tag, latest_version_commit, latest_version)
-    except IndexError:
+    else:
         for commit in repo.iter_commits(reverse=True):
             latest_version_commit = commit
             break
@@ -58,7 +58,7 @@ def determine_version_from_git_repo(
         commit_sha = repo.head.commit.hexsha[:8]
 
         for commit in repo.iter_commits():
-            _LOG.debug('iterating over commit %s', commit)
+            _LOG.log(logging.NOTSET, 'iterating over commit %s', commit)
             if commit == latest_version_commit:
                 break
             patch += 1
