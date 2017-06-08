@@ -40,7 +40,7 @@ def determine_version_from_git_repo(
             latest_version_tag, latest_version_tag.commit, latest_version)
     except IndexError:
         latest_version_tag = repo.head
-        latest_version = (0, 1, 0, 0, None, None)
+        latest_version = (0, 0, 0, None, None, None)
         _LOG.warning(
             'no version tags in the repository "%s", assuming: %s',
             repo.working_dir, latest_version)
