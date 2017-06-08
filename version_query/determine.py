@@ -37,18 +37,21 @@ def determine_version_from_git_repo(
     try:
         latest_version_tag = version_tags[-1]
         latest_version = version_tags[latest_version_tag]
+        latest_version_commit = latest_version_tag.commit
         _LOG.debug(
             'latest version is: %s, sha %s, tuple %s',
-            latest_version_tag, latest_version_tag.commit, latest_version)
+            latest_version_tag, latest_version_commit, latest_version)
     except IndexError:
-        latest_version_tag = repo.head
+        for commit in repo.iter_commits(reverse=True):
+            latest_version_commit = commit
+            break
         latest_version = (0, 0, 0, None, None, None)
-        _LOG.warning(
+        _LOG.debug(
             'no version tags in the repository "%s", assuming: %s',
             repo.working_dir, latest_version)
     major, minor, release, patch, suffix, commit_sha = latest_version
 
-    if repo.head.commit != latest_version_tag.commit or repo.is_dirty(untracked_files=True):
+    if repo.head.commit != latest_version_commit or repo.is_dirty(untracked_files=True):
         release += 1
         suffix = 'dev'
         patch = 0
@@ -56,7 +59,7 @@ def determine_version_from_git_repo(
 
         for commit in repo.iter_commits():
             _LOG.debug('iterating over commit %s', commit)
-            if commit == latest_version_tag.commit:
+            if commit == latest_version_commit:
                 break
             patch += 1
 
