@@ -15,7 +15,7 @@ from .version import Version
 
 _LOG = logging.getLogger(__name__)
 
-DATETIME_FORMAT = '%Y%m%d.%H%M%S'
+DATETIME_FORMAT = '%Y%m%d%H%M%S'
 
 
 def determine_version_from_repo(repo_path: pathlib.Path, search_parent_directories=True) -> tuple:
@@ -57,7 +57,7 @@ def determine_version_from_repo(repo_path: pathlib.Path, search_parent_directori
             patch += 1
 
         if repo.is_dirty(untracked_files=True):
-            commit_sha += '.dirty.{}'.format(
+            commit_sha += '.dirty{}'.format(
                 datetime.datetime.strftime(datetime.datetime.now(), DATETIME_FORMAT))
 
     return major, minor, release, suffix, patch, commit_sha

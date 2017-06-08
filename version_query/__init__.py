@@ -4,5 +4,5 @@ from .determine import determine_version
 from .version import Version
 
 
-def generate_version_str():
+def generate_version_str() -> str:
     return Version.generate_str(*determine_version())
