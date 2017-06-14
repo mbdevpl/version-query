@@ -77,3 +77,7 @@ after_success:
   - python -m coverage run --branch --source . -m unittest discover --verbose
   - python -m coverage report --show-missing
   - coveralls
+
+notifications:
+  slack:
+    secure: "m10wMO0tqsggvtlJ+jdbQJQSfij/pa2nlr6LQsiAHUENeydVSa0ZejHjPRwbIoVYi+VXe3WAON6K4fKziBahEv92Z3PokGEnCE3AiAwXHM2F2dNuJqeug0UW7VZcEMAXK+yUW2ZTlJUTVDZg4A8EVCbV5lJ1cR61XisVEtk/DmC9lyms1UXNerUCImPlGwk6c0NbXYieZdMV1qljvuqZWjC8ZhgLle44NHPptDgltlRha9Qh+mh0CpoF4zTfXmSD0T2RLUygJ0iawL1fTmpxjn0QvbIo99KHkXwHir08S8zwjPwcBqm8cNue+BUfmnJFZbY31uOdhhYMKNTJu+pcdsN/6WfezKvDS/uLiOk0QCtZRm9oaSQxCh/wGgPIlTCO2Ui5RuK9iWo8rc6Kn0kdu2roCWwdV1sBiDbcJ4CPQoyadSVSqJTQswNwxUytDtAnlygcAwEiTREMoe3gyO5bSv0W29K2chL3cbBmaTQ+F6TuOPxVBkaezgRO7IMN52tht14obcLMuByccDVkUKJ2pG8rwgdwPZ8I6gcYdP0KgQs9d8Q5PMSaiwM8o/zmGTfvQqcbyCKaswwiAJEpq5g6rNsaXL2c9BV7CLMGBouy2UFPckqtC+4AnLWj6hiGYQGdidKzZ/eCjOG3W/HY/H/GPdvwPBx43jFURk8ZdKJBrVs="
