@@ -55,15 +55,15 @@ class Version:
             cls, major: int = None, minor: int = None, release: int = None,
             suffix: str = None, patch: int = None, commit_sha: str = None) -> str:
         """Convert given version information to version string."""
-        assert major is None or isinstance(major, int), (type(major), major)
-        assert minor is None or isinstance(minor, int), (type(minor), minor)
-        assert release is None or isinstance(release, int), (type(release), release)
-        assert suffix is None or isinstance(suffix, str), (type(suffix), suffix)
-        assert patch is None or isinstance(patch, int), (type(patch), patch)
-        assert commit_sha is None or isinstance(commit_sha, str), (type(commit_sha), commit_sha)
-
         version_tuple = major, minor, release, suffix, patch, commit_sha
         _LOG.debug('generating version string from tuple %s', version_tuple)
+
+        assert major is None or isinstance(major, int), (type(major), major, version_tuple)
+        assert minor is None or isinstance(minor, int), (type(minor), minor, version_tuple)
+        assert release is None or isinstance(release, int), (type(release), release, version_tuple)
+        assert suffix is None or isinstance(suffix, str), (type(suffix), suffix, version_tuple)
+        assert patch is None or isinstance(patch, int), (type(patch), patch, version_tuple)
+        assert commit_sha is None or isinstance(commit_sha, str), (type(commit_sha), commit_sha, version_tuple)
 
         version_str = None
         if cls.version_tuple_checker(version_tuple, (True, False, False, False, False, False)):

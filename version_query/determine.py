@@ -34,10 +34,9 @@ def determine_version_from_git_repo(
             continue
     if version_tags:
         _LOG.debug('found version tags: %s', version_tags)
-        version_tags = sorted(version_tags, key=lambda _: version_tags[_])
-        latest_version_tag = version_tags[-1]
+        version_tags = sorted(version_tags.items(), key=lambda _: version_tags[_[0]])
+        latest_version_tag, latest_version = version_tags[-1]
         latest_version_commit = latest_version_tag.commit
-        latest_version = version_tags[latest_version_tag]
         _LOG.debug(
             'latest version is: %s, sha %s, tuple %s',
             latest_version_tag, latest_version_commit, latest_version)
@@ -49,7 +48,7 @@ def determine_version_from_git_repo(
         _LOG.debug(
             'no version tags in the repository "%s", assuming: %s',
             repo.working_dir, latest_version)
-    major, minor, release, patch, suffix, commit_sha = latest_version
+    major, minor, release, suffix, patch, commit_sha = latest_version
 
     if repo.head.commit != latest_version_commit or repo.is_dirty(untracked_files=True):
         if minor is None:
