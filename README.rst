@@ -73,6 +73,10 @@ The validity of the version identifier is determined by PEP 440.
 If there are no version tags in the repo, the script simply assumes that initial commit
 has tag ``v0.0.0``, and proceeds.
 
+
+how version is incremented for a git repository
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 If current commit is not the one with the latest version tag, a suffix ``.dev#`` is appended
 to the version identifier, where ``#`` is the distance (number of commits) between
 the current commit and the latest version tag.

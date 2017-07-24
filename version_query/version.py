@@ -26,7 +26,7 @@ class Version:
         (_ is not None if flag else _ is None) for _, flag  in zip(version_tuple, flags)])
 
     @classmethod
-    def parse_str(cls, version_str: str):
+    def parse_str(cls, version_str: str) -> tuple:
         """Parse given version string into actionable version information."""
         assert isinstance(version_str, str), (type(version_str), version_str)
 
