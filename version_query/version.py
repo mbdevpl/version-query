@@ -1,5 +1,6 @@
 """Version string parser and generator."""
 
+import enum
 import logging
 import re
 
@@ -7,6 +8,18 @@ import packaging
 import pkg_resources
 
 _LOG = logging.getLogger(__name__)
+
+
+@enum.unique
+class VersionComponent(enum.IntEnum):
+
+    """Enumeration of standard version components."""
+
+    Major = 1
+    Minor = 2
+    Release = 3
+    Patch = 4
+    Local = 5
 
 
 class Version:
