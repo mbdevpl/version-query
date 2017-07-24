@@ -6,13 +6,13 @@ import sys
 import unittest
 
 from version_query.determine import determine_version_from_git_repo, \
-    determine_version_from_manifest, determine_version
+    determine_version_from_manifest, determine_caller_version
 
 
 class Tests(unittest.TestCase):
 
     def test_my(self):
-        version = determine_version()
+        version = determine_caller_version()
         self.assertIsInstance(version, tuple, type(version))
         self.assertEqual(len(version), 6, version)
 

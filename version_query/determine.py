@@ -55,9 +55,13 @@ def determine_version_from_git_repo(
             minor = 0
         if release is None:
             release = 0
-        release += 1
-        suffix = 'dev'
-        patch = 0
+        if suffix is None:
+            release += 1
+            suffix = 'dev'
+        if patch is None:
+            patch = 0
+        else:
+            patch += 1
         commit_sha = repo.head.commit.hexsha[:8]
 
         for commit in repo.iter_commits():
@@ -114,7 +118,7 @@ def determine_version_from_path(path: str):
     return version_tuple
 
 
-def determine_caller_version(inspect_level: int):
+def determine_caller_version(inspect_level: int=1):
     """Generate version string by querying all available information sources."""
     frame_info = inspect.getouterframes(inspect.currentframe())[inspect_level]
     caller_path = frame_info[1] # frame_info.filename
@@ -128,7 +132,3 @@ def determine_caller_version(inspect_level: int):
     _LOG.debug('found directory "%s"', here)
 
     return determine_version_from_path(here)
-
-
-def determine_version() -> tuple:
-    return determine_caller_version(1)
