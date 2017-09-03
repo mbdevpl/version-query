@@ -1,7 +1,5 @@
 """Determine current version of a package."""
 
-import datetime
-import inspect
 import json
 import logging
 import pathlib
@@ -9,23 +7,14 @@ import typing as t
 
 import git
 import packaging
-#import packaging.version.Version
-#import pkg_resources
 
+from .caller import get_caller_folder
 from .version import Version
 
 _LOG = logging.getLogger(__name__)
 
-DATETIME_FORMAT = '%Y%m%d%H%M%S'
 
-
-def determine_version_from_git_repo(
-        repo_path: pathlib.Path, search_parent_directories=True) -> tuple:
-    """Determine package version from tags and index status of a git repository."""
-    _LOG.debug('looking for git repository in "%s"', repo_path)
-    repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
-    _LOG.debug('found git repository in "%s"', repo.working_dir)
-
+def get_latest_version_data(repo: git.Repo) -> t.Tuple[git.Commit, tuple]:
     version_tags = {} # type: t.Mapping[str, t.Tuple[int, int, int, int]]
     for tag in repo.tags:
         try:
@@ -48,31 +37,19 @@ def determine_version_from_git_repo(
         _LOG.debug(
             'no version tags in the repository "%s", assuming: %s',
             repo.working_dir, latest_version)
+
+    return latest_version_commit, latest_version
+
+
+def determine_version_from_git_repo(
+        repo_path: pathlib.Path, search_parent_directories: bool = True) -> tuple:
+    """Determine package version from tags and index status of a git repository."""
+    _LOG.debug('looking for git repository in "%s"', repo_path)
+    repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
+    _LOG.debug('found git repository in "%s"', repo.working_dir)
+
+    _, latest_version = get_latest_version_data(repo)
     major, minor, release, suffix, patch, commit_sha = latest_version
-
-    if repo.head.commit != latest_version_commit or repo.is_dirty(untracked_files=True):
-        if minor is None:
-            minor = 0
-        if release is None:
-            release = 0
-        if suffix is None:
-            release += 1
-            suffix = 'dev'
-        if patch is None:
-            patch = 0
-        else:
-            patch += 1
-        commit_sha = repo.head.commit.hexsha[:8]
-
-        for commit in repo.iter_commits():
-            _LOG.log(logging.NOTSET, 'iterating over commit %s', commit)
-            if commit == latest_version_commit:
-                break
-            patch += 1
-
-        if repo.is_dirty(untracked_files=True):
-            commit_sha += '.dirty{}'.format(
-                datetime.datetime.strftime(datetime.datetime.now(), DATETIME_FORMAT))
 
     return major, minor, release, suffix, patch, commit_sha
 
@@ -86,7 +63,7 @@ def determine_version_from_manifest(path_prefix: pathlib.Path) -> tuple:
         if path.suffix == '.dist-info':
             _LOG.debug('found distribution info directory %s', path)
             metadata_path = path.joinpath('metadata.json')
-            with open(metadata_path, 'r') as metadata_file:
+            with open(str(metadata_path), 'r') as metadata_file:
                 metadata = json.load(metadata_file)
             version = metadata['version']
             _LOG.debug('version in metadata is: "%s"', version)
@@ -94,7 +71,7 @@ def determine_version_from_manifest(path_prefix: pathlib.Path) -> tuple:
         if path.suffix == '.egg-info':
             _LOG.debug('found egg info directory %s', path)
             pkginfo_path = path.joinpath('PKG-INFO')
-            with open(pkginfo_path, 'r') as pkginfo_file:
+            with open(str(pkginfo_path), 'r') as pkginfo_file:
                 for line in pkginfo_file:
                     if line.startswith('Version:'):
                         version = line.replace('Version:', '').strip()
@@ -118,17 +95,8 @@ def determine_version_from_path(path: str):
     return version_tuple
 
 
-def determine_caller_version(inspect_level: int=1):
+def determine_caller_version(inspect_level: int = 1):
     """Generate version string by querying all available information sources."""
-    frame_info = inspect.getouterframes(inspect.currentframe())[inspect_level]
-    caller_path = frame_info[1] # frame_info.filename
-
-    here = pathlib.Path(caller_path).absolute().resolve()
-    if not here.is_file():
-        raise RuntimeError('path "{}" was expected to be a file'.format(here))
-    here = here.parent
-    if not here.is_dir():
-        raise RuntimeError('path "{}" was expected to be a directory'.format(here))
-    _LOG.debug('found directory "%s"', here)
+    here = get_caller_folder(inspect_level + 1)
 
     return determine_version_from_path(here)

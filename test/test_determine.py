@@ -22,7 +22,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(version), 6, version)
 
     def test_manifest(self):
-        sys.argv = ['setup.py', 'sdist', '--formats=gztar,zip']
+        sys.argv = ['setup.py', 'sdist']
         runpy.run_module('setup', run_name='__main__')
         version = determine_version_from_manifest(pathlib.Path.cwd())
         self.assertIsInstance(version, tuple, type(version))
