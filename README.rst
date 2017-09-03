@@ -4,6 +4,7 @@
 .. role:: python(code)
     :language: python
 
+
 Package version query toolkit for Python
 ========================================
 

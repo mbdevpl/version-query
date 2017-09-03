@@ -3,30 +3,31 @@ version: "{build}"
 environment:
   matrix:
     - PYTHON: "C:\\Python33"
+    - PYTHON: "C:\\Python33-x64"
     - PYTHON: "C:\\Python34"
+    - PYTHON: "C:\\Python34-x64"
     - PYTHON: "C:\\Python35"
     - PYTHON: "C:\\Python35-x64"
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python36-x64"
 
+matrix:
+  allow_failures:
+    - PYTHON: "C:\\Python33-x64"
+    - PYTHON: "C:\\Python34-x64"
+
 init:
-  - SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+  - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
 
 install:
-  - python --version
-  - pip --version
   - pip install -U pip
   - pip install -U -r dev_requirements.txt
-  - python setup.py bdist
-  - python setup.py bdist_wheel
-  - python setup.py sdist --formats=gztar,zip
-  - ls -lah dist
-  - pip install .
 
 build: off
 
 test_script:
-  - python -m unittest discover
+  - set TEST_PACKAGING=1
+  - python -m coverage run --branch --source . -m unittest discover --verbose
 
 after_test:
-  - dir /a-d /b /s *.py
+  - python -m coverage report --show-missing
