@@ -8,6 +8,10 @@
 Package version query toolkit for Python
 ========================================
 
+.. image:: https://img.shields.io/pypi/v/version-query.svg
+    :target: https://pypi.python.org/pypi/version-query
+    :alt: package version from PyPI
+
 .. image:: https://travis-ci.org/mbdevpl/version-query.svg?branch=master
     :target: https://travis-ci.org/mbdevpl/version-query
     :alt: build status from Travis CI
@@ -16,9 +20,17 @@ Package version query toolkit for Python
     :target: https://ci.appveyor.com/project/mbdevpl/version-query
     :alt: build status from AppVeyor
 
+.. image:: https://api.codacy.com/project/badge/Grade/437ab82bd6324530847fe8ed833f8d78
+    :target: https://www.codacy.com/app/mbdevpl/version-query
+    :alt: grade from Codacy
+
 .. image:: https://coveralls.io/repos/github/mbdevpl/version-query/badge.svg?branch=master
     :target: https://coveralls.io/github/mbdevpl/version-query
     :alt: test coverage from Coveralls
+
+.. image:: https://img.shields.io/pypi/l/version-query.svg
+    :target: https://github.com/mbdevpl/version-query/blob/master/NOTICE
+    :alt: license
 
 This script is motivated by wish to avoid hardcoding the version number when maintaining
 a Python package.
