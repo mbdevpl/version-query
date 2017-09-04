@@ -4,7 +4,7 @@ import enum
 import logging
 import re
 
-import packaging
+import packaging.version
 import pkg_resources
 
 _LOG = logging.getLogger(__name__)
@@ -30,9 +30,12 @@ class Version:
     _major = r'(?P<major>{})'.format(_num)
     _minor = r'\.(?P<minor>{})'.format(_num)
     _release = r'\.(?P<release>{})'.format(_num)
-    _patch = r'\.(?P<suffix>a|b|rc|dev)?(?P<patch>{})'.format(_num)
+    _suffix = r'(?P<suffix>a|b|rc|dev)'
+    _patch = r'(?P<patch>{})'.format(_num)
+    _suffix_and_patch = r'\.{}?{}?'.format(_suffix, _patch)
     _sha = r'\+(?P<sha>[0123456789\.abcdef]+)'
-    _version = r'(v|ver)?{}({})?({})?({})?({})?'.format(_major, _minor, _release, _patch, _sha)
+    _version = r'(v|ver)?{}({})?({})?({})?({})?'.format(
+        _major, _minor, _release, _suffix_and_patch, _sha)
     version_pattern = re.compile(_version)
 
     version_tuple_checker = lambda version_tuple, flags: all([
@@ -81,20 +84,22 @@ class Version:
         version_str = None
         if cls.version_tuple_checker(version_tuple, (True, False, False, False, False, False)):
             version_str = '{}'.format(major)
+        elif cls.version_tuple_checker(version_tuple, (True, False, False, False, False, True)):
+            version_str = '{}+{}'.format(major, commit_sha)
         elif cls.version_tuple_checker(version_tuple, (True, True, False, False, False, False)):
             version_str = '{}.{}'.format(major, minor)
-        elif cls.version_tuple_checker(version_tuple, (True, False, False, False, False, True)):
-            version_str = '{}.+{}'.format(major, commit_sha)
+        elif cls.version_tuple_checker(version_tuple, (True, True, False, False, False, True)):
+            version_str = '{}.{}+{}'.format(major, minor, commit_sha)
         elif cls.version_tuple_checker(version_tuple, (True, True, True, False, False, False)):
             version_str = '{}.{}.{}'.format(major, minor, release)
-        elif cls.version_tuple_checker(version_tuple, (True, True, False, False, False, True)):
-            version_str = '{}.{}.+{}'.format(major, minor, commit_sha)
-        elif cls.version_tuple_checker(version_tuple, (True, True, True, True, False, False)):
-            version_str = '{}.{}.{}.{}'.format(major, minor, release, suffix)
-        elif cls.version_tuple_checker(version_tuple, (True, True, True, False, True, False)):
-            version_str = '{}.{}.{}.{}'.format(major, minor, release, patch)
         elif cls.version_tuple_checker(version_tuple, (True, True, True, False, False, True)):
             version_str = '{}.{}.{}+{}'.format(major, minor, release, commit_sha)
+        elif cls.version_tuple_checker(version_tuple, (True, True, True, False, True, False)):
+            version_str = '{}.{}.{}.{}'.format(major, minor, release, patch)
+        elif cls.version_tuple_checker(version_tuple, (True, True, True, False, True, True)):
+            version_str = '{}.{}.{}.{}+{}'.format(major, minor, release, patch, commit_sha)
+        elif cls.version_tuple_checker(version_tuple, (True, True, True, True, False, False)):
+            version_str = '{}.{}.{}.{}'.format(major, minor, release, suffix)
         elif cls.version_tuple_checker(version_tuple, (True, True, True, True, True, False)):
             version_str = '{}.{}.{}.{}{}'.format(major, minor, release, suffix, patch)
         elif cls.version_tuple_checker(version_tuple, (True, True, True, True, True, True)):
