@@ -280,6 +280,10 @@ class Tests(unittest.TestCase):
         run_pip('install', 'dist/*-{}-*.whl'.format(version), glob=True)
         run_pip('uninstall', '-y', name)
 
+    def test_pip_error(self):
+        with self.assertRaises(AssertionError):
+            run_pip('wrong_pip_command')
+
     def test_setup_do_nothing(self):
         run_module('setup', 'wrong_setup_command', run_name='__not_main__')
 
