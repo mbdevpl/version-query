@@ -1,8 +1,14 @@
-/.coverage
-/.*project
+# Eclipse
 /.settings
+/.*project
+# Python
 /build
 /dist
-/htmlcov
-/*.egg-info
+/.cache
 __pycache__
+*.egg
+*.egg-info
+*.pyc
+# Python coverage
+/htmlcov
+/.coverage
