@@ -3,12 +3,13 @@
 import datetime
 import logging
 import pathlib
+import sys
 import typing as t
 
 import git
 
 from .config import DATETIME_FORMAT
-from .caller import get_caller_folder
+from .caller import get_caller_folder, get_caller_module_name
 from .version import VersionComponent
 from .determine import get_latest_version_data
 
@@ -65,8 +66,9 @@ def increment_local_version_component(
     assert len(version_tuple) == 6
 
     major, minor, release, suffix, patch, commit_sha = version_tuple
+    repo_is_dirty = repo.is_dirty(untracked_files=True)
 
-    if repo.head.commit == latest_version_commit and not repo.is_dirty(untracked_files=True):
+    if repo.head.commit == latest_version_commit and not repo_is_dirty:
         return major, minor, release, suffix, patch, commit_sha
 
     commit_sha = repo.head.commit.hexsha[:8]
@@ -77,9 +79,13 @@ def increment_local_version_component(
             break
         patch += 1
 
-    if repo.is_dirty(untracked_files=True):
+    if repo_is_dirty:
         commit_sha += '.dirty{}'.format(
             datetime.datetime.strftime(datetime.datetime.now(), DATETIME_FORMAT))
+
+    if not repo_is_dirty and get_caller_module_name(-1) == 'setup' \
+            and any(_ in sys.argv for _ in ('bdist', 'bdist_wheel', 'sdist')):
+        commit_sha = None
 
     return major, minor, release, suffix, patch, commit_sha
 
