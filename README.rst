@@ -165,7 +165,7 @@ are to be used does not match exactly the conditions defined in PEP.
 requirements
 ------------
 
-Python version >= 3.3.
+Python version >= 3.4.
 
 Python libraries as specified in `<requirements.txt>`_.
 
