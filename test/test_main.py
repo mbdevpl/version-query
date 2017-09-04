@@ -3,12 +3,12 @@
 import contextlib
 import io
 import logging
-import runpy
 import sys
 import unittest
 
 from version_query.determine import determine_caller_version
 from version_query.version import Version
+from .test_setup import run_module
 
 _LOG = logging.getLogger(__name__)
 
@@ -48,22 +48,18 @@ if sys.version_info < (3, 5):
 
 class Tests(unittest.TestCase):
 
-    def run_module(self, module, *args, run_name: str = '__main__'):
-        sys.argv = [module] + list(args)
-        runpy.run_module(module, run_name=run_name)
-
     def test_not_as_main(self):
-        self.run_module('version_query', run_name=None)
+        run_module('version_query', run_name=None)
 
     def test_help(self):
         f = io.StringIO()
         with contextlib.redirect_stderr(f):
             with self.assertRaises(SystemExit):
-                self.run_module('version_query')
+                run_module('version_query')
         _LOG.info('%s', f.getvalue())
 
     def test_here(self):
         f = io.StringIO()
         with contextlib.redirect_stdout(f):
-            self.run_module('version_query', '.')
+            run_module('version_query', '.')
         self.assertEqual(f.getvalue().rstrip(), Version.generate_str(*determine_caller_version(1)))
