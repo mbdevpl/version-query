@@ -73,11 +73,23 @@ def increment_local_version_component(
 
     commit_sha = repo.head.commit.hexsha[:8]
 
+    patch_increment = 0
     for commit in repo.iter_commits():
         _LOG.log(logging.NOTSET, 'iterating over commit %s', commit)
         if commit == latest_version_commit:
             break
-        patch += 1
+        patch_increment += 1
+    if patch_increment > 0:
+        if suffix == 'dev':
+            if patch is None:
+                release = (0 if release is None else release) + 1
+                patch = patch_increment
+            else:
+                patch += patch_increment
+        else:
+            release = (0 if release is None else release) + 1
+            suffix = 'dev'
+            patch = patch_increment
 
     if repo_is_dirty:
         commit_sha += '.dirty{}'.format(
