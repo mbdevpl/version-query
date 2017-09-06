@@ -18,6 +18,7 @@ _LOG = logging.getLogger(__name__)
 
 def increment_nonlocal_version_component(
         version_tuple: tuple, incremented_component: VersionComponent) -> tuple:
+    """Increment a selected non-local component of the version tuple."""
     assert isinstance(version_tuple, tuple)
     assert len(version_tuple) == 6
     assert isinstance(incremented_component, VersionComponent)
@@ -62,6 +63,7 @@ def increment_nonlocal_version_component(
 
 def increment_local_version_component(
         version_tuple: tuple, repo: git.Repo, latest_version_commit: git.Commit) -> tuple:
+    """Increment the local component of the version tuple."""
     assert isinstance(version_tuple, tuple)
     assert len(version_tuple) == 6
 
@@ -106,6 +108,7 @@ def increment_version_of_git_repo(
         repo_path: pathlib.Path, search_parent_directories: bool = True,
         incremented_component: t.Optional[VersionComponent] = None,
         only_if_changed: bool = True) -> tuple:
+    """Query and increment the version according to status of the git repository."""
     _LOG.debug('looking for git repository in "%s"', repo_path)
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
     _LOG.debug('found git repository in "%s"', repo.working_dir)
@@ -113,7 +116,8 @@ def increment_version_of_git_repo(
     latest_version_commit, latest_version = get_latest_version_data(repo)
 
     if incremented_component is None:
-        #latest_version = increment_nonlocal_version_component(latest_version, incremented_component) 
+        #latest_version = increment_nonlocal_version_component(
+        #    latest_version, incremented_component)
         incremented_component = VersionComponent.Local
 
     if incremented_component is VersionComponent.Local:

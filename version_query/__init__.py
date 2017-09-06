@@ -12,6 +12,7 @@ from .version import Version
 
 
 def generate_version_str(increment_if_repo_chnaged: bool = True) -> str:
+    """Generate the version string for current/upcoming version of the package."""
     if increment_if_repo_chnaged:
         try:
             return Version.generate_str(*increment_caller_version(2))

@@ -79,7 +79,8 @@ class Version:
         assert release is None or isinstance(release, int), (type(release), release, version_tuple)
         assert suffix is None or isinstance(suffix, str), (type(suffix), suffix, version_tuple)
         assert patch is None or isinstance(patch, int), (type(patch), patch, version_tuple)
-        assert commit_sha is None or isinstance(commit_sha, str), (type(commit_sha), commit_sha, version_tuple)
+        assert commit_sha is None or isinstance(commit_sha, str), (
+            type(commit_sha), commit_sha, version_tuple)
 
         version_str = None
         if cls.version_tuple_checker(version_tuple, (True, False, False, False, False, False)):
@@ -103,7 +104,8 @@ class Version:
         elif cls.version_tuple_checker(version_tuple, (True, True, True, True, True, False)):
             version_str = '{}.{}.{}.{}{}'.format(major, minor, release, suffix, patch)
         elif cls.version_tuple_checker(version_tuple, (True, True, True, True, True, True)):
-            version_str = '{}.{}.{}.{}{}+{}'.format(major, minor, release, suffix, patch, commit_sha)
+            version_str = '{}.{}.{}.{}{}+{}'.format(
+                major, minor, release, suffix, patch, commit_sha)
 
         if version_str is None:
             raise NotImplementedError(*version_tuple)

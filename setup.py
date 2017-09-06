@@ -23,8 +23,7 @@ class Package(setup_boilerplate.Package):
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
-        'Topic :: Utilities'
-        ]
+        'Topic :: Utilities']
     keywords = ['abstract syntax tree', 'ast', 'parser', 'xml']
 
 

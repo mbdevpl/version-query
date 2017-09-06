@@ -32,7 +32,8 @@ class Tests(unittest.TestCase):
     def test_version_parse(self):
         for version_str, (args, kwargs) in CASES.items():
             version_tuple = tuple([
-                args[i] if i < len(args) else (kwargs[KWARG_NAMES[i]] if KWARG_NAMES[i] in kwargs else None)
+                args[i] if i < len(args)
+                else (kwargs[KWARG_NAMES[i]] if KWARG_NAMES[i] in kwargs else None)
                 for i in range(0, 6)])
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 self.assertEqual(Version.parse_str(version_str), version_tuple)

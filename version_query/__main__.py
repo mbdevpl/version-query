@@ -7,6 +7,7 @@ from .determine import determine_version_from_path
 
 
 def main(args=None, namespace=None):
+    """Entry point for version_query package."""
     parser = argparse.ArgumentParser(
         prog='version_query',
         description='''Tool for querying current versions of Python packages.''',

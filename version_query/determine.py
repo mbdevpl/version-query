@@ -15,6 +15,7 @@ _LOG = logging.getLogger(__name__)
 
 
 def get_latest_version_data(repo: git.Repo) -> t.Tuple[git.Commit, tuple]:
+    """Retrieve the commit and version tuple for the latest tagged version in a git repository."""
     version_tags = {} # type: t.Mapping[str, t.Tuple[int, int, int, int]]
     for tag in repo.tags:
         try:
