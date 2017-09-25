@@ -169,6 +169,6 @@ Python version >= 3.4.
 
 Python libraries as specified in `<requirements.txt>`_.
 
-Building and running tests additionally requires packages listed in `<dev_requirements.txt>`_.
+Building and running tests additionally requires packages listed in `<test_requirements.txt>`_.
 
 Tested on Linux, OS X and Windows.
