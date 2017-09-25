@@ -24,9 +24,9 @@ Package version query toolkit for Python
     :target: https://www.codacy.com/app/mbdevpl/version-query
     :alt: grade from Codacy
 
-.. image:: https://coveralls.io/repos/github/mbdevpl/version-query/badge.svg?branch=master
-    :target: https://coveralls.io/github/mbdevpl/version-query
-    :alt: test coverage from Coveralls
+.. image:: https://codecov.io/gh/mbdevpl/version-query/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/mbdevpl/version-query
+    :alt: test coverage from Codecov
 
 .. image:: https://img.shields.io/pypi/l/version-query.svg
     :target: https://github.com/mbdevpl/version-query/blob/master/NOTICE
