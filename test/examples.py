@@ -7,8 +7,11 @@ _HERE = pathlib.Path(__file__).resolve().parent
 
 _PACKAGE_FOLDER = _HERE.parent
 
-GIT_REPO_EXAMPLES = list(_ for _ in _PACKAGE_FOLDER.parent.parent.glob('**/.git')
-                         if _.is_dir())
+_GIT_REPOS_ROOT = _PACKAGE_FOLDER.parent
+if platform.system() != 'Windows':
+    _GIT_REPOS_ROOT = _GIT_REPOS_ROOT.parent
+
+GIT_REPO_EXAMPLES = list(_ for _ in _GIT_REPOS_ROOT.glob('**/.git') if _.is_dir())
 
 
 def python_lib_dir() -> pathlib.Path:

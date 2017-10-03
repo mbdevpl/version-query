@@ -17,7 +17,9 @@ def _all_git_tag_versions(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
     versions = {}
     for tag in repo.tags:
         tag_str = str(tag)
-        if tag_str.startswith('v'):
+        if tag_str.startswith('ver'):
+            tag_str = tag_str[3:]
+        elif tag_str.startswith('v'):
             tag_str = tag_str[1:]
         else:
             continue
@@ -33,14 +35,20 @@ def _all_git_tag_versions(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
 def _latest_git_tag_version(repo: git.Repo) -> t.Tuple[git.Tag, Version]:
     versions = sorted(_all_git_tag_versions(repo).items(), key=lambda _: _[1])
     if not versions:
-        raise ValueError('no versions in this repository')
+        raise ValueError('the given repo {} has no version tags'.format(repo))
     return versions[-1]
 
 
 def _upcoming_git_tag_version(repo: git.Repo) -> Version:
-    latest_version_tag, version = _latest_git_tag_version(repo)
+    try:
+        tag, version = _latest_git_tag_version(repo)
+        tag_commit = tag.commit
+    except ValueError:
+        version = Version.from_str('0.1.0.dev0')
+        tag_commit = next(repo.iter_commits(reverse=True))
+
     repo_is_dirty = repo.is_dirty(untracked_files=True)
-    repo_has_new_commits = repo.head.commit != latest_version_tag.commit
+    repo_has_new_commits = repo.head.commit != tag_commit
 
     if not repo_has_new_commits and not repo_is_dirty:
         return version
@@ -49,7 +57,7 @@ def _upcoming_git_tag_version(repo: git.Repo) -> Version:
     if repo_has_new_commits:
         for commit in repo.iter_commits():
             _LOG.log(logging.NOTSET, 'iterating over commit %s', commit)
-            if commit == latest_version_tag.commit:
+            if commit == tag_commit:
                 break
             pre_patch_increment += 1
         _LOG.debug('there are %i new commits since %s', pre_patch_increment, version)
@@ -84,7 +92,7 @@ def query_git_repo(
     _LOG.debug('looking for git repository in "%s"', repo_path)
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
     _LOG.debug('found git repository in "%s"', repo.working_dir)
-    return _latest_git_tag_version(repo)[1]
+    return _latest_git_tag_version(repo)[-1]
 
 def predict_git_repo(repo_path: pathlib.Path, search_parent_directories: bool = True) -> Version:
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)

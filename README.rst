@@ -63,17 +63,18 @@ in your git repository. Therefore the package can be built and shipped to PyPI b
 of the git repository.
 
 If there is no git repository (this might be the case at installation time or at runtime)
-the script relies on package metadata from its ``PKG-INFO`` file.
+the script relies on package metadata from its ``PKG-INFO`` or ``metadata.json`` file.
 
-``PKG-INFO`` is a file that is automatically-generated when building a package and it is packaged
-into source as well as binary distributions. It should be present for every Python 3 package.
+One of ``PKG-INFO`` or ``metadata.json`` files is automatically-generated when building packages.
+Which one depends on your method of building, but in any case, one of them is packaged into source
+as well as binary distributions. One of them should be present for every Python 3 package.
 
 
 how version is determined from git repository
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-First of all, a most recent (based on commit tree) version tag is found. Version tag is a git tag
-that starts with ``v`` or ``ver``, followed by a valid version identifier.
+First of all, a most recent (based on version precedence) version tag is found. Version tag
+is a git tag that starts with ``v`` or ``ver``, followed by a valid version identifier.
 
 Examples of valid version tags:
 
@@ -84,7 +85,7 @@ Examples of valid version tags:
 The validity of the version identifier is determined by PEP 440.
 
 If there are no version tags in the repo, the script simply assumes that initial commit
-has tag ``v0.0.0``, and proceeds.
+has tag ``v0.1.0.dev0``, and proceeds.
 
 
 how version is incremented for a git repository
