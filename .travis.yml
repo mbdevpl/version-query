@@ -55,6 +55,7 @@ before_install: |
 install:
   - pip install -U pip
   - pip install -U -r dev_requirements.txt
+  - pip install asttokens colorama GitPython hypothesis ipython jupyter Mako numpy ordered-set pandas requests six wget
 
 script:
   - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest discover --verbose
