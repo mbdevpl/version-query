@@ -7,7 +7,7 @@ import sys
 import unittest
 
 from version_query.determine import determine_caller_version
-from version_query.version import Version
+from version_query.version import VersionOld as Version
 from .test_setup import run_module
 
 _LOG = logging.getLogger(__name__)

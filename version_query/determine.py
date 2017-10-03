@@ -4,14 +4,17 @@ import json
 import logging
 import pathlib
 import typing as t
+import warnings
 
 import git
 import packaging
 
 from .caller import get_caller_folder
-from .version import Version
+from .version import VersionOld as Version
 
 _LOG = logging.getLogger(__name__)
+
+warnings.warn('module deprecated', DeprecationWarning, stacklevel=2)
 
 
 def get_latest_version_data(repo: git.Repo) -> t.Tuple[git.Commit, tuple]:
@@ -57,6 +60,7 @@ def determine_version_from_git_repo(
 
 def determine_version_from_manifest(path_prefix: pathlib.Path) -> tuple:
     """Determine version from found PKG-INFO file."""
+    warnings.warn('function deprecated', DeprecationWarning, stacklevel=2)
     _LOG.debug('looking for manifest in %s', path_prefix)
     version_tuple = None, None, None, None, None, None
     version = None

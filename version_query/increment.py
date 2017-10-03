@@ -10,10 +10,13 @@ import git
 
 from .config import DATETIME_FORMAT
 from .caller import get_caller_folder, get_caller_module_name
-from .version import VersionComponent
+from .version import VersionComponentOld as VersionComponent
 from .determine import get_latest_version_data
 
 _LOG = logging.getLogger(__name__)
+
+import warnings
+warnings.warn('module deprecated', DeprecationWarning, stacklevel=2)
 
 
 def increment_nonlocal_version_component(

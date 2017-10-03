@@ -6,7 +6,7 @@ import packaging.version
 import pkg_resources
 import semver
 
-from version_query.version import Version, VersionNew
+from version_query.version import VersionOld as Version, Version as VersionNew
 
 OLD_CASES = {
     '0': ((0,), {}),

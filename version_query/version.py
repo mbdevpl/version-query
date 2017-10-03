@@ -1,9 +1,11 @@
 """Version string parser and generator."""
 
 import enum
+#import itertools
 import logging
 import re
 import typing as t
+import warnings
 
 import packaging.version
 import pkg_resources
@@ -13,7 +15,7 @@ _LOG = logging.getLogger(__name__)
 
 
 @enum.unique
-class VersionComponentNew(enum.IntEnum):
+class VersionComponent(enum.IntEnum):
 
     """Enumeration of standard version components."""
 
@@ -28,7 +30,7 @@ class VersionComponentNew(enum.IntEnum):
     Local = 1 << 7
 
 
-class VersionNew:
+class Version:
 
     """For storing and manipulating version information.
 
@@ -393,7 +395,7 @@ class VersionNew:
         return not other < self
 
 @enum.unique
-class VersionComponent(enum.IntEnum):
+class VersionComponentOld(enum.IntEnum):
 
     """Enumeration of standard version components."""
 
@@ -404,7 +406,7 @@ class VersionComponent(enum.IntEnum):
     Local = 5
 
 
-class Version:
+class VersionOld:
 
     """Version information parser and unparser."""
 
@@ -426,6 +428,7 @@ class Version:
     @classmethod
     def parse_str(cls, version_str: str) -> tuple:
         """Parse given version string into actionable version information."""
+        warnings.warn('function deprecated', DeprecationWarning, stacklevel=2)
         assert isinstance(version_str, str), (type(version_str), version_str)
 
         version = pkg_resources.parse_version(version_str) # type: packaging.version.Version
@@ -453,6 +456,7 @@ class Version:
             cls, major: int = None, minor: int = None, release: int = None,
             suffix: str = None, patch: int = None, commit_sha: str = None) -> str:
         """Convert given version information to version string."""
+        warnings.warn('function deprecated', DeprecationWarning, stacklevel=2)
         version_tuple = major, minor, release, suffix, patch, commit_sha
         _LOG.debug('generating version string from tuple %s', version_tuple)
 
