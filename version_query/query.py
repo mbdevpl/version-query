@@ -4,6 +4,8 @@ import inspect
 import logging
 import pathlib
 
+import git
+
 from .version import VersionComponent, Version
 from .git_query import query_git_repo, predict_git_repo
 from .py_query import query_package_folder
@@ -30,7 +32,7 @@ def _caller_folder(stack_level: int = 1) -> pathlib.Path:
 def query_folder(path: pathlib.Path, search_parent_directories: bool = False) -> Version:
     try:
         return query_git_repo(path, search_parent_directories=search_parent_directories)
-    except ValueError:
+    except git.InvalidGitRepositoryError:
         pass
     return query_package_folder(path, search_parent_directories=search_parent_directories)
 
@@ -42,7 +44,11 @@ def query_caller(stack_level: int = 1) -> Version:
 
 def predict_caller(stack_level: int = 1) -> Version:
     here = _caller_folder(stack_level + 1)
-    return predict_git_repo(here, True)
+    try:
+        return predict_git_repo(here, True)
+    except git.InvalidGitRepositoryError:
+        pass
+    return query_folder(here, True)
 
 
 def main(args=None, namespace=None) -> None:

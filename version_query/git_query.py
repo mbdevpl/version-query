@@ -52,7 +52,7 @@ def _upcoming_git_tag_version(repo: git.Repo) -> Version:
             if commit == latest_version_tag.commit:
                 break
             pre_patch_increment += 1
-        _LOG.warning('there are %i new commits since %s', pre_patch_increment, version)
+        _LOG.debug('there are %i new commits since %s', pre_patch_increment, version)
 
     if version._pre_release:
         if repo_has_new_commits:
