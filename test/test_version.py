@@ -7,8 +7,10 @@ import packaging.version
 import pkg_resources
 import semver
 
-from version_query.version import VersionOld, Version
+from version_query.version import VersionComponent, Version
 from .examples import KWARG_NAMES, COMPATIBLE_CASES, INCOMPATIBLE_CASES
+
+from version_query.version import VersionOld
 
 OLD_CASES = {
     '0': ((0,), {}),

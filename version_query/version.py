@@ -23,12 +23,10 @@ class VersionComponent(enum.IntEnum):
     Minor = 1 << 2
     Patch = 1 << 3
     Release = Major | Minor | Patch
-    PreSeparator = 1 << 4
-    PreType = 1 << 5
-    PrePatch = 1 << 6
-    PreRelease = PreSeparator | PreType | PrePatch
-    PostPatch = 1 << 7
-    Local = 1 << 8
+    PreType = 1 << 4
+    PrePatch = 1 << 5
+    PreRelease = PreType | PrePatch
+    Local = 1 << 6
 
 
 class Version:
