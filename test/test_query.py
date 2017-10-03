@@ -1,14 +1,52 @@
 """Tests of querying tools."""
 
+import contextlib
+import io
 import logging
+import sys
 import unittest
 
+from version_query.version import VersionComponent
 from version_query.git_query import query_git_repo
 from version_query.py_query import query_metadata_json, query_pkg_info, query_package_folder
-from version_query.query import query
+from version_query.query import query_folder, query_caller
 from .examples import GIT_REPO_EXAMPLES, METADATA_JSON_EXAMPLE_PATHS, PKG_INFO_EXAMPLE_PATHS, PACKAGE_FOLDER_EXAMPLES
+from .test_setup import run_module
 
 _LOG = logging.getLogger(__name__)
+
+
+if sys.version_info < (3, 5):
+
+    class _RedirectStream:
+
+        _stream = None
+
+        def __init__(self, new_target):
+            self._new_target = new_target
+            self._old_targets = []
+
+        def __enter__(self):
+            self._old_targets.append(getattr(sys, self._stream))
+            setattr(sys, self._stream, self._new_target)
+            return self._new_target
+
+        def __exit__(self, exctype, excinst, exctb):
+            setattr(sys, self._stream, self._old_targets.pop())
+
+    if sys.version_info < (3, 4):
+
+        class _redirect_stdout(_RedirectStream):
+
+            _stream = "stdout"
+
+        contextlib.redirect_stdout = _redirect_stdout
+
+    class _redirect_stderr(_RedirectStream):
+
+        _stream = "stderr"
+
+    contextlib.redirect_stderr = _redirect_stderr
 
 
 class Tests(unittest.TestCase):
@@ -72,13 +110,35 @@ class Tests(unittest.TestCase):
                     version = query_package_folder(path)
                     _LOG.debug('%s: %s', path, version)
                 except ValueError:
-                    _LOG.exception('failed to get version from %s', path)
+                    _LOG.info('failed to get version from %s', path, exc_info=True)
 
-    def test_query(self):
+    def test_query_folder(self):
         for path in PACKAGE_FOLDER_EXAMPLES:
             with self.subTest(path=path):
                 try:
-                    version = query(path)
+                    version = query_folder(path)
                     _LOG.debug('%s: %s', path, version)
                 except ValueError:
-                    _LOG.exception('failed to get version from %s', path)
+                    _LOG.info('failed to get version from %s', path, exc_info=True)
+
+    def test_not_as_main(self):
+        run_module('version_query', run_name=None)
+
+    def test_help(self):
+        f = io.StringIO()
+        with contextlib.redirect_stderr(f):
+            with self.assertRaises(SystemExit):
+                run_module('version_query')
+        _LOG.info('%s', f.getvalue())
+
+    def test_here(self):
+        f = io.StringIO()
+        with contextlib.redirect_stdout(f):
+            run_module('version_query', '.')
+        self.assertEqual(f.getvalue().rstrip(), query_caller(1).to_str())
+
+    def test_increment_here(self):
+        f = io.StringIO()
+        with contextlib.redirect_stdout(f):
+            run_module('version_query', '-i', '.')
+        self.assertEqual(f.getvalue().rstrip(), query_caller(1).increment(VersionComponent.Patch).to_str())
