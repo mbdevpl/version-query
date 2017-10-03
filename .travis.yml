@@ -66,6 +66,22 @@ after_success:
   - codecov
   - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -name "*.py")
 
+before_deploy:
+  - wget https://gist.githubusercontent.com/mbdevpl/cdbc3dab3ae1941870dcaa5bb1b358bc/raw/travis_bintray_descriptor_gen.py
+  - git status
+  - ls -lah dist/
+  - python3 travis_bintray_descriptor_gen.py "$(python3 -m version_query -p .)" "$TRAVIS_OS_NAME-python$TRAVIS_PYTHON_VERSION" "dist/*.whl" "dist/*.tar.gz" "dist/*.zip"
+  - cat ".bintray.json"
+
+deploy:
+  - provider: bintray
+    file: ".bintray.json"
+    user: "mbdevpl"
+    key:
+      secure: "gtsy5E807oDDnIM+JAzcbuIQETcZrv7eLXDSF0PsVgMbm7vOBNZcwYsYR1BS2EI/NmezqkYa3jIk1INJN8qmuaSPrFWoEvPnxGlPFhUEj3c4xpVny3S3aZkgib35kB3pOf80qj2csaK0yoO5bhnRZHspANJBjLnvlXUd7YeZnrxK4j5FW/3CjPis84LD6C8kA3nwnTnWoALwzyjyHmIGJJ5hcRLRRN7oE5hvFJmqf7wX9cJgXeePx267Z5X5tJQVf/dbl8rFNIK2piaVeoP7BkacMj+7C1yrKmI0hT0QGHgJG2ve1ngXeWn7yZbkcLkWEqQnASTNu9dOO0XL14c+2N9/BJo4HavL1qTYlCLF1FJ1ewnf8MRfQiy0HTvrwxPRpC/9Qaq1/hFvMODt0X8TuDeSWFekZWVVroC7bdg5pjhYc2X+AouZY+t3LHWIMXzmen5lJTqoUWb2gaP44x/d+/JdnbstqAMN5sJJ1Hhtt+7Blsepgh+DoYP0Tcz56pieQu38xrBBavLpI9bdoFdwfqbE7cRPO+iNmrTLuIXSmcbn3iOdOkcj27z5qmPLyxOryPe2iAxRfWyHsU05nlFB7V/oRbjuC4t1YkwVVsTG8Blv56VTc/5H2Sptx6XtDy0Arj9T3IDwp58EQ2ZNQ/oY1d/78nw+9P91IhSqUQAF0R0="
+    on:
+      all_branches: true
+
 notifications:
   slack:
     secure: "m10wMO0tqsggvtlJ+jdbQJQSfij/pa2nlr6LQsiAHUENeydVSa0ZejHjPRwbIoVYi+VXe3WAON6K4fKziBahEv92Z3PokGEnCE3AiAwXHM2F2dNuJqeug0UW7VZcEMAXK+yUW2ZTlJUTVDZg4A8EVCbV5lJ1cR61XisVEtk/DmC9lyms1UXNerUCImPlGwk6c0NbXYieZdMV1qljvuqZWjC8ZhgLle44NHPptDgltlRha9Qh+mh0CpoF4zTfXmSD0T2RLUygJ0iawL1fTmpxjn0QvbIo99KHkXwHir08S8zwjPwcBqm8cNue+BUfmnJFZbY31uOdhhYMKNTJu+pcdsN/6WfezKvDS/uLiOk0QCtZRm9oaSQxCh/wGgPIlTCO2Ui5RuK9iWo8rc6Kn0kdu2roCWwdV1sBiDbcJ4CPQoyadSVSqJTQswNwxUytDtAnlygcAwEiTREMoe3gyO5bSv0W29K2chL3cbBmaTQ+F6TuOPxVBkaezgRO7IMN52tht14obcLMuByccDVkUKJ2pG8rwgdwPZ8I6gcYdP0KgQs9d8Q5PMSaiwM8o/zmGTfvQqcbyCKaswwiAJEpq5g6rNsaXL2c9BV7CLMGBouy2UFPckqtC+4AnLWj6hiGYQGdidKzZ/eCjOG3W/HY/H/GPdvwPBx43jFURk8ZdKJBrVs="

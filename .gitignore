@@ -1,6 +1,11 @@
+# Bintray deployment
+/travis_bintray_descriptor_gen.py
+/.bintray.json
+
 # Eclipse
 /.settings
 /.*project
+
 # Python
 /build
 /dist
@@ -9,6 +14,8 @@ __pycache__
 *.egg
 *.egg-info
 *.pyc
+
 # Python coverage
 /htmlcov
+/coverage.xml
 /.coverage
