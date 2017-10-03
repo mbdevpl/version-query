@@ -36,6 +36,7 @@ matrix:
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7-dev"
   allow_failures:
+    - python: "pypy3.5-5.7.1-beta"
     - python: "3.6-dev"
     - python: "3.7-dev"
     - env: TRAVIS_PYTHON_VERSION="3.6-dev"
@@ -55,7 +56,7 @@ before_install: |
 install:
   - pip install -U pip
   - pip install -U -r dev_requirements.txt
-  - pip install asttokens colorama GitPython hypothesis ipython jupyter Mako numpy ordered-set pandas requests six wget
+  - pip install asttokens colorama GitPython hypothesis ipython jupyter Mako numpy ordered-set requests six wget
 
 script:
   - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest discover --verbose
