@@ -479,24 +479,31 @@ class Version:
     def __lt__(self, other):
         if not isinstance(other, Version):
             raise TypeError(type(other))
-        self_major = 0 if self._major is None else self._major
-        other_major = 0 if other._major is None else other._major
-        if self_major != other_major:
-            return self_major < other_major
-        self_minor = 0 if self._minor is None else self._minor
-        other_minor = 0 if other._minor is None else other._minor
-        if self_minor != other_minor:
-            return self_minor < other_minor
-        self_patch = 0 if self._patch is None else self._patch
-        other_patch = 0 if other._patch is None else other._patch
-        if self_patch != other_patch:
-            return self_patch < other_patch
-        if self._pre_separator != other._pre_separator:
-            if self._pre_separator is None:
-                return True
-            if other._pre_separator is None:
-                return False
-        raise NotImplementedError(repr(self) + ' < ' + repr(other))
+
+        self_release = self.release_to_tuple(True)
+        other_release = other.release_to_tuple(True)
+        if self_release != other_release:
+            return self_release < other_release
+
+        self_pre_release = self.pre_release_to_tuple(True)
+        other_pre_release = other.pre_release_to_tuple(True)
+        if self_pre_release != other_pre_release:
+            for self_part, other_part in itertools.zip_longest(self_pre_release, other_pre_release, fillvalue=(1, '', 0)):
+                if self_part != other_part:
+                    return self_part < other_part
+            raise NotImplementedError(repr(self_pre_release) + ' != ' + repr(other_pre_release))
+
+        self_local = self.local_to_tuple(True)
+        other_local = other.local_to_tuple(True)
+        if self_local != other_local:
+            for self_part, other_part in zip(self_local, other_local):
+                if self_part != other_part:
+                    return self_part < other_part
+            if len(self_local) != len(other_local):
+                return len(self_local) < len(other_local)
+            raise NotImplementedError(repr(self_local) + ' != ' + repr(other_local))
+
+        return False
 
     def __eq__(self, other):
         return not self < other and not other < self

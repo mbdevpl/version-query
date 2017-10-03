@@ -108,6 +108,22 @@ class Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Version.from_str('hello world')
 
+    def test_compare(self):
+        self.assertLess(Version.from_str('0.3dev'), Version.from_str('0.3dev1'))
+        self.assertLess(Version.from_str('0.3rc2'), Version.from_str('0.3'))
+        self.assertLess(Version.from_str('0.3'), Version.from_str('0.3-2'))
+        self.assertLess(Version.from_str('0.3-2rc5'), Version.from_str('0.3-2'))
+        self.assertLess(Version.from_str('0.3-2.dev5'), Version.from_str('0.3-2'))
+        self.assertLess(Version.from_str('0.3-2.dev5'), Version.from_str('0.3-2'))
+        self.assertLess(Version.from_str('0.3-4'), Version.from_str('0.3-4.5'))
+        self.assertLess(Version.from_str('1-1.2.3.4.5.dev4'), Version.from_str('1-1.2.3.4.5'))
+        self.assertLess(Version.from_str('1.0.0'), Version.from_str('1.0.0+blahblah'))
+
+        self.assertEqual(Version.from_str('1.0.0'), Version.from_str('1.0.0'))
+        self.assertEqual(Version.from_str('1.0'), Version.from_str('1.0.0'))
+        self.assertEqual(Version.from_str('1.0'), Version.from_str('1.0.0.0'))
+        self.assertEqual(Version.from_str('1.0.0-0.0.DEV42'), Version.from_str('1.0.0.0.0.dev42'))
+
     def test_to_str(self):
         for result, (args, kwargs) in itertools.chain(COMPATIBLE_CASES.items(), INCOMPATIBLE_CASES.items()):
             with self.subTest(args=args, kwargs=kwargs, result=result):
