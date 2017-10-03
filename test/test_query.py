@@ -142,3 +142,9 @@ class Tests(unittest.TestCase):
         with contextlib.redirect_stdout(f):
             run_module('version_query', '-i', '.')
         self.assertEqual(f.getvalue().rstrip(), query_caller(1).increment(VersionComponent.Patch).to_str())
+
+    def test_predict_here(self):
+        f = io.StringIO()
+        with contextlib.redirect_stdout(f):
+            run_module('version_query', '-p', '.')
+        self.assertEqual(f.getvalue().rstrip(), '')

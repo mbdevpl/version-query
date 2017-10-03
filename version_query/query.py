@@ -5,7 +5,7 @@ import logging
 import pathlib
 
 from .version import VersionComponent, Version
-from .git_query import query_git_repo
+from .git_query import query_git_repo, predict_git_repo
 from .py_query import query_package_folder
 
 _LOG = logging.getLogger(__name__)
@@ -40,15 +40,25 @@ def query_caller(stack_level: int = 1) -> Version:
     return query_folder(here, True)
 
 
+def predict_caller(stack_level: int = 1) -> Version:
+    here = _caller_folder(stack_level + 1)
+    return predict_git_repo(here, True)
+
+
 def main(args=None, namespace=None) -> None:
     parser = argparse.ArgumentParser(
         prog='version_query',
         description='Tool for querying current versions of Python packages.',
         epilog='Copyright 2017 Mateusz Bysiek https://mbdevpl.github.io/ , Apache License 2.0')
     parser.add_argument('-i', '--increment', action='store_true')
+    parser.add_argument('-p', '--predict', action='store_true')
     parser.add_argument('path')
     args = parser.parse_args(args, namespace)
     version = query_folder(args.path)
+    if args.predict and args.increment:
+        raise ValueError()
+    if args.predict:
+        version = predict_git_repo(args.path)
     if args.increment:
         version.increment(VersionComponent.Patch)
     print(version)
