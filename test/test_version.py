@@ -8,7 +8,7 @@ import semver
 
 from version_query.version import Version, VersionNew
 
-CASES = {
+OLD_CASES = {
     '0': ((0,), {}),
     '42': ((42,), {}),
     '5+d2a610ba': ((5,), {'commit_sha': 'd2a610ba'}),
@@ -26,9 +26,9 @@ CASES = {
     '1.0.1.dev0': ((1, 0, 1, 'dev', 0), {}),
     '0.4.4.dev5+84e1d430': ((0, 4, 4, 'dev', 5, '84e1d430'), {})}
 
-KWARG_NAMES = ('major', 'minor', 'release', 'suffix', 'patch', 'commit_sha')
+OLD_KWARG_NAMES = ('major', 'minor', 'release', 'suffix', 'patch', 'commit_sha')
 
-NEW_CASES = {
+CASES = {
     '0': ((0,), {}),
     '42': ((42,), {}),
     '5+d2a610ba': ((5,), {'local': 'd2a610ba'}),
@@ -46,17 +46,17 @@ NEW_CASES = {
     '1.0.1.dev0': ((1, 0, 1, '.', 'dev', 0), {}),
     '0.4.4.dev5+84e1d430': ((0, 4, 4, '.', 'dev', 5, '84e1d430'), {})}
 
-NEW_KWARG_NAMES = ('major', 'minor', 'patch', 'pre_separator', 'pre_type', 'pre_patch', 'local')
+KWARG_NAMES = ('major', 'minor', 'patch', 'pre_separator', 'pre_type', 'pre_patch', 'local')
 
 
-class Tests(unittest.TestCase):
+class TestsOld(unittest.TestCase):
 
     def test_version_parse(self):
-        for version_str, (args, kwargs) in CASES.items():
+        for version_str, (args, kwargs) in OLD_CASES.items():
             version_tuple = tuple([
                 args[i] if i < len(args)
-                else (kwargs[KWARG_NAMES[i]] if KWARG_NAMES[i] in kwargs else None)
-                for i in range(len(KWARG_NAMES))])
+                else (kwargs[OLD_KWARG_NAMES[i]] if OLD_KWARG_NAMES[i] in kwargs else None)
+                for i in range(len(OLD_KWARG_NAMES))])
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 self.assertEqual(Version.parse_str(version_str), version_tuple)
 
@@ -65,7 +65,7 @@ class Tests(unittest.TestCase):
             Version.parse_str('hello world')
 
     def test_version_generate(self):
-        for result, (args, kwargs) in CASES.items():
+        for result, (args, kwargs) in OLD_CASES.items():
             with self.subTest(args=args, kwargs=kwargs, result=result):
                 self.assertEqual(Version.generate_str(*args, **kwargs), result)
 
@@ -78,16 +78,16 @@ class Tests(unittest.TestCase):
             Version.generate_str(1, release=13)
 
 
-class TestsNew(unittest.TestCase):
+class Tests(unittest.TestCase):
 
     maxDiff = None
 
     def test_version_parse(self):
-        for version_str, (args, kwargs) in NEW_CASES.items():
+        for version_str, (args, kwargs) in CASES.items():
             version_tuple = tuple([
                 args[i] if i < len(args)
-                else (kwargs[NEW_KWARG_NAMES[i]] if NEW_KWARG_NAMES[i] in kwargs else None)
-                for i in range(len(NEW_KWARG_NAMES))])
+                else (kwargs[KWARG_NAMES[i]] if KWARG_NAMES[i] in kwargs else None)
+                for i in range(len(KWARG_NAMES))])
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 self.assertEqual(VersionNew.from_str(version_str).to_tuple(), version_tuple)
                 try:
@@ -126,7 +126,7 @@ class TestsNew(unittest.TestCase):
             VersionNew.from_str('hello world')
 
     def test_version_generate(self):
-        for result, (args, kwargs) in NEW_CASES.items():
+        for result, (args, kwargs) in CASES.items():
             with self.subTest(args=args, kwargs=kwargs, result=result):
                 self.assertEqual(VersionNew(*args, **kwargs).to_str(), result)
 

@@ -1,5 +1,6 @@
 """Tests of version determination functions."""
 
+import os
 import pathlib
 import runpy
 import sys
@@ -21,6 +22,7 @@ class Tests(unittest.TestCase):
         self.assertIsInstance(version, tuple, type(version))
         self.assertEqual(len(version), 6, version)
 
+    @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_manifest(self):
         sys.argv = ['setup.py', 'sdist']
         runpy.run_module('setup', run_name='__main__')

@@ -1,7 +1,6 @@
 """Version string parser and generator."""
 
 import enum
-import itertools
 import logging
 import re
 import typing as t
@@ -95,6 +94,7 @@ class VersionNew:
     _re_local = r'\+{}(?:{}{})*'.format(_re_local_part, _re_local_separator, _re_local_part)
     _pattern_local = re.compile(_re_local)
 
+    _re_named_parts_count = 3 + 3
     _re_version = r'{}(?:{})?(?:{})?'.format(_re_release, _re_pre_release, _re_local)
     _pattern_version = re.compile(_re_version)
 
@@ -149,7 +149,7 @@ class VersionNew:
         pre_patch = match.group('prepatch')
         if pre_patch is not None:
             pre_patch = int(pre_patch)
-        local = tuple([_ for _ in match.groups()[6:] if _ is not None])
+        local = tuple([_ for _ in match.groups()[cls._re_named_parts_count:] if _ is not None])
 
         return cls(major=major, minor=minor, patch=patch, pre_separator=match.group('preseparator'),
                    pre_type=match.group('pretype'), pre_patch=pre_patch, local=local)
@@ -355,6 +355,42 @@ class VersionNew:
     def __str__(self):
         return self.to_str()
 
+    def __lt__(self, other):
+        if not isinstance(other, Version):
+            raise TypeError(type(other))
+        self_major = 0 if self._major is None else self._major
+        other_major = 0 if other._major is None else other._major
+        if self_major != other_major:
+            return self_major < other_major
+        self_minor = 0 if self._minor is None else self._minor
+        other_minor = 0 if other._minor is None else other._minor
+        if self_minor != other_minor:
+            return self_minor < other_minor
+        self_patch = 0 if self._patch is None else self._patch
+        other_patch = 0 if other._patch is None else other._patch
+        if self_patch != other_patch:
+            return self_patch < other_patch
+        if self._pre_separator != other._pre_separator:
+            if self._pre_separator is None:
+                return True
+            if other._pre_separator is None:
+                return False
+        raise NotImplementedError(repr(self) + ' < ' + repr(other))
+
+    def __eq__(self, other):
+        return not self < other and not other < self
+
+    def __ne__(self, other):
+        return self < other or other < self
+
+    def __gt__(self, other):
+        return other < self
+
+    def __ge__(self, other):
+        return not self < other
+
+    def __le__(self, other):
+        return not other < self
 
 @enum.unique
 class VersionComponent(enum.IntEnum):
