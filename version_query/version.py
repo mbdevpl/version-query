@@ -184,11 +184,6 @@ class Version:
         major, minor, patch = cls._parse_release_str(_release)
         pre_release = None if _pre_release is None else cls._parse_pre_release_str(_pre_release)
         local = None if _local is None else cls._parse_local_str(_local)
-        #match.group('preseparator'),
-        #           pre_type=match.group('pretype'), pre_patch=pre_patch
-        #raise NotImplementedError(match.groupdict(), match.groups())
-
-        #local = tuple([_ for _ in match.groups()[:] if _ is not None])
 
         return cls(major=major, minor=minor, patch=patch, pre_release=pre_release, local=local)
 

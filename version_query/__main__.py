@@ -1,23 +1,6 @@
 """Tool for querying current versions of Python packages."""
 
-import argparse
-import warnings
-
-from .version import VersionOld as Version
-from .determine import determine_version_from_path
-
-
-def main(args=None, namespace=None):
-    """Entry point for version_query package."""
-    warnings.warn('module deprecated', DeprecationWarning, stacklevel=2)
-    parser = argparse.ArgumentParser(
-        prog='version_query',
-        description='''Tool for querying current versions of Python packages.''',
-        epilog='''Copyright 2017 Mateusz Bysiek https://mbdevpl.github.io/ , Apache License 2.0''')
-    parser.add_argument('path')
-    args = parser.parse_args(args, namespace)
-    version = determine_version_from_path(args.path)
-    print(Version.generate_str(*version))
+from .query import main
 
 
 if __name__ == '__main__':

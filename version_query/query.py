@@ -17,8 +17,8 @@ def query(path: pathlib.Path, search_parent_directories: bool = False):
 def main(args=None, namespace=None):
     parser = argparse.ArgumentParser(
         prog='version_query',
-        description='''Tool for querying current versions of Python packages.''',
-        epilog='''Copyright 2017 Mateusz Bysiek https://mbdevpl.github.io/ , Apache License 2.0''')
+        description='Tool for querying current versions of Python packages.',
+        epilog='Copyright 2017 Mateusz Bysiek https://mbdevpl.github.io/ , Apache License 2.0')
     parser.add_argument('-i', '--increment', action='store_true')
     parser.add_argument('path')
     args = parser.parse_args(args, namespace)

@@ -72,4 +72,4 @@ def query_git_repo(
     _LOG.debug('looking for git repository in "%s"', repo_path)
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
     _LOG.debug('found git repository in "%s"', repo.working_dir)
-    return _latest_git_tag_version(repo)
+    return _latest_git_tag_version(repo)[1]
