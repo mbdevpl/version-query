@@ -19,6 +19,7 @@ warnings.warn('module deprecated', DeprecationWarning, stacklevel=2)
 
 def get_latest_version_data(repo: git.Repo) -> t.Tuple[git.Commit, tuple]:
     """Retrieve the commit and version tuple for the latest tagged version in a git repository."""
+    warnings.warn('function deprecated', DeprecationWarning, stacklevel=2)
     version_tags = {} # type: t.Mapping[str, t.Tuple[int, int, int, int]]
     for tag in repo.tags:
         try:
@@ -48,6 +49,7 @@ def get_latest_version_data(repo: git.Repo) -> t.Tuple[git.Commit, tuple]:
 def determine_version_from_git_repo(
         repo_path: pathlib.Path, search_parent_directories: bool = True) -> tuple:
     """Determine package version from tags and index status of a git repository."""
+    warnings.warn('function deprecated', DeprecationWarning, stacklevel=2)
     _LOG.debug('looking for git repository in "%s"', repo_path)
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
     _LOG.debug('found git repository in "%s"', repo.working_dir)
