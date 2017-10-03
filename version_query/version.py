@@ -388,6 +388,58 @@ class Version:
                 raise ValueError('local_separator={} has wrong value in {}'
                                  .format(repr(part), repr(self)))
 
+    def increment(self, component: VersionComponent, amount: int = 1) -> 'Version':
+        """Increment a selected version component and return self."""
+        if not isinstance(component, VersionComponent):
+            raise TypeError()
+
+        if component not in (VersionComponent.Major, VersionComponent.Minor,
+                             VersionComponent.Patch, VersionComponent.PrePatch):
+            raise ValueError()
+
+        if component <= VersionComponent.Release:
+
+            if component <= VersionComponent.Minor:
+
+                if component is VersionComponent.Major:
+                    self._major += amount
+                    if self._minor is not None:
+                        self._minor = 0
+                elif component is VersionComponent.Minor:
+                    if self._minor is None:
+                        self._minor = amount
+                    else:
+                        self._minor += amount
+
+                if self._patch is not None:
+                    self._patch = 0
+
+            elif component is VersionComponent.Patch:
+                if self._patch is None:
+                    self._patch = amount
+                else:
+                    self._patch += amount
+
+            if self._pre_release:
+                self._pre_release = None
+            if self._local:
+                self._local = None
+
+        elif component is VersionComponent.PrePatch:
+            if self._pre_release is None:
+                self._pre_release = [('.', None, 1)]
+            else:
+                if len(self._pre_release) > 1:
+                    self._pre_release = self._pre_release[:1]
+                pre_patch = self._pre_release[0][2]
+                if pre_patch is None:
+                    pre_patch = amount
+                else:
+                    pre_patch += amount
+                self._pre_release[0] = (self._pre_release[0][0], self._pre_release[0][1], pre_patch)
+
+        return self
+
     def _to_str_release(self) -> str:
         version_tuple = self._major, self._minor, self._patch
         cls = type(self)

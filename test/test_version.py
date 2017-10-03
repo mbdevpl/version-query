@@ -110,6 +110,11 @@ class Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Version.from_str('hello world')
 
+    def test_increment(self):
+        self.assertEqual(Version.from_str('1.0').increment(VersionComponent.Minor), Version.from_str('1.1'))
+        self.assertEqual(Version.from_str('1.5').increment(VersionComponent.Major), Version.from_str('2.0'))
+        self.assertEqual(Version.from_str('0.3dev').increment(VersionComponent.PrePatch), Version.from_str('0.3dev1'))
+
     def test_compare(self):
         self.assertLess(Version.from_str('0.3dev'), Version.from_str('0.3dev1'))
         self.assertLess(Version.from_str('0.3rc2'), Version.from_str('0.3'))

@@ -1,12 +1,33 @@
 
 import argparse
+import inspect
+import logging
 import pathlib
 
+from .version import VersionComponent, Version
 from .git_query import query_git_repo
 from .py_query import query_package_folder
 
+_LOG = logging.getLogger(__name__)
 
-def query(path: pathlib.Path, search_parent_directories: bool = False):
+
+def _caller_folder(stack_level: int = 1) -> pathlib.Path:
+    """Determine folder in which the caller module of this function is located."""
+    frame_info = inspect.getouterframes(inspect.currentframe())[stack_level]
+    caller_path = frame_info[1] # frame_info.filename
+
+    here = pathlib.Path(caller_path).absolute().resolve()
+    if not here.is_file():
+        raise RuntimeError('path "{}" was expected to be a file'.format(here))
+    here = here.parent
+    if not here.is_dir():
+        raise RuntimeError('path "{}" was expected to be a directory'.format(here))
+    _LOG.debug('found directory "%s"', here)
+
+    return here
+
+
+def query_folder(path: pathlib.Path, search_parent_directories: bool = False) -> Version:
     try:
         return query_git_repo(path, search_parent_directories=search_parent_directories)
     except ValueError:
@@ -14,7 +35,12 @@ def query(path: pathlib.Path, search_parent_directories: bool = False):
     return query_package_folder(path, search_parent_directories=search_parent_directories)
 
 
-def main(args=None, namespace=None):
+def query_caller(stack_level: int = 1) -> Version:
+    here = _caller_folder(stack_level + 1)
+    return query_folder(here, True)
+
+
+def main(args=None, namespace=None) -> None:
     parser = argparse.ArgumentParser(
         prog='version_query',
         description='Tool for querying current versions of Python packages.',
@@ -22,7 +48,7 @@ def main(args=None, namespace=None):
     parser.add_argument('-i', '--increment', action='store_true')
     parser.add_argument('path')
     args = parser.parse_args(args, namespace)
-    version = query(args.path)
+    version = query_folder(args.path)
     if args.increment:
-        version.increment()
+        version.increment(VersionComponent.Patch)
     print(version)
