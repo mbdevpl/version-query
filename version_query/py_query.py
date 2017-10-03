@@ -49,11 +49,15 @@ def query_pkg_info(path: pathlib.Path) -> Version:
     raise ValueError(path)
 
 
-def query_package_folder(path: pathlib.Path) -> Version:
-    metadata_json_paths = list(path.glob('*.dist-info/metadata.json'))
-    pkg_info_paths = list(path.glob('*.egg-info/PKG-INFO'))
-    if len(metadata_json_paths) == 1 and len(pkg_info_paths) == 0:
-        return query_metadata_json(metadata_json_paths[0])
-    if len(metadata_json_paths) == 0 and len(pkg_info_paths) == 1:
-        return query_pkg_info(pkg_info_paths[0])
-    raise ValueError(metadata_json_paths, pkg_info_paths)
+def query_package_folder(path: pathlib.Path, search_parent_directories: bool = False) -> Version:
+    paths = [path] + list(path.parents) if search_parent_directories else []
+    last_path_i = len(paths) - 1
+    for i, path in enumerate(paths):
+        metadata_json_paths = list(path.glob('*.dist-info/metadata.json'))
+        pkg_info_paths = list(path.glob('*.egg-info/PKG-INFO'))
+        if len(metadata_json_paths) == 1 and len(pkg_info_paths) == 0:
+            return query_metadata_json(metadata_json_paths[0])
+        if len(metadata_json_paths) == 0 and len(pkg_info_paths) == 1:
+            return query_pkg_info(pkg_info_paths[0])
+        if i == last_path_i:
+            raise ValueError(metadata_json_paths, pkg_info_paths)

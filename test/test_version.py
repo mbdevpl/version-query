@@ -1,12 +1,14 @@
 """Tests of version string parsing and generation."""
 
+import itertools
 import unittest
 
 import packaging.version
 import pkg_resources
 import semver
 
-from version_query.version import VersionOld as Version, Version as VersionNew
+from version_query.version import VersionOld, Version
+from .examples import KWARG_NAMES, COMPATIBLE_CASES, INCOMPATIBLE_CASES
 
 OLD_CASES = {
     '0': ((0,), {}),
@@ -28,26 +30,6 @@ OLD_CASES = {
 
 OLD_KWARG_NAMES = ('major', 'minor', 'release', 'suffix', 'patch', 'commit_sha')
 
-CASES = {
-    '0': ((0,), {}),
-    '42': ((42,), {}),
-    '5+d2a610ba': ((5,), {'local': 'd2a610ba'}),
-    '0.1': ((0, 1), {}),
-    '8.0': ((8, 0), {}),
-    '16.4': ((16, 4), {}),
-    '5.0+f753199e': ((5, 0), {'local': 'f753199e'}),
-    '0.54.0': ((0, 54, 0), {}),
-    '1.0.0': ((1, 0, 0), {}),
-    '7.0.42+1d7b090a': ((7, 0, 42), {'local': '1d7b090a'}),
-    '1.0.0.4': ((1, 0, 0, '.', None, 4), {}),
-    '2.0.0.8+cc81cee': ((2, 0, 0, '.', None, 8, 'cc81cee'), {}),
-    '4.5.0.dev': ((4, 5, 0, '.', 'dev'), {}),
-    '1.0.0.rc3': ((1, 0, 0, '.', 'rc', 3), {}),
-    '1.0.1.dev0': ((1, 0, 1, '.', 'dev', 0), {}),
-    '0.4.4.dev5+84e1d430': ((0, 4, 4, '.', 'dev', 5, '84e1d430'), {})}
-
-KWARG_NAMES = ('major', 'minor', 'patch', 'pre_separator', 'pre_type', 'pre_patch', 'local')
-
 
 class TestsOld(unittest.TestCase):
 
@@ -58,82 +40,83 @@ class TestsOld(unittest.TestCase):
                 else (kwargs[OLD_KWARG_NAMES[i]] if OLD_KWARG_NAMES[i] in kwargs else None)
                 for i in range(len(OLD_KWARG_NAMES))])
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
-                self.assertEqual(Version.parse_str(version_str), version_tuple)
+                self.assertEqual(VersionOld.parse_str(version_str), version_tuple)
 
     def test_version_parse_bad(self):
         with self.assertRaises(packaging.version.InvalidVersion):
-            Version.parse_str('hello world')
+            VersionOld.parse_str('hello world')
 
     def test_version_generate(self):
         for result, (args, kwargs) in OLD_CASES.items():
             with self.subTest(args=args, kwargs=kwargs, result=result):
-                self.assertEqual(Version.generate_str(*args, **kwargs), result)
+                self.assertEqual(VersionOld.generate_str(*args, **kwargs), result)
 
     def test_version_generate_bad(self):
         with self.assertRaises(NotImplementedError):
-            Version.generate_str()
+            VersionOld.generate_str()
         with self.assertRaises(NotImplementedError):
-            Version.generate_str(5, patch=2)
+            VersionOld.generate_str(5, patch=2)
         with self.assertRaises(NotImplementedError):
-            Version.generate_str(1, release=13)
+            VersionOld.generate_str(1, release=13)
 
 
 class Tests(unittest.TestCase):
 
     maxDiff = None
 
-    def test_version_parse(self):
-        for version_str, (args, kwargs) in CASES.items():
-            version_tuple = tuple([
-                args[i] if i < len(args)
-                else (kwargs[KWARG_NAMES[i]] if KWARG_NAMES[i] in kwargs else None)
-                for i in range(len(KWARG_NAMES))])
+    def test_from_str(self):
+        for version_str, (args, kwargs) in COMPATIBLE_CASES.items():
+            version_tuple = args + tuple(
+                v for k, v in sorted(kwargs.items(), key=lambda _: KWARG_NAMES.index(_[0])))
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
-                self.assertEqual(VersionNew.from_str(version_str).to_tuple(), version_tuple)
+                self.assertEqual(Version.from_str(version_str).to_tuple(), version_tuple)
                 try:
                     py_version = packaging.version.Version(version_str)
                 except ValueError:
                     pass
                 else:
-                    if not (version_tuple[4] is not None and version_tuple[5] is None):
-                        self.assertEqual(VersionNew.from_py_version(py_version).to_tuple(),
-                                         version_tuple, py_version)
+                    self.assertEqual(Version.from_py_version(py_version).to_tuple(),
+                                     version_tuple, py_version)
                 try:
                     py_version_setuptools = pkg_resources.parse_version(version_str)
                 except ValueError:
                     pass
                 else:
-                    if not (version_tuple[4] is not None and version_tuple[5] is None):
-                        self.assertEqual(VersionNew.from_py_version(py_version_setuptools).to_tuple(),
-                                         version_tuple, py_version_setuptools)
+                    self.assertEqual(Version.from_py_version(py_version_setuptools).to_tuple(),
+                                     version_tuple, py_version_setuptools)
                 try:
                     sem_version = semver.parse(version_str)
                 except ValueError:
                     pass
                 else:
-                    self.assertEqual(VersionNew.from_sem_version(sem_version).to_tuple(),
+                    self.assertEqual(Version.from_sem_version(sem_version).to_tuple(),
                                      version_tuple, sem_version)
                 try:
                     sem_version_info = semver.parse_version_info(version_str)
                 except ValueError:
                     pass
                 else:
-                    self.assertEqual(VersionNew.from_sem_version(sem_version_info).to_tuple(),
+                    self.assertEqual(Version.from_sem_version(sem_version_info).to_tuple(),
                                      version_tuple, sem_version_info)
+        for version_str, (args, kwargs) in INCOMPATIBLE_CASES.items():
+            version_tuple = args + tuple(
+                v for k, v in sorted(kwargs.items(), key=lambda _: KWARG_NAMES.index(_[0])))
+            with self.subTest(version_str=version_str, version_tuple=version_tuple):
+                self.assertEqual(Version.from_str(version_str).to_tuple(), version_tuple)
 
-    def test_version_parse_bad(self):
+    def test_from_str_bad(self):
         with self.assertRaises(ValueError):
-            VersionNew.from_str('hello world')
+            Version.from_str('hello world')
 
-    def test_version_generate(self):
-        for result, (args, kwargs) in CASES.items():
+    def test_to_str(self):
+        for result, (args, kwargs) in itertools.chain(COMPATIBLE_CASES.items(), INCOMPATIBLE_CASES.items()):
             with self.subTest(args=args, kwargs=kwargs, result=result):
-                self.assertEqual(VersionNew(*args, **kwargs).to_str(), result)
+                self.assertEqual(Version(*args, **kwargs).to_str(), result)
 
-    def test_version_generate_bad(self):
-        with self.assertRaises(TypeError):
-            VersionNew().to_str()
+    def test_to_str_bad(self):
         with self.assertRaises(ValueError):
-            VersionNew(5, pre_patch=2).to_str()
+            Version(-1).to_str()
         with self.assertRaises(ValueError):
-            VersionNew(1, patch=13).to_str()
+            Version(5, pre_release=[(None, 'dev',-1)]).to_str()
+        with self.assertRaises(ValueError):
+            Version(1, patch=13).to_str()

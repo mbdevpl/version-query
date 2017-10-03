@@ -27,9 +27,9 @@ class Tests(unittest.TestCase):
             with self.subTest(path=path):
                 try:
                     version = query_git_repo(path)
-                    _LOG.info('%s: %s', path, version)
+                    _LOG.debug('%s: %s', path, version)
                 except ValueError:
-                    _LOG.exception('failed to get version from %s', path)
+                    _LOG.info('failed to get version from %s', path, exc_info=True)
 
     def test_query_metadata_json(self):
         for path in METADATA_JSON_EXAMPLE_PATHS:
