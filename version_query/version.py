@@ -23,10 +23,12 @@ class VersionComponent(enum.IntEnum):
     Minor = 1 << 2
     Patch = 1 << 3
     Release = Major | Minor | Patch
-    PreType = 1 << 4
-    PrePatch = 1 << 5
-    PreRelease = PreType | PrePatch
-    Local = 1 << 6
+    DevPatch = 1 << 4
+    #PreType = 1 << 4
+    #PrePatch = 1 << 5
+    #PostPatch = 1 << 6
+    #PreRelease = PreType | PrePatch
+    #Local = 1 << 7
 
 
 class Version:
@@ -394,7 +396,7 @@ class Version:
             raise TypeError()
 
         if component not in (VersionComponent.Major, VersionComponent.Minor,
-                             VersionComponent.Patch, VersionComponent.PrePatch):
+                             VersionComponent.Patch, VersionComponent.DevPatch):
             raise ValueError()
 
         if component <= VersionComponent.Release:
@@ -420,27 +422,25 @@ class Version:
                 else:
                     self._patch += amount
 
-            if self._pre_release:
-                self._pre_release = None
-            if self._local:
-                self._local = None
+            self._pre_release = None
+            self._local = None
 
-        elif component is VersionComponent.PrePatch:
+        elif component is VersionComponent.DevPatch:
             if self._pre_release is None:
-                self._pre_release = [('.', None, 1)]
+                self._pre_release = []
+            if not self._pre_release or self.pre_release_to_tuple(True)[-1][1] != 'dev':
+                self._pre_release.append(('.', 'dev', amount))
             else:
-                if len(self._pre_release) > 1:
-                    self._pre_release = self._pre_release[:1]
-                pre_patch = self._pre_release[0][2]
+                pre_sep, pre_type, pre_patch = self._pre_release[-1]
                 if pre_patch is None:
                     pre_patch = amount
                 else:
                     pre_patch += amount
-                self._pre_release[0] = (self._pre_release[0][0], self._pre_release[0][1], pre_patch)
+                self._pre_release[-1] = (pre_sep, pre_type, pre_patch)
 
         return self
 
-    def _to_str_release(self) -> str:
+    def release_to_str(self) -> str:
         version_tuple = self._major, self._minor, self._patch
         cls = type(self)
         if cls._version_tuple_checker(version_tuple, (True, False, False)):
@@ -451,7 +451,7 @@ class Version:
             return '.'.join(str(_) for _ in version_tuple[:3])
         raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
 
-    def _to_str_pre_release_segment(self, segment: int) -> str:
+    def pre_release_segment_to_str(self, segment: int) -> str:
         version_tuple = self._pre_release[segment]
         cls = type(self)
         if cls._version_tuple_checker(version_tuple, (False, False, False)):
@@ -464,20 +464,20 @@ class Version:
             return '{}{}{}'.format(*version_tuple)
         raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
 
-    def _to_str_pre_release(self) -> str:
+    def pre_release_to_str(self) -> str:
         if self._pre_release is None:
             return ''
-        return ''.join(self._to_str_pre_release_segment(i)
+        return ''.join(self.pre_release_segment_to_str(i)
                        for i, _ in enumerate(self._pre_release))
 
-    def _to_str_local(self) -> str:
+    def local_to_str(self) -> str:
         if not self._local:
             return ''
         return '+{}'.format(''.join(self._local))
 
     def to_str(self) -> str:
-        return '{}{}{}'.format(self._to_str_release(), self._to_str_pre_release(),
-                               self._to_str_local())
+        return '{}{}{}'.format(self.release_to_str(), self.pre_release_to_str(),
+                               self.local_to_str())
 
     def release_to_tuple(self, sort: bool = False) -> tuple:
         return (0 if sort else None) if self._major is None else self._major, \
