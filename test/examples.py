@@ -1,3 +1,4 @@
+"""Examples for tests."""
 
 import pathlib
 import platform
@@ -58,6 +59,12 @@ INCOMPATIBLE_CASES = {
     '1.0.0-2': ((1, 0, 0, '-', None, 2), {}),
     '1.0.0-0.2': ((1, 0, 0, '-', None, 0, '.', None, 2), {}),
     '4.5.0.dev': ((4, 5, 0, '.', 'dev', None), {})}
+
+
+def case_to_version_tuple(args, kwargs):
+    return args + tuple(
+        v for _, v in sorted(kwargs.items(), key=lambda _: KWARG_NAMES.index(_[0])))
+
 
 INCREMENT_CASES = {
     ('1.0', (VersionComponent.Minor,)): '1.1',

@@ -7,10 +7,10 @@ import packaging.version
 import pkg_resources
 import semver
 
-from version_query.version import VersionComponent, Version
+from version_query.version import Version
 from .examples import \
-    KWARG_NAMES, COMPATIBLE_CASES, INCOMPATIBLE_CASES, INCREMENT_CASES, COMPARISON_CASES_LESS, \
-    COMPARISON_CASES_EQUAL
+    KWARG_NAMES, COMPATIBLE_CASES, INCOMPATIBLE_CASES, case_to_version_tuple, INCREMENT_CASES, \
+    COMPARISON_CASES_LESS, COMPARISON_CASES_EQUAL
 
 from version_query.version import VersionOld
 
@@ -69,25 +69,31 @@ class Tests(unittest.TestCase):
     maxDiff = None
 
     def test_from_str(self):
-        for version_str, (args, kwargs) in COMPATIBLE_CASES.items():
-            version_tuple = args + tuple(
-                v for k, v in sorted(kwargs.items(), key=lambda _: KWARG_NAMES.index(_[0])))
+        for version_str, (args, kwargs) in itertools.chain(
+                COMPATIBLE_CASES.items(), INCOMPATIBLE_CASES.items()):
+            version_tuple = case_to_version_tuple(args, kwargs)
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 self.assertEqual(Version.from_str(version_str).to_tuple(), version_tuple)
-                try:
-                    py_version = packaging.version.Version(version_str)
-                except ValueError:
-                    pass
-                else:
-                    self.assertEqual(Version.from_py_version(py_version).to_tuple(),
-                                     version_tuple, py_version)
-                try:
-                    py_version_setuptools = pkg_resources.parse_version(version_str)
-                except ValueError:
-                    pass
-                else:
-                    self.assertEqual(Version.from_py_version(py_version_setuptools).to_tuple(),
-                                     version_tuple, py_version_setuptools)
+
+    def test_from_str_bad(self):
+        with self.assertRaises(ValueError):
+            Version.from_str('hello world')
+
+    def test_from_py_version(self):
+        for version_str, (args, kwargs) in COMPATIBLE_CASES.items():
+            version_tuple = case_to_version_tuple(args, kwargs)
+            with self.subTest(version_str=version_str, version_tuple=version_tuple):
+                py_version = packaging.version.Version(version_str)
+                self.assertEqual(Version.from_py_version(py_version).to_tuple(),
+                                 version_tuple, py_version)
+                py_version_setuptools = pkg_resources.parse_version(version_str)
+                self.assertEqual(Version.from_py_version(py_version_setuptools).to_tuple(),
+                                 version_tuple, py_version_setuptools)
+
+    def test_from_sem_version(self):
+        for version_str, (args, kwargs) in COMPATIBLE_CASES.items():
+            version_tuple = case_to_version_tuple(args, kwargs)
+            with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 try:
                     sem_version = semver.parse(version_str)
                 except ValueError:
@@ -102,15 +108,6 @@ class Tests(unittest.TestCase):
                 else:
                     self.assertEqual(Version.from_sem_version(sem_version_info).to_tuple(),
                                      version_tuple, sem_version_info)
-        for version_str, (args, kwargs) in INCOMPATIBLE_CASES.items():
-            version_tuple = args + tuple(
-                v for k, v in sorted(kwargs.items(), key=lambda _: KWARG_NAMES.index(_[0])))
-            with self.subTest(version_str=version_str, version_tuple=version_tuple):
-                self.assertEqual(Version.from_str(version_str).to_tuple(), version_tuple)
-
-    def test_from_str_bad(self):
-        with self.assertRaises(ValueError):
-            Version.from_str('hello world')
 
     def test_increment(self):
         for (initial_version, args), result_version in INCREMENT_CASES.items():
@@ -138,6 +135,6 @@ class Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Version(-1).to_str()
         with self.assertRaises(ValueError):
-            Version(5, pre_release=[(None, 'dev',-1)]).to_str()
+            Version(5, pre_release=[(None, 'dev', -1)]).to_str()
         with self.assertRaises(ValueError):
             Version(1, patch=13).to_str()

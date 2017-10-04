@@ -72,7 +72,9 @@ def _upcoming_git_tag_version(repo: git.Repo, ignore_untracked_files: bool = Tru
         version._local = (commit_sha,)
 
     if repo_is_dirty:
-        if version._local:
+        if version._local is None:
+            version._local = ()
+        else:
             version._local = version._local + ('.',)
         version._local = version._local + ('dirty{}'.format(datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S')),)
 

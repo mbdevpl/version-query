@@ -12,7 +12,8 @@ from version_query.version import VersionComponent
 from version_query.git_query import query_git_repo
 from version_query.py_query import query_metadata_json, query_pkg_info, query_package_folder
 from version_query.query import query_folder, query_caller, predict_caller
-from .examples import GIT_REPO_EXAMPLES, METADATA_JSON_EXAMPLE_PATHS, PKG_INFO_EXAMPLE_PATHS, PACKAGE_FOLDER_EXAMPLES
+from .examples import \
+    GIT_REPO_EXAMPLES, METADATA_JSON_EXAMPLE_PATHS, PKG_INFO_EXAMPLE_PATHS, PACKAGE_FOLDER_EXAMPLES
 from .test_setup import run_module
 
 _LOG = logging.getLogger(__name__)
@@ -160,7 +161,8 @@ class Tests(unittest.TestCase):
         f = io.StringIO()
         with contextlib.redirect_stdout(f):
             run_module('version_query', '-i', '.')
-        self.assertEqual(f.getvalue().rstrip(), query_caller().increment(VersionComponent.Patch).to_str())
+        self.assertEqual(f.getvalue().rstrip(),
+                         query_caller().increment(VersionComponent.Patch).to_str())
 
     def test_predict_here(self):
         f = io.StringIO()
