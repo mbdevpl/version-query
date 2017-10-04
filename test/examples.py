@@ -3,6 +3,8 @@ import pathlib
 import platform
 import sys
 
+from version_query.version import VersionComponent
+
 _HERE = pathlib.Path(__file__).resolve().parent
 
 _PACKAGE_FOLDER = _HERE.parent
@@ -56,3 +58,27 @@ INCOMPATIBLE_CASES = {
     '1.0.0-2': ((1, 0, 0, '-', None, 2), {}),
     '1.0.0-0.2': ((1, 0, 0, '-', None, 0, '.', None, 2), {}),
     '4.5.0.dev': ((4, 5, 0, '.', 'dev', None), {})}
+
+INCREMENT_CASES = {
+    ('1.0', (VersionComponent.Minor,)): '1.1',
+    ('1.5', (VersionComponent.Major,)): '2.0',
+    ('0.3dev', (VersionComponent.DevPatch,)): '0.3dev1',
+    ('0.3.5', (VersionComponent.DevPatch, 500)): '0.3.5.dev500',
+    ('4.0.1-0.3', (VersionComponent.DevPatch, 2)): '4.0.1-0.3.dev2'}
+
+COMPARISON_CASES_LESS = {
+    '0.3dev': '0.3dev1',
+    '0.3rc2': '0.3',
+    '0.3': '0.3-2',
+    '0.3-2rc5': '0.3-2',
+    '0.3-2.dev5': '0.3-2',
+    '0.3-2.dev42': '0.3-2',
+    '0.3-4': '0.3-4.5',
+    '1-1.2.3.4.5.dev4': '1-1.2.3.4.5',
+    '1.0.0': '1.0.0+blahblah'}
+
+COMPARISON_CASES_EQUAL = {
+    '1.0.0': '1.0.0',
+    '1': '1.0.0',
+    '1.0': '1.0.0.0',
+    '1.0.0-0.0.DEV42': '1.0.0.0.0.dev42'}

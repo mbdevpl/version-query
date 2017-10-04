@@ -3,6 +3,8 @@
 import contextlib
 import io
 import logging
+import os
+import pathlib
 import sys
 import unittest
 
@@ -103,6 +105,15 @@ class Tests(unittest.TestCase):
                 except ValueError:
                     _LOG.exception('failed to get version from %s', path)
 
+    @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
+    def test_query_pkg_info_current(self):
+        run_module('setup', 'build')
+        paths = list(pathlib.Path.cwd().glob('*.egg-info/PKG-INFO'))
+        self.assertEqual(len(paths), 1)
+        path = paths[0]
+        version = query_pkg_info(path)
+        _LOG.debug('%s: %s', path, version)
+
     def test_query_package_folder(self):
         for path in PACKAGE_FOLDER_EXAMPLES:
             with self.subTest(path=path):
@@ -112,6 +123,13 @@ class Tests(unittest.TestCase):
                 except ValueError:
                     _LOG.info('failed to get version from %s', path, exc_info=True)
 
+    @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
+    def test_query_package_folder_current(self):
+        run_module('setup', 'build')
+        path = pathlib.Path.cwd()
+        version = query_package_folder(path)
+        _LOG.debug('%s: %s', path, version)
+
     def test_query_folder(self):
         for path in PACKAGE_FOLDER_EXAMPLES:
             with self.subTest(path=path):
@@ -120,6 +138,15 @@ class Tests(unittest.TestCase):
                     _LOG.debug('%s: %s', path, version)
                 except ValueError:
                     _LOG.info('failed to get version from %s', path, exc_info=True)
+
+    def test_query_folder_current(self):
+        path = pathlib.Path.cwd()
+        version = query_folder(path)
+        _LOG.debug('%s: %s', path, version)
+
+    def test_query_caller(self):
+        version = query_caller()
+        _LOG.debug('caller: %s', version)
 
     def test_not_as_main(self):
         run_module('version_query', run_name=None)

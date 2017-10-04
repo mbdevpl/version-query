@@ -50,7 +50,7 @@ def query_pkg_info(path: pathlib.Path) -> Version:
 
 
 def query_package_folder(path: pathlib.Path, search_parent_directories: bool = False) -> Version:
-    paths = [path] + list(path.parents) if search_parent_directories else []
+    paths = [path] + (list(path.parents) if search_parent_directories else [])
     metadata_json_paths, pkg_info_paths = None, None
     for path in paths:
         metadata_json_paths = list(path.glob('*.dist-info/metadata.json'))

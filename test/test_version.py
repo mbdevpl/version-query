@@ -8,7 +8,9 @@ import pkg_resources
 import semver
 
 from version_query.version import VersionComponent, Version
-from .examples import KWARG_NAMES, COMPATIBLE_CASES, INCOMPATIBLE_CASES
+from .examples import \
+    KWARG_NAMES, COMPATIBLE_CASES, INCOMPATIBLE_CASES, INCREMENT_CASES, COMPARISON_CASES_LESS, \
+    COMPARISON_CASES_EQUAL
 
 from version_query.version import VersionOld
 
@@ -111,28 +113,24 @@ class Tests(unittest.TestCase):
             Version.from_str('hello world')
 
     def test_increment(self):
-        self.assertEqual(Version.from_str('1.0').increment(VersionComponent.Minor), Version.from_str('1.1'))
-        self.assertEqual(Version.from_str('1.5').increment(VersionComponent.Major), Version.from_str('2.0'))
-        self.assertEqual(Version.from_str('0.3dev').increment(VersionComponent.PrePatch), Version.from_str('0.3dev1'))
+        for (initial_version, args), result_version in INCREMENT_CASES.items():
+            with self.subTest(initial_version=initial_version, args=args,
+                              result_version=result_version):
+                self.assertEqual(Version.from_str(initial_version).increment(*args),
+                                 Version.from_str(result_version))
 
     def test_compare(self):
-        self.assertLess(Version.from_str('0.3dev'), Version.from_str('0.3dev1'))
-        self.assertLess(Version.from_str('0.3rc2'), Version.from_str('0.3'))
-        self.assertLess(Version.from_str('0.3'), Version.from_str('0.3-2'))
-        self.assertLess(Version.from_str('0.3-2rc5'), Version.from_str('0.3-2'))
-        self.assertLess(Version.from_str('0.3-2.dev5'), Version.from_str('0.3-2'))
-        self.assertLess(Version.from_str('0.3-2.dev5'), Version.from_str('0.3-2'))
-        self.assertLess(Version.from_str('0.3-4'), Version.from_str('0.3-4.5'))
-        self.assertLess(Version.from_str('1-1.2.3.4.5.dev4'), Version.from_str('1-1.2.3.4.5'))
-        self.assertLess(Version.from_str('1.0.0'), Version.from_str('1.0.0+blahblah'))
+        for earlier_version, later_version in COMPARISON_CASES_LESS.items():
+            with self.subTest(earlier_version=earlier_version, later_version=later_version):
+                self.assertLess(Version.from_str(earlier_version), Version.from_str(later_version))
 
-        self.assertEqual(Version.from_str('1.0.0'), Version.from_str('1.0.0'))
-        self.assertEqual(Version.from_str('1.0'), Version.from_str('1.0.0'))
-        self.assertEqual(Version.from_str('1.0'), Version.from_str('1.0.0.0'))
-        self.assertEqual(Version.from_str('1.0.0-0.0.DEV42'), Version.from_str('1.0.0.0.0.dev42'))
+        for version, equivalent_version in COMPARISON_CASES_EQUAL.items():
+            with self.subTest(version=version, equivalent_version=equivalent_version):
+                self.assertEqual(Version.from_str(version), Version.from_str(equivalent_version))
 
     def test_to_str(self):
-        for result, (args, kwargs) in itertools.chain(COMPATIBLE_CASES.items(), INCOMPATIBLE_CASES.items()):
+        for result, (args, kwargs) in itertools.chain(
+                COMPATIBLE_CASES.items(), INCOMPATIBLE_CASES.items()):
             with self.subTest(args=args, kwargs=kwargs, result=result):
                 self.assertEqual(Version(*args, **kwargs).to_str(), result)
 
