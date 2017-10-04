@@ -36,14 +36,6 @@ if sys.version_info < (3, 5):
         def __exit__(self, exctype, excinst, exctb):
             setattr(sys, self._stream, self._old_targets.pop())
 
-    if sys.version_info < (3, 4):
-
-        class _redirect_stdout(_RedirectStream):
-
-            _stream = "stdout"
-
-        contextlib.redirect_stdout = _redirect_stdout
-
     class _redirect_stderr(_RedirectStream):
 
         _stream = "stderr"
