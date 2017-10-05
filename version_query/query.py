@@ -44,7 +44,7 @@ def query_caller(stack_level: int = 1) -> Version:
     return query_folder(here, True)
 
 
-def query() -> str:
+def query_version_str() -> str:
     return query_caller(2).to_str()
 
 
@@ -58,7 +58,7 @@ def predict_caller(stack_level: int = 1) -> Version:
     return query_folder(here, True)
 
 
-def predict() -> str:
+def predict_version_str() -> str:
     return predict_caller(2).to_str()
 
 
