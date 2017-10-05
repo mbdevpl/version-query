@@ -1,4 +1,4 @@
-"""Tests of version string parsing and generation."""
+"""Tests of version string parsing, generation and comparison."""
 
 import itertools
 import unittest
@@ -9,7 +9,7 @@ import semver
 
 from version_query.version import Version
 from .examples import \
-    KWARG_NAMES, COMPATIBLE_CASES, INCOMPATIBLE_CASES, case_to_version_tuple, INCREMENT_CASES, \
+    COMPATIBLE_CASES, INCOMPATIBLE_CASES, case_to_version_tuple, INCREMENT_CASES, \
     COMPARISON_CASES_LESS, COMPARISON_CASES_EQUAL
 
 from version_query.version import VersionOld

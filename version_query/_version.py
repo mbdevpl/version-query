@@ -1,5 +1,5 @@
 """Version of version_query package."""
 
-from .query import predict_caller
+from .query import predict
 
-VERSION = predict_caller().to_str()
+VERSION = predict()

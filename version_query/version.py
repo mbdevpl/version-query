@@ -123,7 +123,7 @@ class Version:
             raise ValueError('given pre-release string {} is invalid'.format(repr(pre_release)))
         parts = cls._pattern_pre_release.findall(pre_release)
         _LOG.debug('parsed pre-release string %s into %s',
-                     repr(pre_release), parts)
+                   repr(pre_release), parts)
         tuples = []
         for part in parts:
             match = cls._pattern_pre_release_part.fullmatch(part)
@@ -159,15 +159,15 @@ class Version:
 
         py_version = pkg_resources.parse_version(version_str) # type: packaging.version.Version
         _LOG.debug('packaging parsed version string %s into %s: %s',
-                     repr(version_str), type(py_version), py_version)
+                   repr(version_str), type(py_version), py_version)
 
         try:
             sem_version = semver.parse(version_str) # type: dict
             _LOG.debug('semver parsed version string %s into %s: %s',
-                         repr(version_str), type(sem_version), sem_version)
+                       repr(version_str), type(sem_version), sem_version)
             sem_version_info = semver.parse_version_info(version_str) # type: semver.VersionInfo
             _LOG.debug('semver parsed version string %s into %s: %s',
-                         repr(version_str), type(sem_version_info), sem_version_info)
+                       repr(version_str), type(sem_version_info), sem_version_info)
         except ValueError:
             _LOG.debug('semver could not parse version string %s', repr(version_str))
 
@@ -175,7 +175,7 @@ class Version:
         if match is None:
             raise ValueError('version string {} is invalid'.format(repr(version_str)))
         _LOG.debug('version_query parsed version string %s into %s: %s %s',
-                     repr(version_str), type(match), match.groupdict(), match.groups())
+                   repr(version_str), type(match), match.groupdict(), match.groups())
 
         _release = match.group('release')
         _pre_release = match.group('prerelease')
@@ -196,10 +196,12 @@ class Version:
         return cls(**version_dict)
 
     @classmethod
-    def from_py_version(cls, py_version: t.Union[packaging.version.Version, pkg_resources.SetuptoolsVersion]):
+    def from_py_version(
+            cls, py_version: t.Union[packaging.version.Version, pkg_resources.SetuptoolsVersion]):
         if isinstance(py_version, (packaging.version.Version, pkg_resources.SetuptoolsVersion)):
             ver = py_version._version
-            major, minor, patch = [ver.release[i] if len(ver.release) > i else None for i in range(3)]
+            major, minor, patch = [ver.release[i] if len(ver.release) > i
+                                   else None for i in range(3)]
             pre_release = None
             local = None
             if len(ver.release) == 4:
@@ -221,7 +223,8 @@ class Version:
                 pre_release = [('.',) + tuple(pre_ver[i] if pre_ver and len(pre_ver) > i else None
                                               for i in range(2))]
             if ver.local:
-                local = tuple(itertools.chain.from_iterable((dot, str(_)) for dot, _ in zip('.' * len(ver.local), ver.local)))[1:]
+                local = tuple(itertools.chain.from_iterable(
+                    (dot, str(_)) for dot, _ in zip('.' * len(ver.local), ver.local)))[1:]
             _LOG.debug('parsing %s %s', type(py_version), ver)
             return cls(major, minor, patch, pre_release=pre_release, local=local)
         raise NotImplementedError(type(py_version))
@@ -301,7 +304,8 @@ class Version:
                         continue
                     if i == len(args) - 1:
                         break
-                    raise ValueError('expected 3-tuple with pre-release information in arg={} (at index {} in args={}) in {}'
+                    raise ValueError('pre-release segment arg={} (index {} in args={} in {})'
+                                     ' must be a 3-tuple'
                                      .format(arg, i, args, repr(self)))
             else:
                 accumulated = []
@@ -330,7 +334,8 @@ class Version:
             raise TypeError('pre_release={} is of wrong type {} in {}'
                             .format(repr(pre_release), type(pre_release), repr(self)))
         if pre_release is not None and len(pre_release) == 0:
-            raise ValueError('pre_release has no elements although it is set in {}'.format(repr(self)))
+            raise ValueError('pre_release has no elements although it is set in {}'
+                             .format(repr(self)))
         if pre_release is not None:
             for pre in pre_release:
                 if not isinstance(pre, tuple):
@@ -356,7 +361,7 @@ class Version:
                                      .format(repr(pre_patch), repr(self)))
                 if pre_separator is None and pre_type is None and pre_patch is not None:
                     raise ValueError(
-                        'only pre_patch={} is present but neither pre_separator nor pre_type is in {}'
+                        'neither pre_separator nor pre_type is set but pre_patch={} is in {}'
                         .format(repr(pre_patch), repr(self)))
                 if pre_separator is not None and pre_type is None and pre_patch is None:
                     raise ValueError(
@@ -389,6 +394,14 @@ class Version:
             if i % 2 == 1 and part not in ('-', '.'):
                 raise ValueError('local_separator={} has wrong value in {}'
                                  .format(repr(part), repr(self)))
+
+    @property
+    def has_pre_release(self):
+        return self._pre_release is not None
+
+    @property
+    def has_local(self):
+        return self._local is not None
 
     def increment(self, component: VersionComponent, amount: int = 1) -> 'Version':
         """Increment a selected version component and return self."""
@@ -493,13 +506,15 @@ class Version:
     def pre_release_to_tuple(self, sort: bool = False) -> tuple:
         if self._pre_release is None:
             return ((1, '', 0),) if sort else ()
-        parts = [self.pre_release_segment_to_tuple(i, sort) for i, _ in enumerate(self._pre_release)]
+        parts = [self.pre_release_segment_to_tuple(i, sort)
+                 for i, _ in enumerate(self._pre_release)]
         return tuple(parts) if sort else tuple(itertools.chain.from_iterable(parts))
 
     def local_to_tuple(self, sort: bool = False) -> tuple:
         if self._local is None:
             return ()
-        return tuple(0 if _ in ('.', '-') else _.lower() for _ in self._local) if sort else self._local
+        return tuple(0 if _ in ('.', '-') else _.lower() for _ in self._local) \
+            if sort else self._local
 
     def to_tuple(self, sort: bool = False) -> tuple:
         return self.release_to_tuple(sort) + self.pre_release_to_tuple(sort) \
@@ -533,7 +548,8 @@ class Version:
         self_pre_release = self.pre_release_to_tuple(True)
         other_pre_release = other.pre_release_to_tuple(True)
         if self_pre_release != other_pre_release:
-            for self_part, other_part in itertools.zip_longest(self_pre_release, other_pre_release, fillvalue=(1, '', 0)):
+            for self_part, other_part in itertools.zip_longest(
+                    self_pre_release, other_pre_release, fillvalue=(1, '', 0)):
                 if self_part != other_part:
                     return self_part < other_part
             raise NotImplementedError(repr(self_pre_release) + ' != ' + repr(other_pre_release))

@@ -1,3 +1,4 @@
+"""High-level utility functions for querying, manipulating and generating version information."""
 
 import argparse
 import inspect
@@ -14,7 +15,7 @@ _LOG = logging.getLogger(__name__)
 
 
 def _caller_folder(stack_level: int = 1) -> pathlib.Path:
-    """Determine folder in which the caller module of this function is located."""
+    """Determine folder in which the caller module of a function is located."""
     frame_info = inspect.getouterframes(inspect.currentframe())[stack_level]
     caller_path = frame_info[1] # frame_info.filename
 
@@ -30,6 +31,7 @@ def _caller_folder(stack_level: int = 1) -> pathlib.Path:
 
 
 def query_folder(path: pathlib.Path, search_parent_directories: bool = False) -> Version:
+    """Determine version of code in a given folder."""
     try:
         return query_git_repo(path, search_parent_directories=search_parent_directories)
     except git.InvalidGitRepositoryError:
@@ -42,7 +44,12 @@ def query_caller(stack_level: int = 1) -> Version:
     return query_folder(here, True)
 
 
+def query() -> str:
+    return query_caller(2).to_str()
+
+
 def predict_caller(stack_level: int = 1) -> Version:
+    """Predict the version of code associated with the caller of this function."""
     here = _caller_folder(stack_level + 1)
     try:
         return predict_git_repo(here, True)
@@ -51,7 +58,12 @@ def predict_caller(stack_level: int = 1) -> Version:
     return query_folder(here, True)
 
 
+def predict() -> str:
+    return predict_caller(2).to_str()
+
+
 def main(args=None, namespace=None) -> None:
+    """Entry point of the command-line interface."""
     parser = argparse.ArgumentParser(
         prog='version_query',
         description='Tool for querying current versions of Python packages.',

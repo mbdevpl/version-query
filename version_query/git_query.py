@@ -62,7 +62,7 @@ def _upcoming_git_tag_version(repo: git.Repo, ignore_untracked_files: bool = Tru
             pre_patch_increment += 1
         _LOG.debug('there are %i new commits since %s', pre_patch_increment, version)
 
-    if not version._pre_release:
+    if not version.has_pre_release:
         version.increment(VersionComponent.Patch)
     if repo_has_new_commits:
         version.increment(VersionComponent.DevPatch, pre_patch_increment)
@@ -72,11 +72,11 @@ def _upcoming_git_tag_version(repo: git.Repo, ignore_untracked_files: bool = Tru
         version._local = (commit_sha,)
 
     if repo_is_dirty:
-        if version._local is None:
-            version._local = ()
+        dt_ = 'dirty{}'.format(datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S'))
+        if version.has_local:
+            version._local = version._local + ('.', dt_)
         else:
-            version._local = version._local + ('.',)
-        version._local = version._local + ('dirty{}'.format(datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S')),)
+            version._local = (dt_,)
 
     #if not repo_is_dirty and get_caller_module_name(-1) == 'setup' \
     #        and any(_ in sys.argv for _ in ('bdist', 'bdist_wheel', 'sdist')):
