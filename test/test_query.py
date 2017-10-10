@@ -46,6 +46,14 @@ if sys.version_info < (3, 5):
 
 class Tests(unittest.TestCase):
 
+    def test_deprecated(self):
+        import warnings
+        warnings.warn('remove this test after removing deprecated function',
+                      DeprecationWarning, stacklevel=2)
+        from version_query import generate_version_str
+        with self.assertWarns(DeprecationWarning):
+            generate_version_str()
+
     def test_examples(self):
         lvl = logging.WARNING if len(GIT_REPO_EXAMPLES) < 10 else logging.INFO
         _LOG.log(lvl, 'git repos count: %i', len(GIT_REPO_EXAMPLES))
