@@ -10,6 +10,7 @@ _LOG = logging.getLogger(__name__)
 
 
 def query_metadata_json(path: pathlib.Path) -> Version:
+    """Get version from metadata.json file."""
     with open(str(path), 'r') as metadata_file:
         metadata = json.load(metadata_file)
     version_str = metadata['version']
@@ -17,6 +18,7 @@ def query_metadata_json(path: pathlib.Path) -> Version:
 
 
 def query_pkg_info(path: pathlib.Path) -> Version:
+    """Get version from PKG-INFO file."""
     with open(str(path), 'r') as pkginfo_file:
         for line in pkginfo_file:
             if line.startswith('Version:'):
@@ -26,6 +28,7 @@ def query_pkg_info(path: pathlib.Path) -> Version:
 
 
 def query_package_folder(path: pathlib.Path, search_parent_directories: bool = False) -> Version:
+    """Get version from Python package folder."""
     paths = [path] + (list(path.parents) if search_parent_directories else [])
     metadata_json_paths, pkg_info_paths = None, None
     for path in paths:
