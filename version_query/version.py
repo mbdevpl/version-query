@@ -1,5 +1,6 @@
 """Version string parser and generator."""
 
+import collections.abc
 import enum
 import itertools
 import logging
@@ -329,7 +330,7 @@ class Version:
                 pre_release = None
         self._pre_release = pre_release
 
-        if pre_release is not None and not isinstance(pre_release, list):
+        if pre_release is not None and not isinstance(pre_release, collections.abc.Sequence):
             raise TypeError('pre_release={} is of wrong type {} in {}'
                             .format(repr(pre_release), type(pre_release), repr(self)))
         if pre_release is not None and len(pre_release) == 0:
@@ -374,17 +375,40 @@ class Version:
         if local is None:
             if len(args) == 1 and isinstance(args[0], tuple):
                 local = args[0]
+            elif not args:
+                local = None
             else:
                 local = args
         elif isinstance(local, str):
             local = (local,)
-        self._local = local  # still temporary
+        self.local = local
 
-        if local is not None and not isinstance(local, tuple):
+    @property
+    def pre_release(self) -> t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]:
+        return self._pre_release.copy()
+
+    @pre_release.setter
+    def pre_release(self, pre_release):
+        pass
+
+    @property
+    def has_pre_release(self):
+        return self._pre_release is not None
+
+    @property
+    def local(self) -> tuple:
+        return self._local
+
+    @local.setter
+    def local(self, local: t.Optional[t.Sequence[str]]):
+
+        if local is None:
+            self._local = None
+            return
+
+        if not isinstance(local, collections.abc.Sequence):
             raise TypeError('local={} is of wrong type {} in {}'
                             .format(repr(local), type(local), repr(self)))
-
-        self._local = tuple([part for part in local])  # final setting
 
         for i, part in enumerate(local):
             if not isinstance(part, str):
@@ -394,9 +418,7 @@ class Version:
                 raise ValueError('local_separator={} has wrong value in {}'
                                  .format(repr(part), repr(self)))
 
-    @property
-    def has_pre_release(self):
-        return self._pre_release is not None
+        self._local = tuple(local)
 
     @property
     def has_local(self):
@@ -537,7 +559,7 @@ class Version:
 
     def __lt__(self, other):
         if not isinstance(other, Version):
-            raise TypeError(type(other))
+            raise TypeError('cannot compare {} and {}'.format(type(self), type(other)))
 
         self_release = self.release_to_tuple(True)
         other_release = other.release_to_tuple(True)

@@ -9,8 +9,8 @@ import semver
 
 from version_query.version import Version
 from .examples import \
-    COMPATIBLE_CASES, INCOMPATIBLE_CASES, case_to_version_tuple, INCREMENT_CASES, \
-    COMPARISON_CASES_LESS, COMPARISON_CASES_EQUAL
+    INIT_CASES, BAD_INIT_CASES, COMPATIBLE_CASES, INCOMPATIBLE_CASES, case_to_version_tuple, \
+    INCREMENT_CASES, COMPARISON_CASES_LESS, COMPARISON_CASES_EQUAL
 
 
 class Tests(unittest.TestCase):
@@ -58,6 +58,19 @@ class Tests(unittest.TestCase):
                     self.assertEqual(Version.from_sem_version(sem_version_info).to_tuple(),
                                      version_tuple, sem_version_info)
 
+    def test_init(self):
+        for version, (args, kwargs) in INIT_CASES.items():
+            with self.subTest(args=args, kwargs=kwargs, version=version):
+                created_version = Version(*args, **dict(kwargs))
+                self.assertIsInstance(created_version, Version)
+                self.assertEqual(Version.from_str(version), created_version)
+
+    def test_init_bad(self):
+        for (args, kwargs), exception in BAD_INIT_CASES.items():
+            with self.subTest(args=args, kwargs=kwargs, exception=exception):
+                with self.assertRaises(exception):
+                    Version(*args, **dict(kwargs))
+
     def test_increment(self):
         for (initial_version, args), result_version in INCREMENT_CASES.items():
             with self.subTest(initial_version=initial_version, args=args,
@@ -79,11 +92,3 @@ class Tests(unittest.TestCase):
                 COMPATIBLE_CASES.items(), INCOMPATIBLE_CASES.items()):
             with self.subTest(args=args, kwargs=kwargs, result=result):
                 self.assertEqual(Version(*args, **kwargs).to_str(), result)
-
-    def test_to_str_bad(self):
-        with self.assertRaises(ValueError):
-            Version(-1).to_str()
-        with self.assertRaises(ValueError):
-            Version(5, pre_release=[(None, 'dev', -1)]).to_str()
-        with self.assertRaises(ValueError):
-            Version(1, patch=13).to_str()

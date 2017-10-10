@@ -69,14 +69,14 @@ def _upcoming_git_tag_version(repo: git.Repo, ignore_untracked_files: bool = Tru
 
     if repo_has_new_commits:
         commit_sha = repo.head.commit.hexsha[:8]
-        version._local = (commit_sha,)
+        version.local = (commit_sha,)
 
     if repo_is_dirty:
         dt_ = 'dirty{}'.format(datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S'))
         if version.has_local:
-            version._local = version._local + ('.', dt_)
+            version.local += ('.', dt_)
         else:
-            version._local = (dt_,)
+            version.local = (dt_,)
 
     #if not repo_is_dirty and get_caller_module_name(-1) == 'setup' \
     #        and any(_ in sys.argv for _ in ('bdist', 'bdist_wheel', 'sdist')):

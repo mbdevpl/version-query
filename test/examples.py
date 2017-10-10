@@ -40,6 +40,16 @@ PACKAGE_FOLDER_EXAMPLES = list(_ for _ in _PACKAGE_FOLDER.parent.glob('*')
 
 KWARG_NAMES = ('major', 'minor', 'patch', 'pre_release', 'local')
 
+INIT_CASES = {
+    '1': ((1,), {}),
+    '1.0': ((1, 0), {}),
+    '1.0.0': ((1, 0, 0), {})}
+
+BAD_INIT_CASES = {
+    ((-1,), ()): ValueError,
+    ((5,), (('pre_release', ((None, 'dev', -1),)),)): ValueError,
+    ((1,), (('patch', 13),)): ValueError}
+
 COMPATIBLE_CASES = {
     '0': ((0, None, None), {}),
     '42': ((42, None, None), {}),
