@@ -153,27 +153,27 @@ class Tests(unittest.TestCase):
         run_module('version_query', run_name=None)
 
     def test_help(self):
-        f = io.StringIO()
-        with contextlib.redirect_stderr(f):
+        sio = io.StringIO()
+        with contextlib.redirect_stderr(sio):
             with self.assertRaises(SystemExit):
                 run_module('version_query')
-        _LOG.info('%s', f.getvalue())
+        _LOG.info('%s', sio.getvalue())
 
     def test_here(self):
-        f = io.StringIO()
-        with contextlib.redirect_stdout(f):
+        sio = io.StringIO()
+        with contextlib.redirect_stdout(sio):
             run_module('version_query', '.')
-        self.assertEqual(f.getvalue().rstrip(), query_caller().to_str())
+        self.assertEqual(sio.getvalue().rstrip(), query_caller().to_str())
 
     def test_increment_here(self):
-        f = io.StringIO()
-        with contextlib.redirect_stdout(f):
+        sio = io.StringIO()
+        with contextlib.redirect_stdout(sio):
             run_module('version_query', '-i', '.')
-        self.assertEqual(f.getvalue().rstrip(),
+        self.assertEqual(sio.getvalue().rstrip(),
                          query_caller().increment(VersionComponent.Patch).to_str())
 
     def test_predict_here(self):
-        f = io.StringIO()
-        with contextlib.redirect_stdout(f):
+        sio = io.StringIO()
+        with contextlib.redirect_stdout(sio):
             run_module('version_query', '-p', '.')
-        self.assertEqual(f.getvalue().rstrip(), predict_caller().to_str())
+        self.assertEqual(sio.getvalue().rstrip(), predict_caller().to_str())
