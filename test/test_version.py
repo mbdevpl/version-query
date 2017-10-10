@@ -1,6 +1,5 @@
 """Tests of version string parsing, generation and comparison."""
 
-import itertools
 import unittest
 
 import packaging.version
@@ -9,7 +8,7 @@ import semver
 
 from version_query.version import Version
 from .examples import \
-    INIT_CASES, BAD_INIT_CASES, COMPATIBLE_CASES, INCOMPATIBLE_CASES, case_to_version_tuple, \
+    INIT_CASES, BAD_INIT_CASES, COMPATIBLE_STR_CASES, STR_CASES, case_to_version_tuple, \
     INCREMENT_CASES, COMPARISON_CASES_LESS, COMPARISON_CASES_EQUAL
 
 
@@ -18,8 +17,7 @@ class Tests(unittest.TestCase):
     maxDiff = None
 
     def test_from_str(self):
-        for version_str, (args, kwargs) in itertools.chain(
-                COMPATIBLE_CASES.items(), INCOMPATIBLE_CASES.items()):
+        for version_str, (args, kwargs) in STR_CASES.items():
             version_tuple = case_to_version_tuple(args, kwargs)
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 self.assertEqual(Version.from_str(version_str).to_tuple(), version_tuple)
@@ -29,7 +27,7 @@ class Tests(unittest.TestCase):
             Version.from_str('hello world')
 
     def test_from_py_version(self):
-        for version_str, (args, kwargs) in COMPATIBLE_CASES.items():
+        for version_str, (args, kwargs) in COMPATIBLE_STR_CASES.items():
             version_tuple = case_to_version_tuple(args, kwargs)
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 py_version = packaging.version.Version(version_str)
@@ -40,7 +38,7 @@ class Tests(unittest.TestCase):
                                  version_tuple, py_version_setuptools)
 
     def test_from_sem_version(self):
-        for version_str, (args, kwargs) in COMPATIBLE_CASES.items():
+        for version_str, (args, kwargs) in COMPATIBLE_STR_CASES.items():
             version_tuple = case_to_version_tuple(args, kwargs)
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 try:
@@ -57,6 +55,17 @@ class Tests(unittest.TestCase):
                 else:
                     self.assertEqual(Version.from_sem_version(sem_version_info).to_tuple(),
                                      version_tuple, sem_version_info)
+
+    def test_from_version(self):
+        for version_str, (args, kwargs) in INIT_CASES.items():
+            with self.subTest(args=args, kwargs=kwargs, version_str=version_str):
+                version = Version.from_str(version_str)
+                created_version = Version(*args, **dict(kwargs))
+                self.assertIsInstance(created_version, Version)
+                self.assertEqual(version, created_version)
+                version_copy = Version.from_version(created_version)
+                self.assertEqual(version, version_copy)
+                self.assertEqual(version_copy, created_version)
 
     def test_init(self):
         for version, (args, kwargs) in INIT_CASES.items():
@@ -88,7 +97,6 @@ class Tests(unittest.TestCase):
                 self.assertEqual(Version.from_str(version), Version.from_str(equivalent_version))
 
     def test_to_str(self):
-        for result, (args, kwargs) in itertools.chain(
-                COMPATIBLE_CASES.items(), INCOMPATIBLE_CASES.items()):
+        for result, (args, kwargs) in STR_CASES.items():
             with self.subTest(args=args, kwargs=kwargs, result=result):
                 self.assertEqual(Version(*args, **kwargs).to_str(), result)

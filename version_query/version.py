@@ -288,7 +288,7 @@ class Version:
                 .format(repr(patch), repr(self)))
 
         if args and pre_release is not None and local is not None:
-            raise ValueError('args={} pre_release={} and local={} are all present in {}'
+            raise ValueError('args={}, pre_release={} and local={} are all present in {}'
                              .format(args, pre_release, local, repr(self)))
 
         if pre_release is None:
@@ -542,7 +542,7 @@ class Version:
             + self.local_to_tuple(sort)
 
     def to_dict(self) -> dict:
-        return vars(self)
+        return {field[1:]: value for field, value in vars(self).items()}
 
     def to_py_version(self) -> packaging.version.Version:
         return pkg_resources.parse_version(self.to_str())

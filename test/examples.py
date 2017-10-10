@@ -1,5 +1,6 @@
 """Examples for tests."""
 
+import itertools
 import pathlib
 import platform
 import sys
@@ -46,11 +47,17 @@ INIT_CASES = {
     '1.0.0': ((1, 0, 0), {})}
 
 BAD_INIT_CASES = {
+    (('spam',), ()): TypeError,
     ((-1,), ()): ValueError,
+    ((1, 'ham'), ()): TypeError,
+    ((1, -2), ()): ValueError,
+    ((1, 0, 'eggs'), ()): TypeError,
+    ((1, 0, -3), ()): ValueError,
+    ((1, 0, 0, 0, ), (('pre_release', ((None, 'dev', 0),)), ('local', 'bad'))): ValueError,
     ((5,), (('pre_release', ((None, 'dev', -1),)),)): ValueError,
     ((1,), (('patch', 13),)): ValueError}
 
-COMPATIBLE_CASES = {
+COMPATIBLE_STR_CASES = {
     '0': ((0, None, None), {}),
     '42': ((42, None, None), {}),
     '5+d2a610ba': ((5, None, None), {'local': 'd2a610ba'}),
@@ -69,10 +76,17 @@ COMPATIBLE_CASES = {
     '0.4.4.dev5+84e1d430': ((0, 4, 4, '.', 'dev', 5, '84e1d430'), {}),
     '0.4.4.dev5+20171003.84e1d430': ((0, 4, 4, '.', 'dev', 5, '20171003', '.', '84e1d430'), {})}
 
-INCOMPATIBLE_CASES = {
+INCOMPATIBLE_STR_CASES = {
     '1.0.0-2': ((1, 0, 0, '-', None, 2), {}),
     '1.0.0-0.2': ((1, 0, 0, '-', None, 0, '.', None, 2), {}),
     '4.5.0.dev': ((4, 5, 0, '.', 'dev', None), {})}
+
+STR_CASES = dict(itertools.chain(COMPATIBLE_STR_CASES.items(),
+                                 INCOMPATIBLE_STR_CASES.items()))
+
+BAD_STR_CASES = {
+    '-1.0.0': ValueError,
+    '1.0.0.ekhm_what': ValueError}
 
 
 def case_to_version_tuple(args, kwargs):
