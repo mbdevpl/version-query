@@ -384,12 +384,20 @@ class Version:
         self.local = local
 
     @property
+    def release(self) -> t.Tuple[int, t.Optional[int], t.Optional[int]]:
+        return self._major, self._minor, self._patch
+
+    @release.setter
+    def release(self, major: int, minor: t.Optional[int] = None, patch: t.Optional[int] = None):
+        raise NotImplementedError()
+
+    @property
     def pre_release(self) -> t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]:
         return self._pre_release.copy()
 
     @pre_release.setter
     def pre_release(self, pre_release):
-        pass
+        raise NotImplementedError()
 
     @property
     def has_pre_release(self):
