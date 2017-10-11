@@ -86,7 +86,9 @@ class Version:
     _re_number = r'(?:0|[123456789][0123456789]*)'
     #_re_sha = r'[0123456789abcdef]+'
     _re_letters = r'(?:[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)'
+    _pattern_letters = re.compile(_re_letters)
     _re_alphanumeric = r'(?:[0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)'
+    _pattern_alphanumeric = re.compile(_re_alphanumeric)
     _re_sep = r'(?:[\.-])'
 
     _re_release_parts = r'(?P<major>{})(?:\.(?P<minor>{}))?(?:\.(?P<patch>{}))?'.format(
@@ -156,7 +158,7 @@ class Version:
 
     @classmethod
     def from_str(cls, version_str: str):
-
+        """Create version from string."""
         py_version = pkg_resources.parse_version(version_str) # type: packaging.version.Version
         _LOG.debug('packaging parsed version string %s into %s: %s',
                    repr(version_str), type(py_version), py_version)
@@ -198,6 +200,7 @@ class Version:
     @classmethod
     def from_py_version(
             cls, py_version: t.Union[packaging.version.Version, pkg_resources.SetuptoolsVersion]):
+        """Create version from a standard Python version object."""
         if isinstance(py_version, (packaging.version.Version, pkg_resources.SetuptoolsVersion)):
             ver = py_version._version
             major, minor, patch = [ver.release[i] if len(ver.release) > i
@@ -231,6 +234,7 @@ class Version:
 
     @classmethod
     def from_sem_version(cls, sem_version: t.Union[dict, semver.VersionInfo]):
+        """Create version from semantic version object."""
         _LOG.debug('parsing %s %s', type(sem_version), sem_version)
         if isinstance(sem_version, semver.VersionInfo):
             major, minor, patch = sem_version.major, sem_version.minor, sem_version.patch
@@ -259,33 +263,13 @@ class Version:
             pre_release: t.Sequence[
                 t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]] = None,
             local: t.Union[str, tuple] = None):
-        self._major = major
-        self._minor = minor
-        self._patch = patch
-        self._pre_release = [args, pre_release] # only temporary
-        self._local = [args, local]  # only temporary
+        self._major = None
+        self._minor = None
+        self._patch = None
+        self._pre_release = None
+        self._local = None
 
-        _LOG.debug('initializing and validating %s', repr(self))
-
-        if not isinstance(major, int):
-            raise TypeError('major={} is of wrong type {} in {}'
-                            .format(repr(major), type(major), repr(self)))
-        if major < 0:
-            raise ValueError('major={} has wrong value in {}'.format(repr(major), repr(self)))
-        if minor is not None and not isinstance(minor, int):
-            raise TypeError('minor={} is of wrong type {} in {}'
-                            .format(repr(minor), type(minor), repr(self)))
-        if minor is not None and minor < 0:
-            raise ValueError('minor={} has wrong value in {}'.format(repr(minor), repr(self)))
-        if patch is not None and not isinstance(patch, int):
-            raise TypeError('patch={} is of wrong type {} in {}'
-                            .format(repr(patch), type(patch), repr(self)))
-        if patch is not None and patch < 0:
-            raise ValueError('patch={} has wrong value in {}'.format(repr(patch), repr(self)))
-        if minor is None and patch is not None:
-            raise ValueError(
-                'patch={} is present but not minor in {}'
-                .format(repr(patch), repr(self)))
+        self.release = major, minor, patch
 
         if args and pre_release is not None and local is not None:
             raise ValueError('args={}, pre_release={} and local={} are all present in {}'
@@ -296,7 +280,7 @@ class Version:
             consumed_args = 0
             if len(args) > 0 and isinstance(args[0], tuple):
                 for i, arg in enumerate(args):
-                    if not isinstance(args, tuple):
+                    if not isinstance(arg, tuple):
                         break
                     if len(arg) == 3 and arg[0] in (None, '.', '-'):
                         pre_release.append(arg)
@@ -325,48 +309,9 @@ class Version:
                         accumulated = []
             if consumed_args > 0:
                 args = args[consumed_args:]
-                self._local = [args, local]  # only temporary
             else:
                 pre_release = None
-        self._pre_release = pre_release
-
-        if pre_release is not None and not isinstance(pre_release, collections.abc.Sequence):
-            raise TypeError('pre_release={} is of wrong type {} in {}'
-                            .format(repr(pre_release), type(pre_release), repr(self)))
-        if pre_release is not None and len(pre_release) == 0:
-            raise ValueError('pre_release has no elements although it is set in {}'
-                             .format(repr(self)))
-        if pre_release is not None:
-            for pre in pre_release:
-                if not isinstance(pre, tuple):
-                    raise TypeError('pre-release part {} is of wrong type {} in {}'
-                                    .format(repr(pre), type(pre), repr(self)))
-                if len(pre) != 3:
-                    raise ValueError()
-                pre_separator, pre_type, pre_patch = pre
-                if pre_separator is not None and not isinstance(pre_separator, str):
-                    raise TypeError('pre_separator={} is of wrong type {} in {}'
-                                    .format(repr(pre_separator), type(pre_separator), repr(self)))
-                if pre_separator is not None and pre_separator not in ('-', '.'):
-                    raise ValueError('pre_separator={} has wrong value in {}'
-                                     .format(repr(pre_separator), repr(self)))
-                if pre_type is not None and not isinstance(pre_type, str):
-                    raise TypeError('pre_type={} is of wrong type {} in {}'
-                                    .format(repr(pre_type), type(pre_type), repr(self)))
-                if pre_patch is not None and not isinstance(pre_patch, int):
-                    raise TypeError('pre_patch={} is of wrong type {} in {}'
-                                    .format(repr(pre_patch), type(pre_patch), repr(self)))
-                if pre_patch is not None and pre_patch < 0:
-                    raise ValueError('pre_patch={} has wrong value in {}'
-                                     .format(repr(pre_patch), repr(self)))
-                if pre_separator is None and pre_type is None and pre_patch is not None:
-                    raise ValueError(
-                        'neither pre_separator nor pre_type is set but pre_patch={} is in {}'
-                        .format(repr(pre_patch), repr(self)))
-                if pre_separator is not None and pre_type is None and pre_patch is None:
-                    raise ValueError(
-                        'pre_separator={} is present but neither pre_type nor pre_patch is in {}'
-                        .format(repr(pre_separator), repr(self)))
+        self.pre_release = pre_release
 
         if args and local is not None:
             raise ValueError('args={} and local={} are present at the same time in {}'
@@ -388,8 +333,40 @@ class Version:
         return self._major, self._minor, self._patch
 
     @release.setter
-    def release(self, major: int, minor: t.Optional[int] = None, patch: t.Optional[int] = None):
-        raise NotImplementedError()
+    def release(self, release: t.Tuple[int, t.Optional[int], t.Optional[int]]):
+        #major: int, minor: t.Optional[int] = None, patch: t.Optional[int] = None):
+        if not isinstance(release, tuple):
+            raise TypeError('release={} is of wrong type {} in {}'
+                            .format(repr(release), type(release), repr(self)))
+        if len(release) != 3:
+            raise ValueError('release={} has wrong length {} in {}'
+                             .format(repr(release), len(release), repr(self)))
+
+        major, minor, patch = release
+
+        if not isinstance(major, int):
+            raise TypeError('major={} is of wrong type {} in {}'
+                            .format(repr(major), type(major), repr(self)))
+        if major < 0:
+            raise ValueError('major={} has wrong value in {}'.format(repr(major), repr(self)))
+        if minor is not None and not isinstance(minor, int):
+            raise TypeError('minor={} is of wrong type {} in {}'
+                            .format(repr(minor), type(minor), repr(self)))
+        if minor is not None and minor < 0:
+            raise ValueError('minor={} has wrong value in {}'.format(repr(minor), repr(self)))
+        if patch is not None and not isinstance(patch, int):
+            raise TypeError('patch={} is of wrong type {} in {}'
+                            .format(repr(patch), type(patch), repr(self)))
+        if patch is not None and patch < 0:
+            raise ValueError('patch={} has wrong value in {}'.format(repr(patch), repr(self)))
+        if minor is None and patch is not None:
+            raise ValueError(
+                'patch={} is present but not minor in {}'
+                .format(repr(patch), repr(self)))
+
+        self._major = major
+        self._minor = minor
+        self._patch = patch
 
     @property
     def pre_release(self) -> t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]:
@@ -397,7 +374,53 @@ class Version:
 
     @pre_release.setter
     def pre_release(self, pre_release):
-        raise NotImplementedError()
+        if pre_release is None:
+            self._pre_release = None
+            return
+
+        if not isinstance(pre_release, collections.abc.Sequence):
+            raise TypeError('pre_release={} is of wrong type {} in {}'
+                            .format(repr(pre_release), type(pre_release), repr(self)))
+        if len(pre_release) == 0:
+            raise ValueError('pre_release has no elements although it is set in {}'
+                             .format(repr(self)))
+
+        for pre in pre_release:
+            if not isinstance(pre, tuple):
+                raise TypeError('pre-release part {} is of wrong type {} in {}'
+                                .format(repr(pre), type(pre), repr(self)))
+            if len(pre) != 3:
+                raise ValueError('pre-release part={} has wrong length {} in {}'
+                                 .format(repr(pre), len(pre), repr(self)))
+            pre_separator, pre_type, pre_patch = pre
+            if pre_separator is not None and not isinstance(pre_separator, str):
+                raise TypeError('pre_separator={} is of wrong type {} in {}'
+                                .format(repr(pre_separator), type(pre_separator), repr(self)))
+            if pre_separator is not None and pre_separator not in ('-', '.'):
+                raise ValueError('pre_separator={} has wrong value in {}'
+                                 .format(repr(pre_separator), repr(self)))
+            if pre_type is not None and not isinstance(pre_type, str):
+                raise TypeError('pre_type={} is of wrong type {} in {}'
+                                .format(repr(pre_type), type(pre_type), repr(self)))
+            if pre_type is not None and type(self)._pattern_letters.fullmatch(pre_type) is None:
+                raise ValueError('pre_type={} has wrong value in {}'
+                                 .format(repr(pre_type), repr(self)))
+            if pre_patch is not None and not isinstance(pre_patch, int):
+                raise TypeError('pre_patch={} is of wrong type {} in {}'
+                                .format(repr(pre_patch), type(pre_patch), repr(self)))
+            if pre_patch is not None and pre_patch < 0:
+                raise ValueError('pre_patch={} has wrong value in {}'
+                                 .format(repr(pre_patch), repr(self)))
+            if pre_separator is None and pre_type is None and pre_patch is not None:
+                raise ValueError(
+                    'neither pre_separator nor pre_type is set but pre_patch={} is in {}'
+                    .format(repr(pre_patch), repr(self)))
+            if pre_separator is not None and pre_type is None and pre_patch is None:
+                raise ValueError(
+                    'pre_separator={} is present but neither pre_type nor pre_patch is in {}'
+                    .format(repr(pre_separator), repr(self)))
+
+        self._pre_release = pre_release
 
     @property
     def has_pre_release(self):
@@ -409,7 +432,6 @@ class Version:
 
     @local.setter
     def local(self, local: t.Optional[t.Sequence[str]]):
-
         if local is None:
             self._local = None
             return
@@ -418,10 +440,17 @@ class Version:
             raise TypeError('local={} is of wrong type {} in {}'
                             .format(repr(local), type(local), repr(self)))
 
+        if len(local) % 2 != 1:
+            raise ValueError('local={} has wrong length {} in {}'
+                             .format(repr(local), len(local), repr(self)))
+
         for i, part in enumerate(local):
             if not isinstance(part, str):
                 raise TypeError('local_part or local_separator {} is of wrong type {} in {}'
                                 .format(repr(part), type(part), repr(self)))
+            if i % 2 == 0 and type(self)._pattern_alphanumeric.fullmatch(part) is None:
+                raise ValueError('local_part={} has wrong value in {}'
+                                 .format(repr(part), repr(self)))
             if i % 2 == 1 and part not in ('-', '.'):
                 raise ValueError('local_separator={} has wrong value in {}'
                                  .format(repr(part), repr(self)))
@@ -483,6 +512,7 @@ class Version:
         return self
 
     def release_to_str(self) -> str:
+        """Get string representation of this version's release component."""
         version_tuple = self._major, self._minor, self._patch
         cls = type(self)
         if cls._version_tuple_checker(version_tuple, (True, False, False)):
@@ -493,7 +523,7 @@ class Version:
             return '.'.join(str(_) for _ in version_tuple[:3])
         raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
 
-    def pre_release_segment_to_str(self, segment: int) -> str:
+    def _pre_release_segment_to_str(self, segment: int) -> str:
         version_tuple = self._pre_release[segment]
         cls = type(self)
         if cls._version_tuple_checker(version_tuple, (False, False, False)):
@@ -509,7 +539,7 @@ class Version:
     def pre_release_to_str(self) -> str:
         if self._pre_release is None:
             return ''
-        return ''.join(self.pre_release_segment_to_str(i)
+        return ''.join(self._pre_release_segment_to_str(i)
                        for i, _ in enumerate(self._pre_release))
 
     def local_to_str(self) -> str:
@@ -533,6 +563,7 @@ class Version:
             (0 if sort else None) if pre_patch is None else pre_patch
 
     def pre_release_to_tuple(self, sort: bool = False) -> tuple:
+        """Create tuple from this version's pre-release component."""
         if self._pre_release is None:
             return ((1, '', 0),) if sort else ()
         parts = [self.pre_release_segment_to_tuple(i, sort)

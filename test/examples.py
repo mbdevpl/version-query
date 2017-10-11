@@ -44,18 +44,47 @@ KWARG_NAMES = ('major', 'minor', 'patch', 'pre_release', 'local')
 INIT_CASES = {
     '1': ((1,), {}),
     '1.0': ((1, 0), {}),
-    '1.0.0': ((1, 0, 0), {})}
+    '1.0.0': ((1, 0, 0), {}),
+    '1.0.0.rc2': ((1, 0, 0, '.', 'rc', 2), {}),
+    '1.0.0.rc3': ((1, 0, 0, ('.', 'rc', 3)), {}),
+    '1.0.0.rc2+local': ((1, 0, 0, '.', 'rc', 2, 'local'), {}),
+    '1.0.0.rc3+local': ((1, 0, 0, ('.', 'rc', 3), 'local'), {}),
+    '1.0.0.rc4+local': ((1, 0, 0, ('.', 'rc', 4), ('local',)), {})}
 
 BAD_INIT_CASES = {
     (('spam',), ()): TypeError,
     ((-1,), ()): ValueError,
     ((1, 'ham'), ()): TypeError,
     ((1, -2), ()): ValueError,
+    ((1,), (('patch', 13),)): ValueError,
     ((1, 0, 'eggs'), ()): TypeError,
     ((1, 0, -3), ()): ValueError,
+    ((1, 0, 0, 0), ()): TypeError,
+    ((1, 0, 0, '.', 'dev'), ()): ValueError,
+    ((1, 0, 0, '.'), ()): ValueError,
+    ((1, 0, 0, '.', 1), ()): ValueError,
+    ((1, 0, 0, ('.', None, 1), ('.', 'dev'), ('local',)), ()): ValueError,
     ((1, 0, 0, 0, ), (('pre_release', ((None, 'dev', 0),)), ('local', 'bad'))): ValueError,
-    ((5,), (('pre_release', ((None, 'dev', -1),)),)): ValueError,
-    ((1,), (('patch', 13),)): ValueError}
+    ((5,), (('pre_release', 1),)): TypeError,
+    ((5,), (('pre_release', ()),)): ValueError,
+    ((5,), (('pre_release', (0,)),)): TypeError,
+    ((5,), (('pre_release', ('dev',)),)): TypeError,
+    ((5,), (('pre_release', ((None, 'dev'),)),)): ValueError,
+    ((6,), (('pre_release', ((42, 'dev', 0),)),)): TypeError,
+    ((6,), (('pre_release', (('spam', 'dev', 0),)),)): ValueError,
+    ((6,), (('pre_release', ((None, 42, 0),)),)): TypeError,
+    ((6,), (('pre_release', ((None, 'd-v', 0),)),)): ValueError,
+    ((6,), (('pre_release', ((None, 'dev', 'eggs'),)),)): TypeError,
+    ((6,), (('pre_release', ((None, 'dev', -1),)),)): ValueError,
+    ((6,), (('pre_release', ((None, None, 1),)),)): ValueError,
+    ((6,), (('pre_release', (('.', None, None),)),)): ValueError,
+    ((7,), (('local', 0),)): TypeError,
+    ((7,), (('local', ('abc', '.')),)): ValueError,
+    ((7,), (('local', (0,)),)): TypeError,
+    ((7,), (('local', ('a.c',)),)): ValueError,
+    ((7,), (('local', ('abc', 1, 'def')),)): TypeError,
+    ((7,), (('local', ('abc', 'def')),)): ValueError,
+    ((7,), (('local', ('abc', '.', 9)),)): TypeError}
 
 COMPATIBLE_STR_CASES = {
     '0': ((0, None, None), {}),
@@ -110,7 +139,8 @@ COMPARISON_CASES_LESS = {
     '0.3-2.dev42': '0.3-2',
     '0.3-4': '0.3-4.5',
     '1-1.2.3.4.5.dev4': '1-1.2.3.4.5',
-    '1.0.0': '1.0.0+blahblah'}
+    '1.0.0': '1.0.0+blahblah',
+    '1.0.0+aa': '1.0.0+aaa'}
 
 COMPARISON_CASES_EQUAL = {
     '1.0.0': '1.0.0',
