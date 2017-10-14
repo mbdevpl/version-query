@@ -48,11 +48,11 @@ class Tests(unittest.TestCase):
 
     def test_deprecated(self):
         import warnings
-        warnings.warn('remove this test after removing deprecated function',
-                      DeprecationWarning, stacklevel=2)
+        warnings.warn('remove this test after removing deprecated function', DeprecationWarning)
         from version_query import generate_version_str
         with self.assertWarns(DeprecationWarning):
-            generate_version_str()
+            version_str = generate_version_str()
+        self.assertIsInstance(version_str, str)
 
     def test_examples(self):
         lvl = logging.WARNING if len(GIT_REPO_EXAMPLES) < 10 else logging.INFO

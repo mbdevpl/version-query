@@ -16,4 +16,4 @@ def generate_version_str(increment_if_repo_chnaged: bool = True) -> str:
     warnings.warn('function generate_version_str() is deprecated, use predict() instead',
                   DeprecationWarning, stacklevel=2)
     from .query import predict_caller
-    return predict_caller(2)
+    return predict_caller(2).to_str()
