@@ -6,7 +6,7 @@ import packaging.version
 import pkg_resources
 import semver
 
-from version_query.version import Version
+from version_query.version import VersionComponent, Version
 from .examples import \
     INIT_CASES, BAD_INIT_CASES, COMPATIBLE_STR_CASES, STR_CASES, case_to_version_tuple, \
     INCREMENT_CASES, COMPARISON_CASES_LESS, COMPARISON_CASES_EQUAL
@@ -100,6 +100,19 @@ class Tests(unittest.TestCase):
                               result_version=result_version):
                 self.assertEqual(Version.from_str(initial_version).increment(*args),
                                  Version.from_str(result_version))
+
+    def test_increment_bad(self):
+        version = Version(1, 0, 0)
+        with self.assertRaises(TypeError):
+            version.increment(3)
+        with self.assertRaises(TypeError):
+            version.increment('dev')
+        with self.assertRaises(TypeError):
+            version.increment(VersionComponent.Minor, '5')
+        with self.assertRaises(ValueError):
+            version.increment(VersionComponent.Minor, -1)
+        with self.assertRaises(ValueError):
+            version.increment(VersionComponent.Local)
 
     def test_compare(self):
         for earlier_version, later_version in COMPARISON_CASES_LESS.items():

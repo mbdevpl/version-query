@@ -147,11 +147,28 @@ def case_to_version_tuple(args, kwargs):
 
 
 INCREMENT_CASES = {
-    ('1.0', (VersionComponent.Minor,)): '1.1',
+    ('1', (VersionComponent.Major,)): '2',
+    ('1', (VersionComponent.Minor,)): '1.1',
+    ('1', (VersionComponent.Patch, 8)): '1.0.8',
+    ('1', (VersionComponent.DevPatch,)): '1.dev1',
     ('1.5', (VersionComponent.Major,)): '2.0',
+    ('1.5', (VersionComponent.Minor, 3)): '1.8',
+    ('1.5', (VersionComponent.Patch,)): '1.5.1',
+    ('1.5', (VersionComponent.DevPatch,)): '1.5.dev1',
+    ('1.5.1', (VersionComponent.Major,3)): '4.0.0',
+    ('1.5.1', (VersionComponent.Minor,)): '1.6.0',
+    ('1.5.1', (VersionComponent.Patch,)): '1.5.2',
+    ('1.5.1', (VersionComponent.DevPatch,)): '1.5.1.dev1',
+    ('1.5.1-2.4', (VersionComponent.Major,)): '2.0.0',
+    ('1.5.1-2.4', (VersionComponent.Minor,)): '1.6',
+    ('1.5.1-2.4', (VersionComponent.Patch,)): '1.5.2',
+    ('1.5.1-2.4', (VersionComponent.DevPatch, 2)): '1.5.1-2.4.dev2',
+    ('0.dev', (VersionComponent.DevPatch,)): '0.dev1',
     ('0.3dev', (VersionComponent.DevPatch,)): '0.3dev1',
-    ('0.3.5', (VersionComponent.DevPatch, 500)): '0.3.5.dev500',
-    ('4.0.1-0.3', (VersionComponent.DevPatch, 2)): '4.0.1-0.3.dev2'}
+    ('0.3.5dev', (VersionComponent.DevPatch,)): '0.3.5dev1',
+    ('0.dev2', (VersionComponent.DevPatch,)): '0.dev3',
+    ('0.3dev2', (VersionComponent.DevPatch,)): '0.3dev3',
+    ('0.3.5dev2', (VersionComponent.DevPatch,)): '0.3.5dev3'}
 
 COMPARISON_CASES_LESS = {
     '0.3dev': '0.3dev1',

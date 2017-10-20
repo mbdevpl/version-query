@@ -28,7 +28,7 @@ class VersionComponent(enum.IntEnum):
     #PrePatch = 1 << 5
     #PostPatch = 1 << 6
     #PreRelease = PreType | PrePatch
-    #Local = 1 << 7
+    Local = 1 << 7
 
 
 class Version:
@@ -464,21 +464,21 @@ class Version:
     def increment(self, component: VersionComponent, amount: int = 1) -> 'Version':
         """Increment a selected version component and return self."""
         if not isinstance(component, VersionComponent):
-            raise TypeError()
+            raise TypeError('component={} is of wrong type {}'
+                            .format(repr(component), type(component)))
+        if not isinstance(amount, int):
+            raise TypeError('amount={} is of wrong type {}'.format(repr(amount), type(amount)))
+        if amount < 1:
+            raise ValueError('amount={} has wrong value'.format(amount))
 
-        if component not in (VersionComponent.Major, VersionComponent.Minor,
-                             VersionComponent.Patch, VersionComponent.DevPatch):
-            raise ValueError()
+        if component in (VersionComponent.Major, VersionComponent.Minor, VersionComponent.Patch):
 
-        if component <= VersionComponent.Release:
-
-            if component <= VersionComponent.Minor:
-
+            if component in (VersionComponent.Major, VersionComponent.Minor):
                 if component is VersionComponent.Major:
                     self._major += amount
                     if self._minor is not None:
                         self._minor = 0
-                elif component is VersionComponent.Minor:
+                else:
                     if self._minor is None:
                         self._minor = amount
                     else:
@@ -487,7 +487,9 @@ class Version:
                 if self._patch is not None:
                     self._patch = 0
 
-            elif component is VersionComponent.Patch:
+            else:
+                if self._minor is None:
+                    self._minor = 0
                 if self._patch is None:
                     self._patch = amount
                 else:
@@ -508,6 +510,8 @@ class Version:
                 else:
                     pre_patch += amount
                 self._pre_release[-1] = (pre_sep, pre_type, pre_patch)
+        else:
+            raise ValueError('incrementing component={} is not possible'.format(component))
 
         return self
 
