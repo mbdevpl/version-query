@@ -56,7 +56,13 @@ before_install: |
 install:
   - pip install -U pip
   - pip install -U -r dev_requirements.txt
-  - pip install asttokens colorama GitPython hypothesis ipython jupyter Mako numpy ordered-set requests six wget
+  # just some example Python packages
+  - git clone https://github.com/PyCQA/pylint ../pylint
+  - cd ../pylint && python setup.py build && cd -
+  - git clone https://github.com/mbdevpl/argunparse ../argunparse
+  - cd ../argunparse && python setup.py build && cd -
+  - git clone https://github.com/k-bx/python-semver ../semver
+  - cd ../semver && python setup.py build && cd -
 
 script:
   - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest discover --verbose

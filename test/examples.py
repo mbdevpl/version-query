@@ -4,6 +4,7 @@ import itertools
 import pathlib
 import platform
 import sys
+import typing as t
 
 from version_query.version import VersionComponent
 
@@ -28,16 +29,38 @@ def python_lib_dir() -> pathlib.Path:
         lib_dir_parts.append('python{}.{}'.format(*sys.version_info[:2]))
 
     lib_dir = pathlib.Path(*lib_dir_parts)
-    if not lib_dir.is_dir():
-        raise ValueError(lib_dir)
+    assert lib_dir.is_dir(), lib_dir
     return lib_dir
 
 
-METADATA_JSON_EXAMPLE_PATHS = list(python_lib_dir().glob('**/*.dist-info/metadata.json'))
-PKG_INFO_EXAMPLE_PATHS = list(python_lib_dir().glob('**/*.egg-info/PKG-INFO'))
+PY_LIB_DIR = python_lib_dir()
 
-PACKAGE_FOLDER_EXAMPLES = list(_ for _ in _PACKAGE_FOLDER.parent.glob('*')
-                               if list(_.glob('*.dist-info')) or list(_.glob('*.egg-info')))
+_SYS_DIST_INFOS = list(PY_LIB_DIR.glob('**/*.dist-info'))
+_SYS_EGG_INFOS = list(PY_LIB_DIR.glob('**/*.egg-info'))
+_USER_DIST_INFOS = [pth for _ in _PACKAGE_FOLDER.parent.glob('*') for pth in _.glob('*.dist-info')]
+_USER_EGG_INFOS = [pth for _ in _PACKAGE_FOLDER.parent.glob('*') for pth in _.glob('*.egg-info')]
+#print(_SYS_DIST_INFOS, _SYS_EGG_INFOS, _USER_DIST_INFOS, _USER_EGG_INFOS)
+
+METADATA_JSON_EXAMPLE_PATHS = list(itertools.chain.from_iterable(
+    _.glob('metadata.json') for _ in itertools.chain(_SYS_DIST_INFOS, _USER_DIST_INFOS)))
+PKG_INFO_EXAMPLE_PATHS = list(itertools.chain.from_iterable(
+    _.glob('PKG-INFO') for _ in itertools.chain(_SYS_EGG_INFOS, _USER_EGG_INFOS)))
+
+
+def _remove_version_suffixes(path: pathlib.Path) -> t.Optional[pathlib.Path]:
+    name = path.with_suffix('').name
+    i = name.rfind('-')
+    if i > 0:
+        name = name[:i]
+    path = path.with_name(name)
+    return path if path.is_dir() else None
+
+
+PACKAGE_FOLDER_EXAMPLES = [pth for pth in [
+    _remove_version_suffixes(_)
+    for _ in itertools.chain(_SYS_DIST_INFOS, _SYS_EGG_INFOS, _USER_DIST_INFOS, _USER_EGG_INFOS)]
+                           if pth is not None]
+#print(PACKAGE_FOLDER_EXAMPLES)
 
 KWARG_NAMES = ('major', 'minor', 'patch', 'pre_release', 'local')
 

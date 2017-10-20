@@ -13,7 +13,8 @@ from version_query.git_query import query_git_repo
 from version_query.py_query import query_metadata_json, query_pkg_info, query_package_folder
 from version_query.query import query_folder, query_caller, predict_caller
 from .examples import \
-    GIT_REPO_EXAMPLES, METADATA_JSON_EXAMPLE_PATHS, PKG_INFO_EXAMPLE_PATHS, PACKAGE_FOLDER_EXAMPLES
+    PY_LIB_DIR, GIT_REPO_EXAMPLES, METADATA_JSON_EXAMPLE_PATHS, PKG_INFO_EXAMPLE_PATHS, \
+    PACKAGE_FOLDER_EXAMPLES
 from .test_setup import run_module
 
 _LOG = logging.getLogger(__name__)
@@ -55,56 +56,43 @@ class Tests(unittest.TestCase):
         self.assertIsInstance(version_str, str)
 
     def test_examples(self):
-        lvl = logging.WARNING if len(GIT_REPO_EXAMPLES) < 10 else logging.INFO
-        _LOG.log(lvl, 'git repos count: %i', len(GIT_REPO_EXAMPLES))
-        if len(GIT_REPO_EXAMPLES) < 5:
-            _LOG.warning('git repos: %s', GIT_REPO_EXAMPLES)
-        self.assertGreater(len(GIT_REPO_EXAMPLES), 0)
+        def check_examples_count(description, examples):
+            lvl = logging.WARNING if len(examples) < 10 else logging.INFO
+            _LOG.log(lvl, '%s count: %i', description, len(examples))
+            if len(examples) < 5:
+                _LOG.warning('%s list: %s', description, examples)
+            self.assertGreater(len(examples), 0)
 
-        lvl = logging.WARNING if len(METADATA_JSON_EXAMPLE_PATHS) < 10 else logging.INFO
-        _LOG.log(lvl, 'metadata.json count: %i', len(METADATA_JSON_EXAMPLE_PATHS))
-        if len(METADATA_JSON_EXAMPLE_PATHS) < 5:
-            _LOG.warning('%s', METADATA_JSON_EXAMPLE_PATHS)
-        self.assertGreater(len(METADATA_JSON_EXAMPLE_PATHS), 0)
+        _LOG.warning('%s', PY_LIB_DIR)
 
-        lvl = logging.WARNING if len(PKG_INFO_EXAMPLE_PATHS) < 10 else logging.INFO
-        _LOG.log(lvl, 'PKG-INFO count: %i', len(PKG_INFO_EXAMPLE_PATHS))
-        if len(PKG_INFO_EXAMPLE_PATHS) < 5:
-            _LOG.warning('%s', PKG_INFO_EXAMPLE_PATHS)
-        #self.assertGreater(len(PKG_INFO_EXAMPLE_PATHS), 0)
+        with self.assertRaises(AssertionError):
+            check_examples_count('test', [])
+        check_examples_count('test', list(range(1)))
+        check_examples_count('test', list(range(9)))
+        check_examples_count('test', list(range(10)))
 
-        lvl = logging.WARNING if len(PACKAGE_FOLDER_EXAMPLES) < 10 else logging.INFO
-        _LOG.log(lvl, 'package folders: %i', len(PACKAGE_FOLDER_EXAMPLES))
-        if len(PACKAGE_FOLDER_EXAMPLES) < 5:
-            _LOG.warning('%s', PACKAGE_FOLDER_EXAMPLES)
-        #self.assertGreater(len(PACKAGE_FOLDER_EXAMPLES), 0)
+        check_examples_count('git repo', GIT_REPO_EXAMPLES)
+        check_examples_count('metadata.json', METADATA_JSON_EXAMPLE_PATHS)
+        check_examples_count('PKG-INFO', PKG_INFO_EXAMPLE_PATHS)
+        check_examples_count('package folder', PACKAGE_FOLDER_EXAMPLES)
 
-    def test_query_git_repo(self):
-        for path in GIT_REPO_EXAMPLES:
-            with self.subTest(path=path):
+    def _query_test_case(self, paths, query_function):
+        for path in paths:
+            with self.subTest(path=path, query_function=query_function):
                 try:
-                    version = query_git_repo(path)
+                    version = query_function(path)
                     _LOG.debug('%s: %s', path, version)
                 except ValueError:
                     _LOG.info('failed to get version from %s', path, exc_info=True)
 
+    def test_query_git_repo(self):
+        self._query_test_case(GIT_REPO_EXAMPLES, query_git_repo)
+
     def test_query_metadata_json(self):
-        for path in METADATA_JSON_EXAMPLE_PATHS:
-            with self.subTest(path=path):
-                try:
-                    version = query_metadata_json(path)
-                    _LOG.debug('%s: %s', path, version)
-                except ValueError:
-                    _LOG.exception('failed to get version from %s', path)
+        self._query_test_case(METADATA_JSON_EXAMPLE_PATHS, query_metadata_json)
 
     def test_query_pkg_info(self):
-        for path in PKG_INFO_EXAMPLE_PATHS:
-            with self.subTest(path=path):
-                try:
-                    version = query_pkg_info(path)
-                    _LOG.debug('%s: %s', path, version)
-                except ValueError:
-                    _LOG.exception('failed to get version from %s', path)
+        self._query_test_case(PKG_INFO_EXAMPLE_PATHS, query_pkg_info)
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_query_pkg_info_current(self):
@@ -116,29 +104,17 @@ class Tests(unittest.TestCase):
         _LOG.debug('%s: %s', path, version)
 
     def test_query_package_folder(self):
-        for path in PACKAGE_FOLDER_EXAMPLES:
-            with self.subTest(path=path):
-                try:
-                    version = query_package_folder(path)
-                    _LOG.debug('%s: %s', path, version)
-                except ValueError:
-                    _LOG.info('failed to get version from %s', path, exc_info=True)
+        self._query_test_case(PACKAGE_FOLDER_EXAMPLES, query_package_folder)
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_query_package_folder_current(self):
         run_module('setup', 'build')
-        path = pathlib.Path.cwd()
+        path = pathlib.Path.cwd().joinpath('version_query')
         version = query_package_folder(path)
         _LOG.debug('%s: %s', path, version)
 
     def test_query_folder(self):
-        for path in PACKAGE_FOLDER_EXAMPLES:
-            with self.subTest(path=path):
-                try:
-                    version = query_folder(path)
-                    _LOG.debug('%s: %s', path, version)
-                except ValueError:
-                    _LOG.info('failed to get version from %s', path, exc_info=True)
+        self._query_test_case(PACKAGE_FOLDER_EXAMPLES, query_folder)
 
     def test_query_folder_current(self):
         path = pathlib.Path.cwd()

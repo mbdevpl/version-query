@@ -31,11 +31,11 @@ def query_package_folder(path: pathlib.Path, search_parent_directories: bool = F
     """Get version from Python package folder."""
     paths = [path] + (list(path.parents) if search_parent_directories else [])
     metadata_json_paths, pkg_info_paths = None, None
-    for path_ in paths:
-        metadata_json_paths = list(path_.glob('*.dist-info/metadata.json'))
-        pkg_info_paths = list(path_.glob('*.egg-info/PKG-INFO'))
+    for pth in paths:
+        metadata_json_paths = list(pth.parent.glob('{}*.dist-info/metadata.json'.format(pth.name)))
+        pkg_info_paths = list(pth.parent.glob('{}*.egg-info/PKG-INFO'.format(pth.name)))
         if len(metadata_json_paths) == 1 and len(pkg_info_paths) == 0:
             return query_metadata_json(metadata_json_paths[0])
         if len(metadata_json_paths) == 0 and len(pkg_info_paths) == 1:
             return query_pkg_info(pkg_info_paths[0])
-    raise ValueError(metadata_json_paths, pkg_info_paths)
+    raise ValueError(paths, metadata_json_paths, pkg_info_paths)
