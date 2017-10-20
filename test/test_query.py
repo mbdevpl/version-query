@@ -11,7 +11,8 @@ import unittest
 from version_query.version import VersionComponent
 from version_query.git_query import query_git_repo
 from version_query.py_query import query_metadata_json, query_pkg_info, query_package_folder
-from version_query.query import query_folder, query_caller, predict_caller
+from version_query.query import \
+    query_folder, query_caller, query_version_str, predict_caller, predict_version_str
 from .examples import \
     PY_LIB_DIR, GIT_REPO_EXAMPLES, METADATA_JSON_EXAMPLE_PATHS, PKG_INFO_EXAMPLE_PATHS, \
     PACKAGE_FOLDER_EXAMPLES
@@ -135,11 +136,19 @@ class Tests(unittest.TestCase):
                 run_module('version_query')
         _LOG.info('%s', sio.getvalue())
 
+    def test_bad_usage(self):
+        sio = io.StringIO()
+        with contextlib.redirect_stderr(sio):
+            with self.assertRaises(ValueError):
+                run_module('version_query', '-p', '-i', '.')
+        _LOG.info('%s', sio.getvalue())
+
     def test_here(self):
         sio = io.StringIO()
         with contextlib.redirect_stdout(sio):
             run_module('version_query', '.')
         self.assertEqual(sio.getvalue().rstrip(), query_caller().to_str())
+        self.assertEqual(sio.getvalue().rstrip(), query_version_str())
 
     def test_increment_here(self):
         sio = io.StringIO()
@@ -153,3 +162,4 @@ class Tests(unittest.TestCase):
         with contextlib.redirect_stdout(sio):
             run_module('version_query', '-p', '.')
         self.assertEqual(sio.getvalue().rstrip(), predict_caller().to_str())
+        self.assertEqual(sio.getvalue().rstrip(), predict_version_str())

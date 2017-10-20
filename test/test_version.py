@@ -68,17 +68,31 @@ class Tests(unittest.TestCase):
                 self.assertEqual(version_copy, created_version)
 
     def test_init(self):
-        for version, (args, kwargs) in INIT_CASES.items():
-            with self.subTest(args=args, kwargs=kwargs, version=version):
-                created_version = Version(*args, **dict(kwargs))
-                self.assertIsInstance(created_version, Version)
-                self.assertEqual(Version.from_str(version), created_version)
+        for version_str, (args, kwargs) in INIT_CASES.items():
+            with self.subTest(args=args, kwargs=kwargs, version_str=version_str):
+                version = Version(*args, **dict(kwargs))
+                self.assertIsInstance(version, Version)
+                self.assertEqual(Version.from_str(version_str), version)
+                self.assertIsInstance(version.release, tuple)
+                if version.pre_release is not None:
+                    self.assertIsInstance(version.pre_release, list)
+                if version.has_local:
+                    self.assertIsInstance(version.local, tuple)
 
     def test_init_bad(self):
         for (args, kwargs), exception in BAD_INIT_CASES.items():
             with self.subTest(args=args, kwargs=kwargs, exception=exception):
                 with self.assertRaises(exception):
                     Version(*args, **dict(kwargs))
+        version = Version(1, 0)
+        with self.assertRaises(TypeError):
+            version.release = 2
+        with self.assertRaises(ValueError):
+            version.release = 2, 0
+        with self.assertRaises(ValueError):
+            version.release = 2, 0, 0, 1
+        with self.assertRaises(ValueError):
+            version.local = '42', 'and', '43'
 
     def test_increment(self):
         for (initial_version, args), result_version in INCREMENT_CASES.items():

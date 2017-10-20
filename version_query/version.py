@@ -99,8 +99,7 @@ class Version:
     def _parse_release_str(cls, release: str) -> tuple:
         match = cls._pattern_release.fullmatch(release)
         major = match.group('major')
-        if major is not None:
-            major = int(major)
+        major = int(major)
         minor = match.group('minor')
         if minor is not None:
             minor = int(minor)
@@ -120,9 +119,9 @@ class Version:
 
     @classmethod
     def _parse_pre_release_str(cls, pre_release: str) -> tuple:
-        check_match = cls._pattern_pre_release_check.fullmatch(pre_release)
-        if check_match is None:
-            raise ValueError('given pre-release string {} is invalid'.format(repr(pre_release)))
+        #check_match = cls._pattern_pre_release_check.fullmatch(pre_release)
+        #if check_match is None:
+        #    raise ValueError('given pre-release string {} is invalid'.format(repr(pre_release)))
         parts = cls._pattern_pre_release.findall(pre_release)
         _LOG.debug('parsed pre-release string %s into %s',
                    repr(pre_release), parts)
@@ -244,13 +243,9 @@ class Version:
             major, minor, patch = sem_version['major'], sem_version['minor'], sem_version['patch']
             pre_release = sem_version['prerelease']
             local = sem_version['build']
-        if pre_release is None:
-            pre_release = None
-        else:
+        if pre_release is not None:
             raise NotImplementedError(sem_version)
-        if local is None:
-            local = None
-        else:
+        if local is not None:
             local = cls._parse_local_str('+{}'.format(local))
         return cls(major, minor, patch, pre_release=pre_release, local=local)
 
@@ -369,11 +364,16 @@ class Version:
         self._patch = patch
 
     @property
-    def pre_release(self) -> t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]:
+    def pre_release(self) -> t.Optional[
+            t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]]:
+        if self._pre_release is None:
+            return None
         return self._pre_release.copy()
 
     @pre_release.setter
-    def pre_release(self, pre_release):
+    def pre_release(
+            self, pre_release: t.Optional[
+                t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]]):
         if pre_release is None:
             self._pre_release = None
             return
@@ -427,7 +427,7 @@ class Version:
         return self._pre_release is not None
 
     @property
-    def local(self) -> tuple:
+    def local(self) -> t.Optional[t.Sequence[str]]:
         return self._local
 
     @local.setter
