@@ -17,7 +17,7 @@ _LOG = logging.getLogger(__name__)
 def _caller_folder(stack_level: int = 1) -> pathlib.Path:
     """Determine folder in which the caller module of a function is located."""
     frame_info = inspect.getouterframes(inspect.currentframe())[stack_level]
-    caller_path = frame_info[1] # frame_info.filename
+    caller_path = frame_info[1]  # frame_info.filename
 
     here = pathlib.Path(caller_path).absolute().resolve()
     if not here.is_file():

@@ -39,7 +39,7 @@ _SYS_DIST_INFOS = list(PY_LIB_DIR.glob('**/*.dist-info'))
 _SYS_EGG_INFOS = list(PY_LIB_DIR.glob('**/*.egg-info'))
 _USER_DIST_INFOS = [pth for _ in _PACKAGE_FOLDER.parent.glob('*') for pth in _.glob('*.dist-info')]
 _USER_EGG_INFOS = [pth for _ in _PACKAGE_FOLDER.parent.glob('*') for pth in _.glob('*.egg-info')]
-#print(_SYS_DIST_INFOS, _SYS_EGG_INFOS, _USER_DIST_INFOS, _USER_EGG_INFOS)
+# print(_SYS_DIST_INFOS, _SYS_EGG_INFOS, _USER_DIST_INFOS, _USER_EGG_INFOS)
 
 METADATA_JSON_EXAMPLE_PATHS = list(itertools.chain.from_iterable(
     _.glob('metadata.json') for _ in itertools.chain(_SYS_DIST_INFOS, _USER_DIST_INFOS)))
@@ -60,7 +60,7 @@ PACKAGE_FOLDER_EXAMPLES = [pth for pth in [
     _remove_version_suffixes(_)
     for _ in itertools.chain(_SYS_DIST_INFOS, _SYS_EGG_INFOS, _USER_DIST_INFOS, _USER_EGG_INFOS)]
                            if pth is not None]
-#print(PACKAGE_FOLDER_EXAMPLES)
+# print(PACKAGE_FOLDER_EXAMPLES)
 
 KWARG_NAMES = ('major', 'minor', 'patch', 'pre_release', 'local')
 
@@ -155,7 +155,7 @@ INCREMENT_CASES = {
     ('1.5', (VersionComponent.Minor, 3)): '1.8',
     ('1.5', (VersionComponent.Patch,)): '1.5.1',
     ('1.5', (VersionComponent.DevPatch,)): '1.5.dev1',
-    ('1.5.1', (VersionComponent.Major,3)): '4.0.0',
+    ('1.5.1', (VersionComponent.Major, 3)): '4.0.0',
     ('1.5.1', (VersionComponent.Minor,)): '1.6.0',
     ('1.5.1', (VersionComponent.Patch,)): '1.5.2',
     ('1.5.1', (VersionComponent.DevPatch,)): '1.5.1.dev1',

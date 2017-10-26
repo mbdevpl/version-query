@@ -24,11 +24,15 @@ class VersionComponent(enum.IntEnum):
     Patch = 1 << 3
     Release = Major | Minor | Patch
     DevPatch = 1 << 4
-    #PreType = 1 << 4
-    #PrePatch = 1 << 5
-    #PostPatch = 1 << 6
-    #PreRelease = PreType | PrePatch
+    # PreType = 1 << 4
+    # PrePatch = 1 << 5
+    # PostPatch = 1 << 6
+    # PreRelease = PreType | PrePatch
     Local = 1 << 7
+
+
+def _version_tuple_checker(version_tuple, flags):
+    return all([(_ is not None if flag else _ is None) for _, flag in zip(version_tuple, flags)])
 
 
 class Version:
@@ -84,7 +88,7 @@ class Version:
     """
 
     _re_number = r'(?:0|[123456789][0123456789]*)'
-    #_re_sha = r'[0123456789abcdef]+'
+    # _re_sha = r'[0123456789abcdef]+'
     _re_letters = r'(?:[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)'
     _pattern_letters = re.compile(_re_letters)
     _re_alphanumeric = r'(?:[0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)'
@@ -148,31 +152,28 @@ class Version:
     _re_pre_release = r'(?P<prerelease>(?:(?:{0}{2})|(?:{0}?{1}{2}?))+)'.format(
         _re_sep, _re_letters, _re_number)
     _re_local = r'(?P<local>\+{0}([\.-]{0})*)'.format(_re_alphanumeric)
-    #_re_named_parts_count = 3 + 3
+    # _re_named_parts_count = 3 + 3
     _re_version = r'{}{}?{}?'.format(_re_release, _re_pre_release, _re_local)
     _pattern_version = re.compile(_re_version)
-
-    _version_tuple_checker = lambda version_tuple, flags: all([
-        (_ is not None if flag else _ is None) for _, flag  in zip(version_tuple, flags)])
 
     @classmethod
     def from_str(cls, version_str: str):
         """Create version from string."""
-        py_version = pkg_resources.parse_version(version_str) # type: packaging.version.Version
+        py_version = pkg_resources.parse_version(version_str)  # type: packaging.version.Version
         _LOG.debug('packaging parsed version string %s into %s: %s',
                    repr(version_str), type(py_version), py_version)
 
         try:
-            sem_version = semver.parse(version_str) # type: dict
+            sem_version = semver.parse(version_str)  # type: dict
             _LOG.debug('semver parsed version string %s into %s: %s',
                        repr(version_str), type(sem_version), sem_version)
-            sem_version_info = semver.parse_version_info(version_str) # type: semver.VersionInfo
+            sem_version_info = semver.parse_version_info(version_str)  # type: semver.VersionInfo
             _LOG.debug('semver parsed version string %s into %s: %s',
                        repr(version_str), type(sem_version_info), sem_version_info)
         except ValueError:
             _LOG.debug('semver could not parse version string %s', repr(version_str))
 
-        match = cls._pattern_version.fullmatch(version_str) # type: re.???
+        match = cls._pattern_version.fullmatch(version_str)  # type: re.???
         if match is None:
             raise ValueError('version string {} is invalid'.format(repr(version_str)))
         _LOG.debug('version_query parsed version string %s into %s: %s %s',
@@ -518,25 +519,21 @@ class Version:
     def release_to_str(self) -> str:
         """Get string representation of this version's release component."""
         version_tuple = self._major, self._minor, self._patch
-        cls = type(self)
-        if cls._version_tuple_checker(version_tuple, (True, False, False)):
+        if _version_tuple_checker(version_tuple, (True, False, False)):
             return '.'.join(str(_) for _ in version_tuple[:1])
-        elif cls._version_tuple_checker(version_tuple, (True, True, False)):
+        elif _version_tuple_checker(version_tuple, (True, True, False)):
             return '.'.join(str(_) for _ in version_tuple[:2])
-        elif cls._version_tuple_checker(version_tuple, (True, True, True)):
+        elif _version_tuple_checker(version_tuple, (True, True, True)):
             return '.'.join(str(_) for _ in version_tuple[:3])
         raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
 
     def _pre_release_segment_to_str(self, segment: int) -> str:
         version_tuple = self._pre_release[segment]
-        cls = type(self)
-        if cls._version_tuple_checker(version_tuple, (False, False, False)):
-            return ''
-        elif cls._version_tuple_checker(version_tuple, (True, True, False)):
+        if _version_tuple_checker(version_tuple, (True, True, False)):
             return '{}{}'.format(*version_tuple[:2])
-        elif cls._version_tuple_checker(version_tuple, (True, False, True)):
+        elif _version_tuple_checker(version_tuple, (True, False, True)):
             return '{}{}'.format(version_tuple[0], version_tuple[2])
-        elif cls._version_tuple_checker(version_tuple, (True, True, True)):
+        elif _version_tuple_checker(version_tuple, (True, True, True)):
             return '{}{}{}'.format(*version_tuple)
         raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
 

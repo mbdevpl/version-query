@@ -6,7 +6,6 @@ import pathlib
 import typing as t
 
 import git
-#import packaging
 
 from .version import VersionComponent, Version
 
@@ -26,7 +25,7 @@ def _all_git_tag_versions(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
         try:
             versions[tag] = Version.from_str(tag_str)
         except ValueError:
-        #except packaging.version.InvalidVersion:
+            # except packaging.version.InvalidVersion:
             _LOG.warning('failed to convert %s to version', tag_str)
             continue
     return versions
@@ -62,12 +61,10 @@ def _upcoming_git_tag_version(repo: git.Repo, ignore_untracked_files: bool = Tru
             pre_patch_increment += 1
         _LOG.debug('there are %i new commits since %s', pre_patch_increment, version)
 
-    if not version.has_pre_release:
-        version.increment(VersionComponent.Patch)
-    if repo_has_new_commits:
+        if not version.has_pre_release:
+            version.increment(VersionComponent.Patch)
         version.increment(VersionComponent.DevPatch, pre_patch_increment)
 
-    if repo_has_new_commits:
         commit_sha = repo.head.commit.hexsha[:8]
         version.local = (commit_sha,)
 
@@ -77,10 +74,6 @@ def _upcoming_git_tag_version(repo: git.Repo, ignore_untracked_files: bool = Tru
             version.local += ('.', dt_)
         else:
             version.local = (dt_,)
-
-    #if not repo_is_dirty and get_caller_module_name(-1) == 'setup' \
-    #        and any(_ in sys.argv for _ in ('bdist', 'bdist_wheel', 'sdist')):
-    #    commit_sha = None
 
     return version
 
@@ -92,6 +85,7 @@ def query_git_repo(
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
     _LOG.debug('found git repository in "%s"', repo.working_dir)
     return _latest_git_tag_version(repo)[-1]
+
 
 def predict_git_repo(repo_path: pathlib.Path, search_parent_directories: bool = True) -> Version:
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
