@@ -13,33 +13,25 @@ matrix:
       python: "3.6"
     - os: linux
       language: python
-      python: "3.6-dev"
-    - os: linux
-      language: python
       python: "3.7-dev"
     - os: linux
       language: python
-      python: "pypy3.5-5.7.1-beta"
+      python: "pypy3.5-5.8.0"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.4.6"
+      env: TRAVIS_PYTHON_VERSION="3.4.7"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.5.3"
+      env: TRAVIS_PYTHON_VERSION="3.5.4"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.6.2"
-    - os: osx
-      language: generic
-      env: TRAVIS_PYTHON_VERSION="3.6-dev"
+      env: TRAVIS_PYTHON_VERSION="3.6.3"
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7-dev"
   allow_failures:
-    - python: "pypy3.5-5.7.1-beta"
-    - python: "3.6-dev"
+    - python: "pypy3.5-5.8.0"
     - python: "3.7-dev"
-    - env: TRAVIS_PYTHON_VERSION="3.6-dev"
     - env: TRAVIS_PYTHON_VERSION="3.7-dev"
 
 before_install: |
@@ -74,8 +66,6 @@ after_success:
 
 before_deploy:
   - wget https://gist.githubusercontent.com/mbdevpl/cdbc3dab3ae1941870dcaa5bb1b358bc/raw/travis_bintray_descriptor_gen.py
-  - git status
-  - ls -lah dist/
   - python3 travis_bintray_descriptor_gen.py "$(python3 -m version_query -p .)" "$TRAVIS_OS_NAME-python$TRAVIS_PYTHON_VERSION" "dist/*.whl" "dist/*.tar.gz" "dist/*.zip"
   - cat ".bintray.json"
 
