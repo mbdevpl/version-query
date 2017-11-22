@@ -45,9 +45,9 @@ You can instead:
 
 .. code:: python
 
-    from version_query import predict
+    from version_query import predict_version_str
 
-    __version__ = predict()
+    __version__ = predict_version_str()
 
 
 how does it work

@@ -23,12 +23,9 @@ class VersionComponent(enum.IntEnum):
     Minor = 1 << 2
     Patch = 1 << 3
     Release = Major | Minor | Patch
-    DevPatch = 1 << 4
-    # PreType = 1 << 4
-    # PrePatch = 1 << 5
-    # PostPatch = 1 << 6
-    # PreRelease = PreType | PrePatch
-    Local = 1 << 7
+    PrePatch = 1 << 4
+    DevPatch = 1 << 5
+    Local = 1 << 6
 
 
 def _version_tuple_checker(version_tuple, flags):
@@ -499,6 +496,17 @@ class Version:
             self._pre_release = None
             self._local = None
 
+        elif component is VersionComponent.PrePatch:
+            if self._pre_release is None or self.pre_release_to_tuple(True)[0][1] != '':
+                self._pre_release = [('-', None, amount)]
+            else:
+                pre_sep, pre_type, pre_patch = self._pre_release[0]
+                if pre_patch is None:
+                    pre_patch = amount
+                else:
+                    pre_patch += amount
+                self.pre_release = [(pre_sep, pre_type, pre_patch)]
+
         elif component is VersionComponent.DevPatch:
             if self._pre_release is None:
                 self._pre_release = []
@@ -512,7 +520,7 @@ class Version:
                     pre_patch += amount
                 self._pre_release[-1] = (pre_sep, pre_type, pre_patch)
         else:
-            raise ValueError('incrementing component={} is not possible'.format(component))
+            raise ValueError('incrementing component={} is not possible'.format(repr(component)))
 
         return self
 

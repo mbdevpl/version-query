@@ -61,8 +61,8 @@ def _upcoming_git_tag_version(repo: git.Repo, ignore_untracked_files: bool = Tru
             pre_patch_increment += 1
         _LOG.debug('there are %i new commits since %s', pre_patch_increment, version)
 
-        if not version.has_pre_release:
-            version.increment(VersionComponent.Patch)
+        version.increment(VersionComponent.PrePatch if version.has_pre_release
+                          else VersionComponent.Patch)
         version.increment(VersionComponent.DevPatch, pre_patch_increment)
 
         commit_sha = repo.head.commit.hexsha[:8]
