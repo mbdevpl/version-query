@@ -524,6 +524,20 @@ class Version:
 
         return self
 
+    def devel_increment(self, new_commits: int = 1) -> 'Version':
+        """Increment version depending on current version number and return self.
+
+        If there's no dev patch, then increment release patch by one and increment dev patch
+        by number of new commits.
+
+        If there's a dev patch, then increment it by number of new commits."""
+
+        if not self.has_pre_release or self.pre_release_to_tuple(True)[-1][1] != 'dev':
+            self.increment(VersionComponent.Patch)
+        self.increment(VersionComponent.DevPatch, new_commits)
+
+        return self
+
     def release_to_str(self) -> str:
         """Get string representation of this version's release component."""
         version_tuple = self._major, self._minor, self._patch

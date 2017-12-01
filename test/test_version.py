@@ -9,7 +9,7 @@ import semver
 from version_query.version import VersionComponent, Version
 from .examples import \
     INIT_CASES, BAD_INIT_CASES, COMPATIBLE_STR_CASES, STR_CASES, case_to_version_tuple, \
-    INCREMENT_CASES, COMPARISON_CASES_LESS, COMPARISON_CASES_EQUAL
+    INCREMENT_CASES, DEVEL_INCREMENT_CASES, COMPARISON_CASES_LESS, COMPARISON_CASES_EQUAL
 
 
 class Tests(unittest.TestCase):
@@ -99,6 +99,13 @@ class Tests(unittest.TestCase):
             with self.subTest(initial_version=initial_version, args=args,
                               result_version=result_version):
                 self.assertEqual(Version.from_str(initial_version).increment(*args),
+                                 Version.from_str(result_version))
+
+    def test_devel_increment(self):
+        for (initial_version, args), result_version in DEVEL_INCREMENT_CASES.items():
+            with self.subTest(initial_version=initial_version, args=args,
+                              result_version=result_version):
+                self.assertEqual(Version.from_str(initial_version).devel_increment(*args),
                                  Version.from_str(result_version))
 
     def test_increment_bad(self):
