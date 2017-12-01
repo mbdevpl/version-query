@@ -120,9 +120,9 @@ class Version:
 
     @classmethod
     def _parse_pre_release_str(cls, pre_release: str) -> tuple:
-        #check_match = cls._pattern_pre_release_check.fullmatch(pre_release)
-        #if check_match is None:
-        #    raise ValueError('given pre-release string {} is invalid'.format(repr(pre_release)))
+        # check_match = cls._pattern_pre_release_check.fullmatch(pre_release)
+        # if check_match is None:
+        #     raise ValueError('given pre-release string {} is invalid'.format(repr(pre_release)))
         parts = cls._pattern_pre_release.findall(pre_release)
         _LOG.debug('parsed pre-release string %s into %s',
                    repr(pre_release), parts)
@@ -327,7 +327,7 @@ class Version:
 
     @release.setter
     def release(self, release: t.Tuple[int, t.Optional[int], t.Optional[int]]):
-        #major: int, minor: t.Optional[int] = None, patch: t.Optional[int] = None):
+        # major: int, minor: t.Optional[int] = None, patch: t.Optional[int] = None):
         if not isinstance(release, tuple):
             raise TypeError('release={} is of wrong type {} in {}'
                             .format(repr(release), type(release), repr(self)))
