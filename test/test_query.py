@@ -6,10 +6,13 @@ import logging
 import os
 import pathlib
 import sys
+import tempfile
 import unittest
 
-from version_query.version import VersionComponent
-from version_query.git_query import query_git_repo
+import git
+
+from version_query.version import VersionComponent, Version
+from version_query.git_query import query_git_repo, predict_git_repo
 from version_query.py_query import query_metadata_json, query_pkg_info, query_package_folder
 from version_query.query import \
     query_folder, query_caller, query_version_str, predict_caller, predict_version_str
@@ -88,6 +91,64 @@ class Tests(unittest.TestCase):
 
     def test_query_git_repo(self):
         self._query_test_case(GIT_REPO_EXAMPLES, query_git_repo)
+
+    def test_predict_git_repo(self):
+        self._query_test_case(GIT_REPO_EXAMPLES, predict_git_repo)
+
+    def test_generated_git_repo(self):
+        with tempfile.TemporaryDirectory() as repo_path_str:
+            repo_path = pathlib.Path(repo_path_str)
+            repo = git.Repo.init(str(repo_path))
+
+            with self.assertRaises(ValueError):
+                query_git_repo(repo_path)
+            with self.assertRaises(ValueError):
+                predict_git_repo(repo_path)
+
+            repo_file = tempfile.NamedTemporaryFile(dir=repo_path_str, delete=False)
+            repo_file_path = pathlib.Path(repo_file.name)
+            repo_file.close()
+            _LOG.warning('adding path %s', repo_file_path)
+            repo.index.add([repo_file_path.name])
+            repo.index.commit("initial commit")
+
+            with self.assertRaises(ValueError):
+                query_git_repo(repo_path)
+            upcoming_version = predict_git_repo(repo_path)
+            self.assertEqual(upcoming_version, Version.from_str('0.1.0.dev0'))
+
+            repo.create_tag('v1.0.0')
+
+            version = query_git_repo(repo_path)
+            upcoming_version = predict_git_repo(repo_path)
+            self.assertEqual(version, Version.from_str('1.0.0'))
+            self.assertEqual(version, upcoming_version)
+
+            with open(str(repo_file_path), 'a') as repo_file:
+                repo_file.writelines(['spam', 'eggs', 'ham'])
+            repo.index.add([repo_file_path.name])
+            repo.index.commit("updates")
+
+            version = query_git_repo(repo_path)
+            self.assertEqual(version, Version.from_str('1.0.0'))
+            upcoming_version = predict_git_repo(repo_path)
+            self.assertGreater(upcoming_version, Version.from_str('1.0.1.dev1'))
+            upcoming_version_str = str(upcoming_version)
+            self.assertTrue(upcoming_version_str.startswith('1.0.1.dev1+'))
+
+            with open(str(repo_file_path), 'a') as repo_file:
+                repo_file.writelines(['spam', 'spam', 'lovely spam'])
+
+            version = query_git_repo(repo_path)
+            self.assertEqual(version, Version.from_str('1.0.0'))
+            upcoming_version = predict_git_repo(repo_path)
+            self.assertGreater(upcoming_version, Version.from_str('1.0.1.dev1'))
+            upcoming_version_str = str(upcoming_version)
+            self.assertTrue(upcoming_version_str.startswith('1.0.1.dev1+'))
+            self.assertIn('.dirty', upcoming_version_str)
+
+            repo_file_path.unlink()
+        # TODO: test all variants of above
 
     def test_query_metadata_json(self):
         self._query_test_case(METADATA_JSON_EXAMPLE_PATHS, query_metadata_json)

@@ -7,7 +7,7 @@ import typing as t
 
 import git
 
-from .version import VersionComponent, Version
+from .version import Version
 
 _LOG = logging.getLogger(__name__)
 
@@ -52,20 +52,16 @@ def _upcoming_git_tag_version(repo: git.Repo, ignore_untracked_files: bool = Tru
     if not repo_has_new_commits and not repo_is_dirty:
         return version
 
-    pre_patch_increment = 0
+    new_commits = 0
     if repo_has_new_commits:
         for commit in repo.iter_commits():
             _LOG.log(logging.NOTSET, 'iterating over commit %s', commit)
             if commit == tag_commit:
                 break
-            pre_patch_increment += 1
-        _LOG.debug('there are %i new commits since %s', pre_patch_increment, version)
+            new_commits += 1
+        _LOG.debug('there are %i new commits since %s', new_commits, version)
 
-        version.increment(
-            VersionComponent.PrePatch
-            if version.has_pre_release and version.pre_release_to_tuple(True)[-1][1] != 'dev'
-            else VersionComponent.Patch)
-        version.increment(VersionComponent.DevPatch, pre_patch_increment)
+        version.devel_increment(new_commits)
 
         commit_sha = repo.head.commit.hexsha[:8]
         version.local = (commit_sha,)
