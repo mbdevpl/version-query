@@ -21,12 +21,13 @@ def _all_git_tag_versions(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
         elif tag_str.startswith('v'):
             tag_str = tag_str[1:]
         else:
+            _LOG.debug('%s: ignoring non-version tag %s', repo, tag_str)
             continue
         try:
             versions[tag] = Version.from_str(tag_str)
         except ValueError:
             # except packaging.version.InvalidVersion:
-            _LOG.warning('failed to convert %s to version', tag_str)
+            _LOG.warning('%s: failed to convert %s to version', repo, tag_str)
             continue
     return versions
 

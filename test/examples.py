@@ -182,7 +182,6 @@ INCREMENT_CASES = {
     ('0.3.5dev', (VersionComponent.DevPatch,)): '0.3.5dev1',
     ('0.3.5dev2', (VersionComponent.DevPatch,)): '0.3.5dev3'}
 
-
 DEVEL_INCREMENT_CASES = {
     ('1', ()): '1.0.1.dev1',
     ('1', (3,)): '1.0.1.dev3',
@@ -202,6 +201,7 @@ DEVEL_INCREMENT_CASES = {
     ('0.3.5-2.4.dev2', (3,)): '0.3.5-2.4.dev5'}
 
 COMPARISON_CASES_LESS = {
+    '0.3-4.4-2.9': '0.3-4.4-2.10',
     '0.3dev': '0.3dev1',
     '0.3rc2': '0.3',
     '0.3': '0.3-2',

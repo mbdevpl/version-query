@@ -147,6 +147,30 @@ class Tests(unittest.TestCase):
                 self.assertTrue(upcoming_version_str.startswith('1.0.1.dev1+'))
                 self.assertIn('.dirty', upcoming_version_str)
 
+                repo.create_tag('milestone15')
+                repo.create_tag('wide_char_support')
+
+                version = query_git_repo(repo_path)
+                self.assertEqual(version, Version.from_str('1.0.0'))
+
+                repo.create_tag('version_1.1.0')
+
+                version = query_git_repo(repo_path)
+                self.assertEqual(version, Version.from_str('1.0.0'))
+                new_upcoming_version = predict_git_repo(repo_path)
+                self.assertEqual(new_upcoming_version.release, upcoming_version.release)
+                self.assertEqual(new_upcoming_version.pre_release, upcoming_version.pre_release)
+
+                repo.create_tag('{}1.1.0'.format(version_tag_prefix))
+
+                version = query_git_repo(repo_path)
+                self.assertEqual(version, Version.from_str('1.1.0'))
+                upcoming_version = predict_git_repo(repo_path)
+                self.assertGreater(upcoming_version, Version.from_str('1.1.0'))
+                upcoming_version_str = str(upcoming_version)
+                self.assertTrue(upcoming_version_str.startswith('1.1.0+dirty'),
+                                upcoming_version_str)
+
                 repo.close()
                 repo_file_path.unlink()
         # TODO: test all variants of above
