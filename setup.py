@@ -11,7 +11,7 @@ class Package(setup_boilerplate.Package):
     description = 'Package version query toolkit for Python'
     download_url = 'https://github.com/mbdevpl/version-query'
     classifiers = [
-        'Development Status :: 1 - Planning',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
