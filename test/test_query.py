@@ -191,6 +191,24 @@ class Tests(unittest.TestCase):
         version = query_pkg_info(path)
         _LOG.debug('%s: %s', path, version)
 
+    def test_query_pkg_info_bad(self):
+        with tempfile.NamedTemporaryFile(delete=False) as bad_file:
+            bad_file_path = pathlib.Path(bad_file.name)
+        with self.assertRaises(ValueError):
+            query_pkg_info(bad_file_path)
+
+        with open(str(bad_file_path), 'a') as bad_file:
+            bad_file.write('blah blah blah')
+        with self.assertRaises(ValueError):
+            query_pkg_info(bad_file_path)
+
+        with open(str(bad_file_path), 'a') as bad_file:
+            bad_file.write('Version: hello world')
+        with self.assertRaises(ValueError):
+            query_pkg_info(bad_file_path)
+
+        bad_file_path.unlink()
+
     def test_query_package_folder(self):
         self._check_examples_count('package folder', PACKAGE_FOLDER_EXAMPLES)
         self._query_test_case(PACKAGE_FOLDER_EXAMPLES, query_package_folder)

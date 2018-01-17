@@ -501,10 +501,8 @@ class Version:
                 self._pre_release = [('-', None, amount)]
             else:
                 pre_sep, pre_type, pre_patch = self._pre_release[0]
-                if pre_patch is None:
-                    pre_patch = amount
-                else:
-                    pre_patch += amount
+                assert isinstance(pre_patch, int), (type(pre_patch), pre_patch)
+                pre_patch += amount
                 self.pre_release = [(pre_sep, pre_type, pre_patch)]
 
         elif component is VersionComponent.DevPatch:
