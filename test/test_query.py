@@ -5,6 +5,7 @@ import io
 import logging
 import os
 import pathlib
+import platform
 import sys
 import tempfile
 import unittest
@@ -59,26 +60,21 @@ class Tests(unittest.TestCase):
             version_str = generate_version_str()
         self.assertIsInstance(version_str, str)
 
-    def test_examples(self):
-        def check_examples_count(description, examples):
-            lvl = logging.WARNING if len(examples) < 10 else logging.INFO
-            _LOG.log(lvl, '%s count: %i', description, len(examples))
-            if len(examples) < 5:
-                _LOG.warning('%s list: %s', description, examples)
-            self.assertGreater(len(examples), 0)
+    def _check_examples_count(self, description, examples):
+        lvl = logging.WARNING if len(examples) < 10 else logging.INFO
+        _LOG.log(lvl, '%s count: %i', description, len(examples))
+        if len(examples) < 5:
+            _LOG.warning('%s list: %s', description, examples)
+        self.assertGreater(len(examples), 0)
 
+    def test_example_count_checking(self):
         _LOG.warning('%s', PY_LIB_DIR)
 
         with self.assertRaises(AssertionError):
-            check_examples_count('test', [])
-        check_examples_count('test', list(range(1)))
-        check_examples_count('test', list(range(9)))
-        check_examples_count('test', list(range(10)))
-
-        check_examples_count('git repo', GIT_REPO_EXAMPLES)
-        check_examples_count('metadata.json', METADATA_JSON_EXAMPLE_PATHS)
-        check_examples_count('PKG-INFO', PKG_INFO_EXAMPLE_PATHS)
-        check_examples_count('package folder', PACKAGE_FOLDER_EXAMPLES)
+            self._check_examples_count('test', [])
+        self._check_examples_count('test', list(range(1)))
+        self._check_examples_count('test', list(range(9)))
+        self._check_examples_count('test', list(range(10)))
 
     def _query_test_case(self, paths, query_function):
         for path in paths:
@@ -90,6 +86,7 @@ class Tests(unittest.TestCase):
                     _LOG.info('failed to get version from %s', path, exc_info=True)
 
     def test_query_git_repo(self):
+        self._check_examples_count('git repo', GIT_REPO_EXAMPLES)
         self._query_test_case(GIT_REPO_EXAMPLES, query_git_repo)
 
     def test_predict_git_repo(self):
@@ -175,10 +172,14 @@ class Tests(unittest.TestCase):
                 repo_file_path.unlink()
         # TODO: test all variants of above
 
+    @unittest.skipIf(platform.python_implementation() == 'PyPy' and not METADATA_JSON_EXAMPLE_PATHS,
+                     'no "metadata.json" found when using PyPy')
     def test_query_metadata_json(self):
+        self._check_examples_count('metadata.json', METADATA_JSON_EXAMPLE_PATHS)
         self._query_test_case(METADATA_JSON_EXAMPLE_PATHS, query_metadata_json)
 
     def test_query_pkg_info(self):
+        self._check_examples_count('PKG-INFO', PKG_INFO_EXAMPLE_PATHS)
         self._query_test_case(PKG_INFO_EXAMPLE_PATHS, query_pkg_info)
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
@@ -191,6 +192,7 @@ class Tests(unittest.TestCase):
         _LOG.debug('%s: %s', path, version)
 
     def test_query_package_folder(self):
+        self._check_examples_count('package folder', PACKAGE_FOLDER_EXAMPLES)
         self._query_test_case(PACKAGE_FOLDER_EXAMPLES, query_package_folder)
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
