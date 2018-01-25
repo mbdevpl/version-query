@@ -29,7 +29,8 @@ def python_lib_dir() -> pathlib.Path:
         lib_dir_parts.append('lib')
         if platform.system() != 'Windows':
             lib_dir_parts.append('python{}.{}'.format(*sys.version_info[:2]))
-    elif platform.python_implementation() == 'PyPy':
+    else:
+        assert platform.python_implementation() == 'PyPy'
         lib_dir_parts += ['lib-python', '{}'.format(*sys.version_info[:1])]
 
     lib_dir = pathlib.Path(*lib_dir_parts)

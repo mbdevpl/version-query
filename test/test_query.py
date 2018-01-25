@@ -1,6 +1,7 @@
 """Tests of querying tools."""
 
 import contextlib
+import importlib
 import io
 import logging
 import os
@@ -89,6 +90,24 @@ class Tests(unittest.TestCase):
         self._check_examples_count('git repo', GIT_REPO_EXAMPLES)
         self._query_test_case(GIT_REPO_EXAMPLES, query_git_repo)
 
+    def test_predict_caller_bad(self):
+        with tempfile.TemporaryDirectory() as project_path_str:
+            with tempfile.NamedTemporaryFile(suffix='.py', dir=project_path_str,
+                                             delete=False) as project_file:
+                project_file_path = pathlib.Path(project_file.name)
+            with open(str(project_file_path), 'a') as project_file:
+                project_file.write('from version_query.query import predict_caller\n\n\n'
+                                   'def caller():\n    predict_caller()\n\n\ncaller()\n')
+            sys.path.insert(0, project_path_str)
+            _LOG.warning('inserted %s to sys.path', project_path_str)
+            print(project_file_path)
+            print(project_path_str)
+            with self.assertRaises(ValueError):
+                x = importlib.import_module(project_file_path.with_suffix('').name)
+            sys.path.remove(project_path_str)
+            _LOG.warning('removed %s from sys.path', project_path_str)
+            project_file_path.unlink()
+
     def test_predict_git_repo(self):
         self._query_test_case(GIT_REPO_EXAMPLES, predict_git_repo)
 
@@ -122,7 +141,7 @@ class Tests(unittest.TestCase):
                 self.assertEqual(version, upcoming_version)
 
                 with open(str(repo_file_path), 'a') as repo_file:
-                    repo_file.writelines(['spam', 'eggs', 'ham'])
+                    repo_file.write('spam\neggs\nham\n')
                 repo.index.add([repo_file_path.name])
                 repo.index.commit("updates")
 
@@ -134,7 +153,7 @@ class Tests(unittest.TestCase):
                 self.assertTrue(upcoming_version_str.startswith('1.0.1.dev1+'))
 
                 with open(str(repo_file_path), 'a') as repo_file:
-                    repo_file.writelines(['spam', 'spam', 'lovely spam'])
+                    repo_file.write('spam\nspam\nlovely spam\n')
 
                 version = query_git_repo(repo_path)
                 self.assertEqual(version, Version.from_str('1.0.0'))

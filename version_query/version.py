@@ -605,7 +605,7 @@ class Version:
         return {field[1:]: value for field, value in vars(self).items()}
 
     def to_py_version(self) -> packaging.version.Version:
-        return pkg_resources.parse_version(self.to_str())
+        return packaging.version.Version(self.to_str())
 
     def to_sem_version(self) -> dict:
         return semver.parse(self.to_str())
@@ -616,6 +616,18 @@ class Version:
 
     def __str__(self):
         return self.to_str()
+
+    def __eq__(self, other):
+        return not self < other and not other < self
+
+    def __ne__(self, other):
+        return self < other or other < self
+
+    def __gt__(self, other):
+        return other < self
+
+    def __ge__(self, other):
+        return not self < other
 
     def __lt__(self, other):
         if not isinstance(other, Version):
@@ -646,18 +658,6 @@ class Version:
             raise NotImplementedError(repr(self_local) + ' != ' + repr(other_local))
 
         return False
-
-    def __eq__(self, other):
-        return not self < other and not other < self
-
-    def __ne__(self, other):
-        return self < other or other < self
-
-    def __gt__(self, other):
-        return other < self
-
-    def __ge__(self, other):
-        return not self < other
 
     def __le__(self, other):
         return not other < self

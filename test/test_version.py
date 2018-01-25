@@ -26,6 +26,11 @@ class Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Version.from_str('hello world')
 
+    def test_to_str(self):
+        for result, (args, kwargs) in STR_CASES.items():
+            with self.subTest(args=args, kwargs=kwargs, result=result):
+                self.assertEqual(Version(*args, **kwargs).to_str(), result)
+
     def test_from_py_version(self):
         for version_str, (args, kwargs) in COMPATIBLE_STR_CASES.items():
             version_tuple = case_to_version_tuple(args, kwargs)
@@ -36,6 +41,15 @@ class Tests(unittest.TestCase):
                 py_version_setuptools = pkg_resources.parse_version(version_str)
                 self.assertEqual(Version.from_py_version(py_version_setuptools).to_tuple(),
                                  version_tuple, py_version_setuptools)
+
+    def test_to_py_version(self):
+        for version_str, (args, kwargs) in COMPATIBLE_STR_CASES.items():
+            version_tuple = case_to_version_tuple(args, kwargs)
+            with self.subTest(version_str=version_str, version_tuple=version_tuple):
+                version = Version.from_str(version_str)
+                py_version = packaging.version.Version(version_str)
+                self.assertEqual(version.to_py_version(), py_version, version.to_py_version() < py_version)
+                # py_version_setuptools = pkg_resources.parse_version(version_str)
 
     def test_from_sem_version(self):
         for version_str, (args, kwargs) in COMPATIBLE_STR_CASES.items():
@@ -55,6 +69,17 @@ class Tests(unittest.TestCase):
                 else:
                     self.assertEqual(Version.from_sem_version(sem_version_info).to_tuple(),
                                      version_tuple, sem_version_info)
+
+    def test_to_sem_version(self):
+        for version_str, (args, kwargs) in COMPATIBLE_STR_CASES.items():
+            version_tuple = case_to_version_tuple(args, kwargs)
+            with self.subTest(version_str=version_str, version_tuple=version_tuple):
+                try:
+                    sem_version = semver.parse(version_str)
+                except ValueError:
+                    continue
+                version = Version.from_str(version_str)
+                self.assertEqual(version.to_sem_version(), sem_version)
 
     def test_from_version(self):
         for version_str, (args, kwargs) in INIT_CASES.items():
@@ -123,14 +148,23 @@ class Tests(unittest.TestCase):
 
     def test_compare(self):
         for earlier_version, later_version in COMPARISON_CASES_LESS.items():
+            earlier = Version.from_str(earlier_version)
+            later = Version.from_str(later_version)
             with self.subTest(earlier_version=earlier_version, later_version=later_version):
-                self.assertLess(Version.from_str(earlier_version), Version.from_str(later_version))
+                self.assertLess(earlier, later)
+                self.assertLessEqual(earlier, later)
+                self.assertNotEqual(earlier, later)
+                self.assertNotEqual(later, earlier)
+                self.assertGreaterEqual(later, earlier)
+                self.assertGreater(later, earlier)
 
         for version, equivalent_version in COMPARISON_CASES_EQUAL.items():
+            original = Version.from_str(version)
+            equivalent = Version.from_str(equivalent_version)
             with self.subTest(version=version, equivalent_version=equivalent_version):
-                self.assertEqual(Version.from_str(version), Version.from_str(equivalent_version))
-
-    def test_to_str(self):
-        for result, (args, kwargs) in STR_CASES.items():
-            with self.subTest(args=args, kwargs=kwargs, result=result):
-                self.assertEqual(Version(*args, **kwargs).to_str(), result)
+                self.assertLessEqual(original, equivalent)
+                self.assertLessEqual(equivalent, original)
+                self.assertEqual(original, equivalent)
+                self.assertEqual(equivalent, original)
+                self.assertGreaterEqual(original, equivalent)
+                self.assertGreaterEqual(equivalent, original)
