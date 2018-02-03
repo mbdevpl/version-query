@@ -31,6 +31,8 @@ class Tests(unittest.TestCase):
         self.repo = git.Repo.init(str(self.repo_path))
         self.assertIsInstance(self.repo, git.Repo)
         self._repo_files = []
+        self.repo.git.config('user.email', 'you@example.com')
+        self.repo.git.config('user.name', 'Your Name')
 
     def tearDown(self):
         for path in self._repo_files:
