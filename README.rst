@@ -64,7 +64,16 @@ At development time, the current version number is automatically generated based
 *   index status
 
 in your git repository. Therefore the package can be built and shipped to PyPI based only on status
-of the git repository.
+of the git repository. When there is no git repository (this might be the case at installation time
+or at runtime) then the script relies on metadata generated at packaging time.
+
+That's why, regardless if package is installed from PyPI (from source or wheel distribution)
+or cloned from GitHub, the version query will work.
+
+Additionally, version numbers in version-query are mutable objects and they can be conveniently
+incremented, compared with each other, as well as converted to/from other popular
+versioning formats.
+
 versioning scheme
 =================
 
@@ -120,46 +129,108 @@ Each version component has a meaning and constraints on its contents:
 *   ``<local-separator>`` - a dot or dash, separates parts of local version identifier
 
 
+how exactly the version number is determined
+--------------------------------------------
 
-If there is no git repository (this might be the case at installation time or at runtime)
-the script relies on package metadata from its ``PKG-INFO`` or ``metadata.json`` file.
+The version-query package has two modes of operation:
 
-One of ``PKG-INFO`` or ``metadata.json`` files is automatically-generated when building packages.
-Which one depends on your method of building, but in any case, one of them is packaged into source
-as well as binary distributions. One of them should be present for every Python 3 package.
+*   *query* - only currently available explicit information is used to determine the version number
+*   *prediction* - this applies only to determining version number from git repository, and means
+    that in addition to explicit version information, git repository status can be used
+    to get very fine-grained version number which will be unique for every repository snapshot
 
 
-how version is determined from git repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+version query from package metadata file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-First of all, a most recent (based on version precedence) version tag is found. Version tag
-is a git tag that starts with ``v`` or ``ver``, followed by a valid version identifier.
+The metadata file (``PKG-INFO`` or ``metadata.json``) is automatically generated whenever a Python
+distribution file is built. Which one, depends on your method of building, but in any case,
+the file is then packaged into distributions, and when uploaded to PyPI that metadata file is used
+to populate the package page - therefore all Python packages on PyPI should have it.
+
+Additionally, source code folder of any package using setuptools, in which ``setup.py <build>``
+was executed, contains metadata file -- even if distribution file was not built.
+
+The version identifier is contained verbatim in the metadata file, therefore version query
+in this case boils down to simply reading the metadata file.
+
+Information about Python metadata files:
+
+*   `PEP 345 -- Metadata for Python Software Packages 1.2 <https://www.python.org/dev/peps/pep-0345/>`_,
+    which replaced `PEP 314 -- Metadata for Python Software Packages v1.1 <https://www.python.org/dev/peps/pep-0314/>`_,
+    which in turn replaced `PEP 241 -- Metadata for Python Software Packages <https://www.python.org/dev/peps/pep-0241/>`_;
+
+*   PEP 345 might be at some point in time replaced by
+    `PEP 426 -- Metadata for Python Software Packages 2.0 <https://www.python.org/dev/peps/pep-0426/>`_,
+    but for now PEP 345 is the current standard.
+
+
+version query from git repository
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The version number is equal to the version contained in the most recent version tag.
+
+version tags
+````````````
+
+Any git tag that is a valid version (matching the rules above) is considered a version tag.
+Version number can be prefixed with ``v`` or ``ver``. Other tags are ignored.
 
 Examples of valid version tags:
 
 *   ``v1.0``
 *   ``v0.16.0``
 *   ``v1.0.dev3``
-
-The validity of the version identifier is determined by PEP 440.
-
-If there are no version tags in the repo, the script simply assumes that initial commit
-has tag ``v0.1.0.dev0``, and proceeds.
+*   ``ver0.5.1-4.0.0+a1de3012``
+*   ``42.0``
+*   ``3.14-15``
 
 
-how version is incremented for a git repository
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+most recent version tag
+```````````````````````
 
-If current commit is not the one with the latest version tag, a suffix ``.dev#`` is appended
-to the version identifier, where ``#`` is the distance (number of commits) between
-the current commit and the latest version tag.
+The most recent tag is found based on repository history and version precedence.
 
-Additionally, the release number is incremented by 1. Release number here is defined
-as in ``major.minor.release``, e.g. for version ``1.2.3`` release number is ``3`` and it would be
-assumed equal to ``0`` if not present.
+Search for version tags starts from current commit, and goes backwards in history (towards initial
+commit). Therefore, commits after current one as well as not-merged branches are ignored in the
+version tag search.
+
+If there are several version tags on one commit, then highest version number is used.
+
+If there are version tags on several merged branches, then the highest version number is used.
+
+If there are no version tags in the repository, you'll get an error - so version cannot be queried
+from git repository without any version tags.
+
+But in such case, version can still be *predicted*, as described below.
+
+
+version prediction from git repository
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In version prediction mode, first of all, a most recent version tag is found, as above.
+If there are no version tags in the repo, then the initial commit is assumed to have tag
+``v0.1.0.dev0``.
+
+Then, the new commits are counted. Then, the repository index status is queried. All the results
+are combined to form the predicted version number. Procedure is described in detail below.
+
+
+counting new commits
+````````````````````
+
+If after the commit with the most recent tag there are any new commits, a suffix ``.dev#``
+is appended to the version identifier, where ``#`` is the number of commits between
+the current commit and the most recent version tag.
+
+Additionally, the ``<patch>`` version component is incremented by ``1``.
 
 Additionally, a plus (``+``) character and the first 8 characters of SHA of the latest commit
 are appended to version identifier, e.g. ``+a3014fe0``.
+
+
+repository index status
+```````````````````````
 
 Additionally, if there are any uncommitted changes in the repository (i.e. the repo is *dirty*),
 the suffix ``.dirty`` followed by current date and time in format ``YYYYMMDDhhmmss`` are appended
@@ -182,44 +253,75 @@ of the repository:
     the result is ``9.0.1.dev40+1ad22355.dirty20170608195220``.
 
 
-how version is determined from ``PKG-INFO`` file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+how exactly version numbers are compared
+----------------------------------------
 
-The version identifier is simply read from the package metadata file
-(i.e. the file named ``PKG-INFO``) which should be present for any:
+The base specification of the comparison scheme is:
 
-*   installed package
-*   source distribution
-*   binary distribution
-*   source code folder of any package using setuptools, in which ``setup.py <build>`` was executed
+*   `PEP 508 -- Dependency specification for Python Software Packages <https://www.python.org/dev/peps/pep-0508/>`_ as well as
+
+*   `Semantic Versioning 2.0.0 <http://semver.org/>`_.
+
+With the notable difference to both that all version components are taken into account when
+establishing version precedence.
+
+When being compared, ``<major>``, ``<minor>`` and ``<patch>`` are assumed equal to ``0`` if they
+are not present.
+
+Examples of comparison results:
+
+*   ``0.3-4.4-2.9`` < ``0.3-4.4-2.10``
+*   ``0.3dev`` < ``0.3dev1``
+*   ``0.3rc2`` < ``0.3``
+*   ``0.3`` < ``0.3-2``
+*   ``1.0.0`` < ``1.0.0+blahblah``
+*   ``1.0.0+aa`` < ``1.0.0+aaa``
+*   ``1.0.0`` = ``1.0.0``
+*   ``1`` = ``1.0.0``
+*   ``1.0`` = ``1.0.0.0``
+*   ``1.0.0-0.0.DEV42`` = ``1.0.0.0.0.dev42``
+
+
+how exactly version number is incremented
+-----------------------------------------
+
+Some version components have assumed value ``0`` if they are not present, please see section above
+for details.
+
+Incrementing any version component clears all existing following components.
+
+Examples of how version is incremented:
+
+*   for ``1.5``, incrementing ``<major>`` results in ``2.0``;
+*   for ``1.5.1-2.4``, ``<minor>``++ results in ``1.6``;
+*   ``1.5.1-2.4``, ``<patch>``++, ``1.5.2``;
+*   ``1.5.1``, ``<major>``+=3, ``4.0.0``.
 
 
 limitations
------------
+===========
 
-Either git repository or ``PKG-INFO`` file must be present for the script to work.
+Either git repository or metadata file must be present for the script to work. When, for example,
+zipped version of repository is downloaded from GitHub, the resulting archive contains neither
+metadata files nor repository data.
 
-The current implementation aims at, but is not yet fully compatible with:
+It is unclear what happens if the queried repository is bare.
 
-*   `PEP 440 -- Version Identification and Dependency Specification <https://www.python.org/dev/peps/pep-0440/>`_;
-
-*   `PEP 508 -- Dependency specification for Python Software Packages <https://www.python.org/dev/peps/pep-0508/>`_;
-
-*   `PEP 345 -- Metadata for Python Software Packages 1.2 <https://www.python.org/dev/peps/pep-0345/>`_,
-    which replaced `PEP 314 -- Metadata for Python Software Packages v1.1 <https://www.python.org/dev/peps/pep-0314/>`_,
-    which in turn replaced `PEP 241 -- Metadata for Python Software Packages <https://www.python.org/dev/peps/pep-0241/>`_;
-
-*   PEP 345 might be at some point in time replaced by
-    `PEP 426 -- Metadata for Python Software Packages 2.0 <https://www.python.org/dev/peps/pep-0426/>`_,
-    but for now PEP 345 is the current standard.
-
-Especially, in current implementation at most one of:
+The implementation is not fully compatible with Python versioning. Especially,
+in current implementation at most one of:
 alpha ``a`` / beta ``b`` / release candidate ``rc`` / development ``dev`` suffixes
 can be used in a version identifier.
 
 And the format in which
 alpha ``a``, beta ``b`` and release candidate ``rc`` suffixes
-are to be used does not match exactly the conditions defined in PEP.
+are to be used does not match exactly the conditions defined in PEP 440.
+
+Script might feel a bit slow when attempting to find a version tag in a git repository with a very
+large history and no version tags. It is designed towards packages with short release cycles
+-- in long release cycles the overhead of manual versioning is small anyway.
+
+Despite above limitations, version-query itself (as well as growing number of other packages) are
+using version-query without any issues.
 
 
 requirements
