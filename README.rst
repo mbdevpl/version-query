@@ -50,6 +50,9 @@ You can instead:
 
     __version__ = predict_version_str()
 
+.. contents::
+    :backlinks: none
+
 
 overview
 ========
