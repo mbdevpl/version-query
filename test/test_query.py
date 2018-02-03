@@ -78,6 +78,7 @@ class Tests(unittest.TestCase):
     def _query_test_case(self, paths, query_function):
         for path in paths:
             with self.subTest(path=path, query_function=query_function):
+                _LOG.debug('testing %s() on %s', query_function.__name__, path)
                 try:
                     version = query_function(path)
                     _LOG.debug('%s: %s', path, version)
