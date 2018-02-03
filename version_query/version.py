@@ -36,52 +36,7 @@ class Version:
 
     """For storing and manipulating version information.
 
-    Version scheme defined here is a mix of:
-
-    - semantic versioning http://semver.org/ and
-    - Python versioning (PEP 440) https://www.python.org/dev/peps/pep-0440/
-
-    Version has one of the following forms:
-
-    <release>
-    <release><pre-release>
-    <release>+<local>
-    <release><pre-release>+<local>
-
-    A release version identifier <release> has one of the following forms:
-
-    <major>
-    <major>.<minor>
-    <major>.<minor>.<patch>
-
-    And the pre-release version identifier <pre-release> has one of the following forms:
-
-    <pre-type>
-    <pre-type><pre-patch>
-    <pre-separator><pre-type>
-    <pre-separator><pre-patch>
-    <pre-separator><pre-type><pre-patch>
-    ... and any of these forms can be repeated arbitrary number of times.
-
-    And finally the local version identifier <local> has one of the forms:
-
-    <local-part>
-    <local-part><local-separator><local-part>
-    <local-part><local-separator><local-part><local-separator><local-part>
-    ... and so on.
-
-    Each version component has a meaning and constraints on its contents:
-
-    <major> - a non-negative integer, increments when backwards-incompatible changes are made
-    <minor> - a non-negative integer, increments when backwards-compatible features are added
-    <patch> - a non-negative integer, increments when backwards-compatible bugfixes are made
-
-    <pre-separator> - dot or dash, separates release version information from pre-release
-    <pre-type> - a string of lower-case alphabetic characters, type of the pre-release
-    <pre-patch> - a non-negative integer, revision of the pre-release
-
-    <local-part> - a sequence of alphanumeric characters, stores arbitrary information
-    <local-separator> - a dot or dash, separates parts of local version identifier
+    Definitions of acceptable version formats are provided in readme.
     """
 
     _re_number = r'(?:0|[123456789][0123456789]*)'

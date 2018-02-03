@@ -5,6 +5,7 @@
     :language: python
 
 
+========================================
 Package version query toolkit for Python
 ========================================
 
@@ -50,10 +51,10 @@ You can instead:
     __version__ = predict_version_str()
 
 
-how does it work
-----------------
+overview
+========
 
-At development time, this will automatically infer the current version number based on:
+At development time, the current version number is automatically generated based on:
 
 *   tags
 *   current commit SHA
@@ -61,6 +62,61 @@ At development time, this will automatically infer the current version number ba
 
 in your git repository. Therefore the package can be built and shipped to PyPI based only on status
 of the git repository.
+versioning scheme
+=================
+
+Version scheme used by version-query is a relaxed mixture of:
+
+*   `Semantic Versioning 2.0.0 <http://semver.org/>`_ and
+
+*   `PEP 440 -- Version Identification and Dependency Specification <https://www.python.org/dev/peps/pep-0440/>`_.
+
+These two rulesets are mostly compatible. When they are not, a more relaxed approach of the two
+is used. Details follow.
+
+Version has one of the following forms:
+
+*   ``<release>``
+*   ``<release><pre-release>``
+*   ``<release>+<local>``
+*   ``<release><pre-release>+<local>``
+
+A release version identifier ``<release>`` has one of the following forms:
+
+*   ``<major>``
+*   ``<major>.<minor>``
+*   ``<major>.<minor>.<patch>``
+
+And the pre-release version identifier ``<pre-release>`` has one of the following forms:
+
+*   ``<pre-type>``
+*   ``<pre-type><pre-patch>``
+*   ``<pre-separator><pre-type>``
+*   ``<pre-separator><pre-patch>``
+*   ``<pre-separator><pre-type><pre-patch>``
+*   ... and any of these forms can be repeated arbitrary number of times.
+
+And finally the local version identifier ``<local>`` has one of the forms:
+
+*   ``<local-part>``
+*   ``<local-part><local-separator><local-part>``
+*   ``<local-part><local-separator><local-part><local-separator><local-part>``
+*   ... and so on.
+
+Each version component has a meaning and constraints on its contents:
+
+*   ``<major>`` - a non-negative integer, increments when backwards-incompatible changes are made
+*   ``<minor>`` - a non-negative integer, increments when backwards-compatible features are added
+*   ``<patch>`` - a non-negative integer, increments when backwards-compatible bugfixes are made
+
+*   ``<pre-separator>`` - dot or dash, separates release version information from pre-release
+*   ``<pre-type>`` - a string of lower-case alphabetic characters, type of the pre-release
+*   ``<pre-patch>`` - a non-negative integer, revision of the pre-release
+
+*   ``<local-part>`` - a sequence of alphanumeric characters, stores arbitrary information
+*   ``<local-separator>`` - a dot or dash, separates parts of local version identifier
+
+
 
 If there is no git repository (this might be the case at installation time or at runtime)
 the script relies on package metadata from its ``PKG-INFO`` or ``metadata.json`` file.
@@ -164,7 +220,7 @@ are to be used does not match exactly the conditions defined in PEP.
 
 
 requirements
-------------
+============
 
 Python version >= 3.4.
 
