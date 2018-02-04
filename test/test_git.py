@@ -3,6 +3,7 @@
 import itertools
 import logging
 import pathlib
+import platform
 import tempfile
 import unittest
 
@@ -41,8 +42,9 @@ class Tests(unittest.TestCase):
         self.assertIsInstance(self.repo, git.Repo)
         self.repo.close()
         self.repo = None
-        self._tmpdir.cleanup()
-        self._tmpdir = None
+        if platform.system() != 'Windows':
+            self._tmpdir.cleanup()
+            self._tmpdir = None
 
     @property
     def head_hexsha(self) -> str:
