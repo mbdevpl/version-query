@@ -266,7 +266,7 @@ With the notable difference to both that all version components are taken into a
 establishing version precedence.
 
 When being compared, ``<major>``, ``<minor>`` and ``<patch>`` are assumed equal to ``0`` if they
-are not present.
+are not present. In ``<pre-release>``, the ``<pre-patch>`` is assumed to be ``0`` if not present.
 
 Examples of comparison results:
 
