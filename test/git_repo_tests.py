@@ -10,7 +10,7 @@ import git
 
 _LOG = logging.getLogger(__name__)
 
-__updated__ = "2018-03-15"
+__updated__ = '2018-03-15'
 
 
 class GitRepoTests(unittest.TestCase):
@@ -73,6 +73,3 @@ class GitRepoTests(unittest.TestCase):
             self.repo.index.add([path.name])
         if commit:
             self.repo.index.commit('modified file {}'.format(path))
-
-    def git_detach_head(self):
-        raise NotImplementedError()

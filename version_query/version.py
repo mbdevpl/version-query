@@ -572,6 +572,9 @@ class Version:
     def __str__(self):
         return self.to_str()
 
+    def __hash__(self):
+        return hash(self.to_tuple(sort=True))
+
     def __eq__(self, other):
         return not self < other and not other < self
 
