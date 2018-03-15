@@ -3,74 +3,29 @@
 import itertools
 import logging
 import pathlib
-import platform
+# import platform
 import tempfile
-import unittest
+# import unittest
 
 import git
 
 from version_query.version import VersionComponent, Version
 from version_query.git_query import query_git_repo, predict_git_repo
+from .git_repo_tests import GitRepoTests
 
 _LOG = logging.getLogger(__name__)
 
 
-class Tests(unittest.TestCase):
+class Tests(GitRepoTests):
 
     """Test suite for automated tests of generated git repositories.
 
     Each case is executed in a fresh empty repository.
     """
 
-    repo = None  # type: git.Repo
-    repo_path = None  # type: pathlib.Path
-
     def setUp(self):
-        self._tmpdir = tempfile.TemporaryDirectory()
-        self.repo_path = pathlib.Path(self._tmpdir.name)
-        self.assertTrue(self.repo_path.is_dir())
-        self.repo = git.Repo.init(str(self.repo_path))
-        self.assertIsInstance(self.repo, git.Repo)
-        self._repo_files = []
-        self.repo.git.config('user.email', 'you@example.com')
-        self.repo.git.config('user.name', 'Your Name')
-
-    def tearDown(self):
-        for path in self._repo_files:
-            if path.is_file():
-                path.unlink()
-        self.assertIsInstance(self.repo, git.Repo)
-        self.repo.close()
-        self.repo = None
-        if platform.system() != 'Windows':
-            self._tmpdir.cleanup()
-            self._tmpdir = None
-
-    @property
-    def head_hexsha(self) -> str:
-        return self.repo.head.commit.hexsha[:8]
-
-    def _commit_new_file(self) -> pathlib.Path:
-        self.assertIsInstance(self.repo, git.Repo)
-        with tempfile.NamedTemporaryFile('w', dir=str(self.repo_path), delete=False) as repo_file:
-            repo_file.write('spam spam lovely spam\n')
-            path = pathlib.Path(repo_file.name)
-        self.repo.index.add([path.name])
-        self.repo.index.commit('created file {}'.format(path))
-        _LOG.debug('commited file %s as %s', path, self.head_hexsha)
-        self._repo_files.append(path)
-        return path
-
-    def _modify_file(self, path: pathlib.Path, add: bool = False, commit: bool = False) -> None:
-        self.assertIsInstance(self.repo, git.Repo)
-        self.assertIsInstance(path, pathlib.Path)
-        self.assertTrue(path.is_file())
-        with open(str(path), 'a') as repo_file:
-            repo_file.write('spam eggs ham\n')
-        if add or commit:
-            self.repo.index.add([path.name])
-        if commit:
-            self.repo.index.commit('modified file {}'.format(path))
+        super().setUp()
+        self.git_init()
 
     def test_empty_repo(self):
         with self.assertRaises(ValueError):
