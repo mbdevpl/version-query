@@ -185,6 +185,31 @@ class Tests(GitRepoTests):
         upcoming_version = predict_git_repo(self.repo_path)
         self.assertEqual(upcoming_version.to_str(), '0.2.1.dev5+{}'.format(self.repo_head_hexsha))
 
+    def test_tag_on_merged_branch(self):
+        self.git_commit_new_file()
+        self.repo.create_head('devel')
+        self.git_commit_new_file()
+        self.repo.git.checkout('devel')
+        self.git_commit_new_file()
+        self.repo.create_tag('v1.0.0')
+        self.repo.git.checkout('master')
+        self.repo.git.merge('devel')
+        current_version = query_git_repo(self.repo_path)
+        self.assertEqual(current_version.to_str(), '1.0.0')
+        upcoming_version = predict_git_repo(self.repo_path)
+        self.assertEqual(upcoming_version.to_str(), '1.0.1.dev1+{}'.format(self.repo_head_hexsha))
+
+    def test_many_versions_on_one_commit(self):
+        self.git_commit_new_file()
+        self.repo.create_tag('v0.1.0')
+        self.repo.create_tag('v0.3.0')
+        self.repo.create_tag('v0.2.0')
+        self.git_commit_new_file()
+        current_version = query_git_repo(self.repo_path)
+        self.assertEqual(current_version.to_str(), '0.3.0')
+        upcoming_version = predict_git_repo(self.repo_path)
+        self.assertEqual(upcoming_version.to_str(), '0.3.1.dev1+{}'.format(self.repo_head_hexsha))
+
     def test_version_decreased(self):
         self.git_commit_new_file()
         self.repo.create_tag('v0.2.0')
