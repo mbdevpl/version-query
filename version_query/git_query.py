@@ -73,6 +73,32 @@ def _latest_git_version_tag_on_branches(
 MAX_COMMIT_DISTANCE = 999
 
 
+def _latest_git_version_tag_new(
+        repo: git.Repo, assume_if_none: bool = False, base_commit: git.Commit = None,
+        commit_distance: int = 0, skip_commits: t.Set[git.Commit] = None) -> t.Tuple[
+            git.Commit, t.Optional[git.TagReference], Version, int]:
+    version_tags = _git_version_tags(repo)
+    version_tag_commits = set()
+    divergence_points = []
+    if skip_commits is None:
+        skip_commits = set()
+    while True:
+        commit = None
+        for commit in repo.iter_commits(rev=base_commit):
+            if commit in skip_commits:
+                return None, None, None, -1
+            _LOG.log(logging.NOTSET, 'iterating over commit %s', commit)
+            current_version_tags = {tag: version for tag, version in version_tags.items()
+                                    if tag.commit == commit}
+            commit_distance += 1
+            skip_commits.add(commit)
+            if len(commit.parents) > 1:
+                divergence_points.append(commit)
+                break
+        base_commit = divergence_points.pop()
+    return commit, tag, version, commit_distance
+
+
 def _latest_git_version_tag(
         repo: git.Repo, assume_if_none: bool = False,
         base_commit: t.Optional[git.objects.Commit] = None, commit_distance: int = 0,
@@ -120,6 +146,9 @@ def _latest_git_version_tag(
     tag, version = sorted(current_version_tags.items(), key=lambda _: _[1])[-1]
     _LOG.log(logging.NOTSET, 'result is %s and %s', tag, version)
     return commit, tag, version, commit_distance
+
+
+_latest_git_version_tag = _latest_git_version_tag_new
 
 
 def _upcoming_git_version_tag(repo: git.Repo, ignore_untracked_files: bool = True) -> t.Tuple[
