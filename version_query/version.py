@@ -150,39 +150,38 @@ class Version:
         return cls(**version_dict)
 
     @classmethod
-    def from_py_version(
-            cls, py_version: t.Union[packaging.version.Version, pkg_resources.SetuptoolsVersion]):
+    def from_py_version(cls, py_version: packaging.version.Version):
         """Create version from a standard Python version object."""
-        if isinstance(py_version, (packaging.version.Version, pkg_resources.SetuptoolsVersion)):
-            ver = py_version._version
-            major, minor, patch = [ver.release[i] if len(ver.release) > i
-                                   else None for i in range(3)]
-            pre_release = None
-            local = None
-            if len(ver.release) == 4:
-                pre_ver = (None, ver.release[3])
-            elif len(ver.release) > 4:
-                raise NotImplementedError(ver)
-            else:
-                pre_ver = None
-            pre_ver_present = sum(1 for _ in (ver.post, ver.dev, ver.pre) if _)
-            if pre_ver and pre_ver_present:
-                raise NotImplementedError(ver)
-            if pre_ver_present > 1:
-                raise NotImplementedError(ver)
-            if ver.dev:
-                pre_ver = ver.dev
-            elif ver.pre:
-                pre_ver = ver.pre
-            if pre_ver:
-                pre_release = [('.',) + tuple(pre_ver[i] if pre_ver and len(pre_ver) > i else None
-                                              for i in range(2))]
-            if ver.local:
-                local = tuple(itertools.chain.from_iterable(
-                    (dot, str(_)) for dot, _ in zip('.' * len(ver.local), ver.local)))[1:]
-            _LOG.debug('parsing %s %s', type(py_version), ver)
-            return cls(major, minor, patch, pre_release=pre_release, local=local)
-        raise NotImplementedError(type(py_version))
+        if not isinstance(py_version, packaging.version.Version):
+            _LOG.warning('attempting to parse %s as packaging.version.Version...', type(py_version))
+        ver = py_version._version
+        major, minor, patch = [ver.release[i] if len(ver.release) > i
+                               else None for i in range(3)]
+        pre_release = None
+        local = None
+        if len(ver.release) == 4:
+            pre_ver = (None, ver.release[3])
+        elif len(ver.release) > 4:
+            raise NotImplementedError(ver)
+        else:
+            pre_ver = None
+        pre_ver_present = sum(1 for _ in (ver.post, ver.dev, ver.pre) if _)
+        if pre_ver and pre_ver_present:
+            raise NotImplementedError(ver)
+        if pre_ver_present > 1:
+            raise NotImplementedError(ver)
+        if ver.dev:
+            pre_ver = ver.dev
+        elif ver.pre:
+            pre_ver = ver.pre
+        if pre_ver:
+            pre_release = [('.',) + tuple(pre_ver[i] if pre_ver and len(pre_ver) > i else None
+                                          for i in range(2))]
+        if ver.local:
+            local = tuple(itertools.chain.from_iterable(
+                (dot, str(_)) for dot, _ in zip('.' * len(ver.local), ver.local)))[1:]
+        _LOG.debug('parsing %s %s', type(py_version), ver)
+        return cls(major, minor, patch, pre_release=pre_release, local=local)
 
     @classmethod
     def from_sem_version(cls, sem_version: t.Union[dict, semver.VersionInfo]):
