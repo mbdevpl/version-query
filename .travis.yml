@@ -51,7 +51,7 @@ install:
   - git clone https://github.com/PyCQA/pylint ../pylint
   - cd ../pylint && python setup.py build && cd -
   - git clone https://github.com/mbdevpl/argunparse ../argunparse
-  - cd ../argunparse && python setup.py build && cd -
+  - cd ../argunparse && pip install -r test_requirements.txt && python setup.py build && cd -
   - git clone https://github.com/k-bx/python-semver ../semver
   - cd ../semver && python setup.py build && cd -
 
