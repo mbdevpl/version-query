@@ -48,7 +48,8 @@ class Tests(unittest.TestCase):
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 version = Version.from_str(version_str)
                 py_version = packaging.version.Version(version_str)
-                self.assertEqual(version.to_py_version(), py_version, version.to_py_version() < py_version)
+                self.assertEqual(version.to_py_version(), py_version,
+                                 msg=(version.to_py_version(), py_version))
                 # py_version_setuptools = pkg_resources.parse_version(version_str)
 
     def test_from_sem_version(self):
