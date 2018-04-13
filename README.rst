@@ -143,12 +143,13 @@ The version-query package has two modes of operation:
 version query from package metadata file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The metadata file (``PKG-INFO`` or ``metadata.json``) is automatically generated whenever a Python
-distribution file is built. Which one, depends on your method of building, but in any case,
-the file is then packaged into distributions, and when uploaded to PyPI that metadata file is used
-to populate the package page - therefore all Python packages on PyPI should have it.
+The metadata file (``PKG-INFO`` or ``metadata.json`` or ``METADATA``) is automatically generated
+whenever a Python distribution file is built.
+Which one, depends on your method of building, but in any case, the file is then packaged into
+distributions, and when uploaded to PyPI that metadata file is used to populate
+the package page - therefore all Python packages on PyPI should have it.
 
-Additionally, source code folder of any package using setuptools, in which ``setup.py <build>``
+Additionally, source code folder of any package using setuptools, in which ``setup.py build``
 was executed, contains metadata file -- even if distribution file was not built.
 
 The version identifier is contained verbatim in the metadata file, therefore version query
