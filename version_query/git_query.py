@@ -12,18 +12,24 @@ from .version import Version
 _LOG = logging.getLogger(__name__)
 
 
+def preprocess_git_version_tag(tag: str):
+    """Remove a prefix from a version tag."""
+    if tag.startswith('ver'):
+        return tag[3:]
+    if tag.startswith('v'):
+        return tag[1:]
+    if tag and tag[0] in ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'):
+        return tag
+    raise ValueError('given tag "{}" does not appear to be a version tag'.format(tag))
+
+
 def _git_version_tags(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
     versions = {}
     for tag in repo.tags:
-        tag_str = str(tag)
-        if tag_str.startswith('ver'):
-            tag_str = tag_str[3:]
-        elif tag_str.startswith('v'):
-            tag_str = tag_str[1:]
-        elif tag_str and tag_str[0] in ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'):
-            pass
-        else:
-            _LOG.debug('%s: ignoring non-version tag %s', repo, tag_str)
+        try:
+            tag_str = preprocess_git_version_tag(str(tag))
+        except ValueError:
+            _LOG.debug('%s: ignoring non-version tag %s', repo, tag)
             continue
         try:
             versions[tag] = Version.from_str(tag_str)
