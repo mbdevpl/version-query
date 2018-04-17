@@ -1,6 +1,8 @@
-# Eclipse
-/.settings
-/.*project
+# OS: macOS
+.DS_Store
+
+# OS: Windows
+desktop.ini
 
 # Python
 /build
@@ -11,7 +13,6 @@ __pycache__
 *.egg-info
 *.pyc
 
-# Python coverage
+# Python: coverage
 /htmlcov
-/coverage.xml
 /.coverage
