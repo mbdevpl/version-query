@@ -8,7 +8,7 @@ import logging
 
 from version_query.version import VersionComponent, Version
 from version_query.git_query import query_git_repo, predict_git_repo
-from .git_repo_tests import GitRepoTests
+from .test_with_git_repo import GitRepoTests
 
 _LOG = logging.getLogger(__name__)
 
