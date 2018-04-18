@@ -597,22 +597,18 @@ class Version:
 
         self_pre_release = self.pre_release_to_tuple(True)
         other_pre_release = other.pre_release_to_tuple(True)
-        if self_pre_release != other_pre_release:
-            for self_part, other_part in itertools.zip_longest(
-                    self_pre_release, other_pre_release, fillvalue=(1, '', 0)):
-                if self_part != other_part:
-                    return self_part < other_part
-            raise NotImplementedError(repr(self_pre_release) + ' != ' + repr(other_pre_release))
+        for self_part, other_part in itertools.zip_longest(
+                self_pre_release, other_pre_release, fillvalue=(1, '', 0)):
+            if self_part != other_part:
+                return self_part < other_part
 
         self_local = self.local_to_tuple(True)
         other_local = other.local_to_tuple(True)
-        if self_local != other_local:
-            for self_part, other_part in zip(self_local, other_local):
-                if self_part != other_part:
-                    return self_part < other_part
-            if len(self_local) != len(other_local):
-                return len(self_local) < len(other_local)
-            raise NotImplementedError(repr(self_local) + ' != ' + repr(other_local))
+        for self_part, other_part in zip(self_local, other_local):
+            if self_part != other_part:
+                return self_part < other_part
+        if len(self_local) != len(other_local):
+            return len(self_local) < len(other_local)
 
         return False
 

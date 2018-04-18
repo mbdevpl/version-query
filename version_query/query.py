@@ -20,11 +20,9 @@ def _caller_folder(stack_level: int = 1) -> pathlib.Path:
     caller_path = frame_info[1]  # frame_info.filename
 
     here = pathlib.Path(caller_path).absolute().resolve()
-    if not here.is_file():
-        raise RuntimeError('path "{}" was expected to be a file'.format(here))
+    assert here.is_file(), here
     here = here.parent
-    if not here.is_dir():
-        raise RuntimeError('path "{}" was expected to be a directory'.format(here))
+    assert here.is_dir(), here
     _LOG.debug('found directory "%s"', here)
 
     return here

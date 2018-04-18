@@ -169,3 +169,15 @@ class Tests(unittest.TestCase):
                 self.assertEqual(equivalent, original)
                 self.assertGreaterEqual(original, equivalent)
                 self.assertGreaterEqual(equivalent, original)
+
+    def test_compare_bad(self):
+        with self.assertRaises(TypeError):
+            assert Version(1, 0) < '2.0'
+
+    def test_hash(self):
+        for version, equivalent_version in COMPARISON_CASES_EQUAL.items():
+            original = Version.from_str(version)
+            equivalent = Version.from_str(equivalent_version)
+            with self.subTest(version=version, equivalent_version=equivalent_version):
+                self.assertEqual(hash(original), hash(equivalent))
+                self.assertDictEqual({original: equivalent}, {equivalent: original})
