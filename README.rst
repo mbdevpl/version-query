@@ -302,6 +302,100 @@ Examples of how version is incremented:
 *   ``1.5.1``, ``<major>``+=3, ``4.0.0``.
 
 
+api details
+===========
+
+All functionality mentioned below is considered as the public API. Other functionality may change
+without notice.
+
+
+main api
+--------
+
+.. code:: python
+
+    import version_query
+
+    version_str = version_query.query_version_str()
+
+The version-query package will query the version string while operating in *query* mode.
+
+.. code:: python
+
+    version_str = version_query.predict_version_str()
+
+The version-query package will infer the version string while operating in *prediction* mode.
+
+.. code:: python
+
+    version = version_query.Version(1, 0, 4)
+    version = version_query.Version(major=1, patch=4)
+    version = version_query.Version.from_str('1.0.4')
+
+The Version class is used internally by version-query, but it can be also used explicitly.
+
+.. code:: python
+
+    import packaging.version
+    version = version_query.Version.from_py_version(packaging.version.Version())
+    version.to_py_version()
+
+    import semver
+    version = version_query.Version.from_sem_version(semver.VersionInfo())
+    version.to_sem_version()
+
+Also, Version class interoperates with ``packaging`` and ``semver`` packages as well as selected
+built-in types.
+
+.. code:: python
+
+    assert version_query.Version('1.0.4').increment(version_query.VersionComponent.Patch, 2) \
+        == version_query.Version('1.0.6')
+    assert version_query.Version('1.0.4') < version_query.Version('2.0.0')
+
+The Version objects are mutable, hashable and comparable.
+
+.. code:: python
+
+    version = version_query.query_folder(pathlib.Path('/my/project'), search_parent_directories=False)
+    version = version_query.predict_git_repo(pathlib.Path('/my/git/versioned/project/subdir'), True)
+    version = version_query.query_caller(stack_level=1)
+    version = version_query.predict_caller(2)
+
+Version object can be obtained for any supported path, as well as for any python code
+currently being executed -- as long as it is located in a supported location.
+
+
+command-line interface
+----------------------
+
+.. code:: bash
+
+    python3 -m version_query --help
+    python3 -m version_query /my/project -p
+
+.. code:: python
+
+    version_query.__main__.main(args=['--help'])
+    version_query.__main__.main(args=['/my/project', '-p'])
+
+Version query can be also used as a command-line script, with the entry point also accessible
+as ``version_query.__main__.main`` from within Python.
+
+
+utility functions
+-----------------
+
+.. code:: python
+
+    assert version_query.git_query.preprocess_git_version_tag('v1.0.4') == '1.0.4'
+    assert version_query.git_query.preprocess_git_version_tag('ver1.0.4') == '1.0.4'
+    assert version_query.git_query.preprocess_git_version_tag('1.0.4') == '1.0.4'
+
+Remove ``v`` and ``ver`` prefix from a given string, and preform very crude checking whether
+the tag is probably a version tag.
+
+
 limitations
 ===========
 
