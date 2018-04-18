@@ -1,7 +1,5 @@
 """Tests for version_query package."""
 
-import logging
-import os
+from version_query import _logging
 
-if 'LOGGING_LEVEL' in os.environ:
-    logging.basicConfig(level=getattr(logging, os.environ['LOGGING_LEVEL'].upper()))
+_logging.setup_basic_logging()

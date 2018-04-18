@@ -32,7 +32,7 @@ def _version_tuple_checker(version_tuple, flags):
     return all([(_ is not None if flag else _ is None) for _, flag in zip(version_tuple, flags)])
 
 
-class Version:
+class Version(collections.abc.Hashable):
 
     """For storing and manipulating version information.
 
@@ -225,7 +225,7 @@ class Version:
         if pre_release is None:
             pre_release = []
             consumed_args = 0
-            if len(args) > 0 and isinstance(args[0], tuple):
+            if args and isinstance(args[0], tuple):
                 for i, arg in enumerate(args):
                     if not isinstance(arg, tuple):
                         break
@@ -241,7 +241,7 @@ class Version:
             else:
                 accumulated = []
                 for i, arg in enumerate(args):
-                    if len(accumulated) == 0:
+                    if not accumulated:
                         if arg in (None, '.', '-'):
                             if len(args) < i + 3:
                                 raise ValueError(
@@ -482,8 +482,8 @@ class Version:
         If there's no dev patch, then increment release patch by one and increment dev patch
         by number of new commits.
 
-        If there's a dev patch, then increment it by number of new commits."""
-
+        If there's a dev patch, then increment it by number of new commits.
+        """
         if not self.has_pre_release or self.pre_release_to_tuple(True)[-1][1] != 'dev':
             self.increment(VersionComponent.Patch)
         self.increment(VersionComponent.DevPatch, new_commits)
