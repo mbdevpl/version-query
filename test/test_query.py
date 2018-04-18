@@ -94,7 +94,7 @@ class Tests(unittest.TestCase):
             with tempfile.NamedTemporaryFile(suffix='.py', dir=project_path_str,
                                              delete=False) as project_file:
                 project_file_path = pathlib.Path(project_file.name)
-            with open(str(project_file_path), 'a') as project_file:
+            with project_file_path.open('a') as project_file:
                 project_file.write('from version_query.query import predict_caller\n\n\n'
                                    'def caller():\n    predict_caller()\n\n\ncaller()\n')
             sys.path.insert(0, project_path_str)
@@ -135,12 +135,12 @@ class Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             query_pkg_info(bad_file_path)
 
-        with open(str(bad_file_path), 'a') as bad_file:
+        with bad_file_path.open('a') as bad_file:
             bad_file.write('blah blah blah')
         with self.assertRaises(ValueError):
             query_pkg_info(bad_file_path)
 
-        with open(str(bad_file_path), 'a') as bad_file:
+        with bad_file_path.open('a') as bad_file:
             bad_file.write('Version: hello world')
         with self.assertRaises(ValueError):
             query_pkg_info(bad_file_path)

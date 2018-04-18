@@ -75,7 +75,7 @@ class GitRepoTests(unittest.TestCase):
         self.assertIsInstance(self.repo, git.Repo)
         self.assertIsInstance(path, pathlib.Path)
         self.assertTrue(path.is_file())
-        with open(str(path), 'a') as repo_file:
+        with path.open('a') as repo_file:
             repo_file.write('spam eggs ham\n')
         if add or commit:
             self.repo.index.add([path.name])

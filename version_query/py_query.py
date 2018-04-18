@@ -11,7 +11,7 @@ _LOG = logging.getLogger(__name__)
 
 def query_metadata_json(path: pathlib.Path) -> Version:
     """Get version from metadata.json file."""
-    with open(str(path), 'r') as metadata_file:
+    with path.open('r') as metadata_file:
         metadata = json.load(metadata_file)
     version_str = metadata['version']
     return Version.from_str(version_str)
@@ -19,7 +19,7 @@ def query_metadata_json(path: pathlib.Path) -> Version:
 
 def query_pkg_info(path: pathlib.Path) -> Version:
     """Get version from PKG-INFO file."""
-    with open(str(path), 'r') as pkginfo_file:
+    with path.open('r') as pkginfo_file:
         for line in pkginfo_file:
             if line.startswith('Version:'):
                 version_str = line.replace('Version:', '').strip()
