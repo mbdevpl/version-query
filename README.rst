@@ -10,7 +10,7 @@ Package version query toolkit for Python
 ========================================
 
 .. image:: https://img.shields.io/pypi/v/version-query.svg
-    :target: https://pypi.python.org/pypi/version-query
+    :target: https://pypi.org/project/version-query
     :alt: package version from PyPI
 
 .. image:: https://travis-ci.org/mbdevpl/version-query.svg?branch=master
@@ -42,7 +42,7 @@ Instead of hardcoding:
 
     __version__ = '1.5.0.dev2'
 
-You can instead:
+You can do:
 
 .. code:: python
 
@@ -52,6 +52,8 @@ You can instead:
 
 .. contents::
     :backlinks: none
+
+As long as you mark your releases using git tags.
 
 
 overview
@@ -213,8 +215,9 @@ In version prediction mode, first of all, a most recent version tag is found, as
 If there are no version tags in the repo, then the initial commit is assumed to have tag
 ``v0.1.0.dev0``.
 
-Then, the new commits are counted. Then, the repository index status is queried. All the results
-are combined to form the predicted version number. Procedure is described in detail below.
+Then, the new commits since the most recent version tag are counted.
+Then, the repository index status is queried. All the results are combined to form
+the predicted version number. Procedure is described below in detail.
 
 
 counting new commits

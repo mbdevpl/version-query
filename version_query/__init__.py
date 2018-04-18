@@ -1,13 +1,9 @@
 """Package marker for version_query package."""
 
-import logging
-import os
-
-if 'LOGGING_LEVEL' in os.environ:
-    logging.basicConfig(level=getattr(logging, os.environ['LOGGING_LEVEL'].upper()))
-
-from .query import query_version_str, predict_version_str
-from .version import Version
+from .version import VersionComponent, Version
+from .query import query_folder, query_caller, query_version_str
+from .git_query import predict_git_repo
+from .query import predict_caller, predict_version_str
 
 
 def generate_version_str(increment_if_repo_chnaged: bool = True) -> str:
