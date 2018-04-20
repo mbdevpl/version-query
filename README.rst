@@ -349,9 +349,9 @@ built-in types.
 
 .. code:: python
 
-    assert version_query.Version('1.0.4').increment(version_query.VersionComponent.Patch, 2) \
-        == version_query.Version('1.0.6')
-    assert version_query.Version('1.0.4') < version_query.Version('2.0.0')
+    assert version_query.Version(1, 0, 4).increment(version_query.VersionComponent.Patch, 2) \
+        == version_query.Version.from_str('1.0.6')
+    assert version_query.Version.from_str('1.0.4') < version_query.Version.from_str('2.0.0')
 
 The Version objects are mutable, hashable and comparable.
 
