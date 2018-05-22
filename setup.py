@@ -24,7 +24,9 @@ class Package(setup_boilerplate.Package):
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Utilities']
-    keywords = ['abstract syntax tree', 'ast', 'parser', 'xml']
+    keywords = [
+        'automation', 'continous integration', 'git', 'releasing', 'semantic versioning', 'tagging',
+        'versioning']
 
 
 if __name__ == '__main__':
