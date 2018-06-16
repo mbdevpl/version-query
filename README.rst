@@ -5,9 +5,9 @@
     :language: python
 
 
-========================================
-Package version query toolkit for Python
-========================================
+=============
+version-query
+=============
 
 .. image:: https://img.shields.io/pypi/v/version-query.svg
     :target: https://pypi.org/project/version-query
@@ -33,6 +33,8 @@ Package version query toolkit for Python
     :target: https://github.com/mbdevpl/version-query/blob/master/NOTICE
     :alt: license
 
+Package version query toolkit for Python.
+
 This script is motivated by wish to avoid hardcoding the version number when maintaining
 a Python package.
 
@@ -50,13 +52,13 @@ You can do:
 
     __version__ = predict_version_str()
 
+As long as you mark your releases using git tags.
+
 .. contents::
     :backlinks: none
 
-As long as you mark your releases using git tags.
 
-
-overview
+Overview
 ========
 
 At development time, the current version number is automatically generated based on:
@@ -76,7 +78,7 @@ Additionally, version numbers in version-query are mutable objects and they can 
 incremented, compared with each other, as well as converted to/from other popular
 versioning formats.
 
-versioning scheme
+Versioning scheme
 =================
 
 Version scheme used by version-query is a relaxed mixture of:
@@ -131,7 +133,7 @@ Each version component has a meaning and constraints on its contents:
 *   ``<local-separator>`` - a dot or dash, separates parts of local version identifier
 
 
-how exactly the version number is determined
+How exactly the version number is determined
 --------------------------------------------
 
 The version-query package has two modes of operation:
@@ -142,7 +144,7 @@ The version-query package has two modes of operation:
     to get very fine-grained version number which will be unique for every repository snapshot
 
 
-version query from package metadata file
+Version query from package metadata file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The metadata file (``PKG-INFO`` or ``metadata.json`` or ``METADATA``) is automatically generated
@@ -168,12 +170,12 @@ Information about Python metadata files:
     but for now PEP 345 is the current standard.
 
 
-version query from git repository
+Version query from git repository
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The version number is equal to the version contained in the most recent version tag.
 
-version tags
+Version tags
 ````````````
 
 Any git tag that is a valid version (matching the rules above) is considered a version tag.
@@ -189,7 +191,7 @@ Examples of valid version tags:
 *   ``3.14-15``
 
 
-most recent version tag
+Most recent version tag
 ```````````````````````
 
 The most recent tag is found based on repository history and version precedence.
@@ -208,7 +210,7 @@ from git repository without any version tags.
 But in such case, version can still be *predicted*, as described below.
 
 
-version prediction from git repository
+Version prediction from git repository
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In version prediction mode, first of all, a most recent version tag is found, as above.
@@ -220,7 +222,7 @@ Then, the repository index status is queried. All the results are combined to fo
 the predicted version number. Procedure is described below in detail.
 
 
-counting new commits
+Counting new commits
 ````````````````````
 
 If after the commit with the most recent tag there are any new commits, a suffix ``.dev#``
@@ -233,7 +235,7 @@ Additionally, a plus (``+``) character and the first 8 characters of SHA of the 
 are appended to version identifier, e.g. ``+a3014fe0``.
 
 
-repository index status
+Repository index status
 ```````````````````````
 
 Additionally, if there are any uncommitted changes in the repository (i.e. the repo is *dirty*),
@@ -257,7 +259,7 @@ of the repository:
     the result is ``9.0.1.dev40+1ad22355.dirty20170608195220``.
 
 
-how exactly version numbers are compared
+How exactly version numbers are compared
 ----------------------------------------
 
 The base specification of the comparison scheme is:
@@ -286,7 +288,7 @@ Examples of comparison results:
 *   ``1.0.0-0.0.DEV42`` = ``1.0.0.0.0.dev42``
 
 
-how exactly version number is incremented
+How exactly version number is incremented
 -----------------------------------------
 
 Some version components have assumed value ``0`` if they are not present, please see section above
@@ -302,14 +304,14 @@ Examples of how version is incremented:
 *   ``1.5.1``, ``<major>``+=3, ``4.0.0``.
 
 
-api details
+API details
 ===========
 
 All functionality mentioned below is considered as the public API. Other functionality may change
 without notice.
 
 
-main api
+Main api
 --------
 
 .. code:: python
@@ -366,7 +368,7 @@ Version object can be obtained for any supported path, as well as for any python
 currently being executed -- as long as it is located in a supported location.
 
 
-command-line interface
+Command-line interface
 ----------------------
 
 .. code:: bash
@@ -383,7 +385,7 @@ Version query can be also used as a command-line script, with the entry point al
 as ``version_query.__main__.main`` from within Python.
 
 
-utility functions
+Utility functions
 -----------------
 
 .. code:: python
@@ -396,7 +398,7 @@ Remove ``v`` and ``ver`` prefix from a given string, and preform very crude chec
 the tag is probably a version tag.
 
 
-limitations
+Limitations
 ===========
 
 Either git repository or metadata file must be present for the script to work. When, for example,
@@ -422,10 +424,10 @@ Despite above limitations, version-query itself (as well as growing number of ot
 using version-query without any issues.
 
 
-requirements
+Requirements
 ============
 
-Python version >= 3.4.
+Python version 3.4 or later.
 
 Python libraries as specified in `<requirements.txt>`_.
 

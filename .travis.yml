@@ -19,13 +19,13 @@ matrix:
       python: "pypy3.5-5.8.0"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.4.7"
+      env: TRAVIS_PYTHON_VERSION="3.4.8"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.5.4"
+      env: TRAVIS_PYTHON_VERSION="3.5.5"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.6.3"
+      env: TRAVIS_PYTHON_VERSION="3.6.5"
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7-dev"
@@ -62,7 +62,6 @@ script:
 after_success:
   - python -m coverage report --show-missing
   - codecov
-  - python -m pylint --load-plugins=pylint.extensions.mccabe --docstring-min-length 5 --no-docstring-rgx "^(test)?_|.*Tests$" --unsafe-load-any-extension y --output-format colorized  --reports y $(find . -name "*.py")
 
 before_deploy:
   - pip3 install -U --user version_query || pip3 install -U version_query
