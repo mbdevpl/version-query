@@ -56,8 +56,8 @@ install:
   - cd ../semver && python setup.py build && cd -
 
 script:
-  - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest discover --verbose
-  - LOGGING_LEVEL=critical python -m coverage run --append --branch --source . -m unittest test.test_version --verbose
+  - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest --verbose
+  - LOGGING_LEVEL=critical python -m coverage run --append --branch --source . -m unittest --verbose test.test_version
 
 after_success:
   - python -m coverage report --show-missing
