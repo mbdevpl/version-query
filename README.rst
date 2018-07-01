@@ -311,7 +311,7 @@ All functionality mentioned below is considered as the public API. Other functio
 without notice.
 
 
-Main api
+Main API
 --------
 
 .. code:: python

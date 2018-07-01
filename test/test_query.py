@@ -42,11 +42,11 @@ if sys.version_info < (3, 5):
         def __exit__(self, exctype, excinst, exctb):
             setattr(sys, self._stream, self._old_targets.pop())
 
-    class _redirect_stderr(_RedirectStream):
+    class _RedirectStderr(_RedirectStream):  # pylint: disable=too-few-public-methods
 
-        _stream = "stderr"
+        _stream = 'stderr'
 
-    contextlib.redirect_stderr = _redirect_stderr
+    contextlib.redirect_stderr = _RedirectStderr
 
 
 class Tests(unittest.TestCase):
