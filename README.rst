@@ -29,7 +29,7 @@ version-query
     :target: https://codecov.io/gh/mbdevpl/version-query
     :alt: test coverage from Codecov
 
-.. image:: https://img.shields.io/pypi/l/version-query.svg
+.. image:: https://img.shields.io/github/license/mbdevpl/version-query.svg
     :target: https://github.com/mbdevpl/version-query/blob/master/NOTICE
     :alt: license
 
