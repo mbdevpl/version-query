@@ -12,6 +12,8 @@ matrix:
       language: python
       python: "3.6"
     - os: linux
+      dist: xenial
+      sudo: true
       language: python
       python: "3.7"
     - os: linux
@@ -28,7 +30,7 @@ matrix:
       env: TRAVIS_PYTHON_VERSION="3.5.5"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.6.5"
+      env: TRAVIS_PYTHON_VERSION="3.6.6"
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7.0"
@@ -62,8 +64,8 @@ install:
   - cd ../semver && python setup.py build && cd -
 
 script:
-  - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest --verbose
-  - LOGGING_LEVEL=critical python -m coverage run --append --branch --source . -m unittest --verbose test.test_version
+  - TEST_PACKAGING=1 python -m coverage run --branch --source . -m unittest -v
+  - LOGGING_LEVEL=critical python -m coverage run --append --branch --source . -m unittest -v test.test_version
 
 after_success:
   - python -m coverage report --show-missing
