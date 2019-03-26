@@ -427,7 +427,7 @@ using version-query without any issues.
 Requirements
 ============
 
-Python version 3.4 or later.
+Python version 3.5 or later.
 
 Python libraries as specified in `<requirements.txt>`_.
 

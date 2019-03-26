@@ -4,9 +4,6 @@ matrix:
   include:
     - os: linux
       language: python
-      python: "3.4"
-    - os: linux
-      language: python
       python: "3.5"
     - os: linux
       language: python
@@ -22,9 +19,6 @@ matrix:
     - os: linux
       language: python
       python: "pypy3.5-5.8.0"
-    - os: osx
-      language: generic
-      env: TRAVIS_PYTHON_VERSION="3.4.9"
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.5.6"
