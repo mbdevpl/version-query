@@ -6,7 +6,6 @@ import io
 import logging
 import os
 import pathlib
-import platform
 import sys
 import tempfile
 import unittest
@@ -22,31 +21,6 @@ from .examples import \
 from .test_setup import run_module
 
 _LOG = logging.getLogger(__name__)
-
-
-if sys.version_info < (3, 5):
-
-    class _RedirectStream:
-
-        _stream = None
-
-        def __init__(self, new_target):
-            self._new_target = new_target
-            self._old_targets = []
-
-        def __enter__(self):
-            self._old_targets.append(getattr(sys, self._stream))
-            setattr(sys, self._stream, self._new_target)
-            return self._new_target
-
-        def __exit__(self, exctype, excinst, exctb):
-            setattr(sys, self._stream, self._old_targets.pop())
-
-    class _RedirectStderr(_RedirectStream):  # pylint: disable=too-few-public-methods
-
-        _stream = 'stderr'
-
-    contextlib.redirect_stderr = _RedirectStderr
 
 
 class Tests(unittest.TestCase):
@@ -110,8 +84,7 @@ class Tests(unittest.TestCase):
     def test_predict_git_repo(self):
         self._query_test_case(GIT_REPO_EXAMPLES, predict_git_repo)
 
-    @unittest.skipIf(platform.python_implementation() == 'PyPy' and not METADATA_JSON_EXAMPLE_PATHS,
-                     'no "metadata.json" found when using PyPy')
+    @unittest.skipIf(not METADATA_JSON_EXAMPLE_PATHS, 'no "metadata.json" files found')
     def test_query_metadata_json(self):
         self._check_examples_count('metadata.json', METADATA_JSON_EXAMPLE_PATHS)
         self._query_test_case(METADATA_JSON_EXAMPLE_PATHS, query_metadata_json)
