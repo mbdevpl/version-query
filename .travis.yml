@@ -1,5 +1,9 @@
 sudo: false
 language: generic
+addons:
+  homebrew:
+    packages:
+      - pyenv
 matrix:
   include:
     - os: linux
@@ -14,6 +18,8 @@ matrix:
       language: python
       python: "3.7"
     - os: linux
+      dist: xenial
+      sudo: true
       language: python
       python: "3.8-dev"
     - os: linux
@@ -21,13 +27,13 @@ matrix:
       python: "pypy3.5-5.8.0"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.5.6"
+      env: TRAVIS_PYTHON_VERSION="3.5"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.6.8"
+      env: TRAVIS_PYTHON_VERSION="3.6"
     - os: osx
       language: generic
-      env: TRAVIS_PYTHON_VERSION="3.7.2"
+      env: TRAVIS_PYTHON_VERSION="3.7"
     - os: osx
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.8-dev"
@@ -38,11 +44,12 @@ matrix:
 before_install: |
   set -e
   if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-    brew update
-    brew install pyenv || brew upgrade pyenv
     pyenv install --list
+    if ! [[ ${TRAVIS_PYTHON_VERSION} =~ .*-dev$ ]] ; then
+      TRAVIS_PYTHON_VERSION="$(pyenv install --list | grep " ${TRAVIS_PYTHON_VERSION}\." | tail -n 1 | sed -e 's/^[[:space:]]*//')"
+    fi
     pyenv install "${TRAVIS_PYTHON_VERSION}"
-    export PATH="$HOME/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin:${PATH}"
+    export PATH="${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin:${PATH}"
   fi
   set +e
 
