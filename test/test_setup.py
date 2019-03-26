@@ -262,7 +262,7 @@ class PackageTests(unittest.TestCase):
             name = 'package name'
             description = 'package description'
             version = '1.2.3.4'
-            download_url = 'https://github.com/example'
+            url = 'https://github.com/example'
 
         with tempfile.NamedTemporaryFile('w', suffix='.md', delete=False) as temp_file:
             temp_file.write('test test test')
