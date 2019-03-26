@@ -17,7 +17,7 @@ import docutils.parsers.rst
 import docutils.utils
 import setuptools
 
-__updated__ = '2018-04-18'
+__updated__ = '2019-03-26'
 
 SETUP_TEMPLATE = '''"""Setup script."""
 
@@ -30,10 +30,9 @@ class Package(setup_boilerplate.Package):
 
     name = ''
     description = ''
-    download_url = 'https://github.com/mbdevpl/...'
+    url = 'https://github.com/mbdevpl/...'
     classifiers = [
         'Development Status :: 1 - Planning',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only']
@@ -208,10 +207,10 @@ class Package:
     long_description = None  # type: str
     """If None, it will be generated from readme."""
 
-    url = 'https://mbdevpl.github.io/'  # type: str
-    download_url = 'https://github.com/mbdevpl'  # type: str
+    url = 'https://github.com/mbdevpl'  # type: str
+    download_url = None  # type: str
     author = 'Mateusz Bysiek'  # type: str
-    author_email = 'mb@mbdev.pl'  # type: str
+    author_email = 'mateusz.bysiek@gmail.com'  # type: str
     # maintainer = None  # type: str
     # maintainer_email = None  # type: str
     license_str = 'Apache License 2.0'  # type: str
@@ -262,8 +261,8 @@ class Package:
         with HERE.joinpath(readme_path).open(encoding=encoding) as readme_file:
             long_description = readme_file.read()  # type: str
 
-        if readme_path.endswith('.rst') and cls.download_url.startswith('https://github.com/'):
-            base_url = '{}/blob/v{}/'.format(cls.download_url, cls.version)
+        if readme_path.endswith('.rst') and cls.url.startswith('https://github.com/'):
+            base_url = '{}/blob/v{}/'.format(cls.url, cls.version)
             long_description = resolve_relative_rst_links(long_description, base_url)
 
         return long_description

@@ -8,10 +8,11 @@ import runpy
 import subprocess
 import sys
 import tempfile
+import types
 import typing as t
 import unittest
 
-__updated__ = '2018-02-14'
+__updated__ = '2019-03-26'
 
 
 def run_program(*args, glob: bool = False):
@@ -41,7 +42,7 @@ def run_module(name: str, *args, run_name: str = '__main__') -> None:
     sys.argv = backup_sys_argv
 
 
-def import_module(name: str = 'setup') -> 'module':
+def import_module(name: str = 'setup') -> types.ModuleType:
     setup_module = importlib.import_module(name)
     return setup_module
 
