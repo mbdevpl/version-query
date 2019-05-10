@@ -42,6 +42,7 @@ matrix:
     - env: TRAVIS_PYTHON_VERSION="3.8-dev"
 
 before_install:
+  - mkdir -p "${HOME}/.local/bin"
   - .travis/install_pyenv.sh
 
 install:
