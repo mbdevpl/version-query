@@ -41,17 +41,9 @@ matrix:
     - python: "3.8-dev"
     - env: TRAVIS_PYTHON_VERSION="3.8-dev"
 
-before_install: |
-  set -e
-  if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-    pyenv install --list
-    if ! [[ ${TRAVIS_PYTHON_VERSION} =~ .*-dev$ ]] ; then
-      TRAVIS_PYTHON_VERSION="$(pyenv install --list | grep -E " ${TRAVIS_PYTHON_VERSION}(\.[0-9]+)+$" | tail -n 1 | sed -e 's/^[[:space:]]*//')"
-    fi
-    pyenv install "${TRAVIS_PYTHON_VERSION}"
-    export PATH="${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin:${PATH}"
-  fi
-  set +e
+before_install:
+  - mkdir -p "${HOME}/.local/bin"
+  - .travis/install_pyenv.sh
 
 install:
   - pip install -U pip
