@@ -206,6 +206,12 @@ class Package:
     long_description = None  # type: str
     """If None, it will be generated from readme."""
 
+    long_description_content_type = None  # type: str
+    """If None, it will be set accodring to readme file extension.
+
+    For this field to be automatically set, also long_description field has to be None.
+    """
+
     url = 'https://github.com/mbdevpl'  # type: str
     download_url = None  # type: str
     author = 'Mateusz Bysiek'  # type: str
@@ -252,19 +258,25 @@ class Package:
         raise AttributeError((cls, names))
 
     @classmethod
-    def parse_readme(cls, readme_path: str = 'README.rst', encoding: str = 'utf-8') -> str:
+    def parse_readme(cls, readme_path: str = 'README.rst',
+                     encoding: str = 'utf-8') -> t.Tuple[str, str]:
         """Parse readme and resolve relative links in it if it is feasible.
 
         Links are resolved if readme is in rst format and the package is hosted on GitHub.
         """
+        readme_path = pathlib.Path(readme_path)
         with HERE.joinpath(readme_path).open(encoding=encoding) as readme_file:
             long_description = readme_file.read()  # type: str
 
-        if readme_path.endswith('.rst') and cls.url.startswith('https://github.com/'):
+        if readme_path.suffix.lower() == '.rst' and cls.url.startswith('https://github.com/'):
             base_url = '{}/blob/v{}/'.format(cls.url, cls.version)
             long_description = resolve_relative_rst_links(long_description, base_url)
 
-        return long_description
+        long_description_content_type = {'.rst': 'text/x-rst', '.md': 'text/markdown'}.get(
+            readme_path.suffix.lower(), 'text/plain')
+        long_description_content_type += '; charset=UTF-8'
+
+        return long_description, long_description_content_type
 
     @classmethod
     def prepare(cls) -> None:
@@ -272,7 +284,7 @@ class Package:
         if cls.version is None:
             cls.version = find_version(cls.name)
         if cls.long_description is None:
-            cls.long_description = cls.parse_readme()
+            cls.long_description, cls.long_description_content_type = cls.parse_readme()
         if cls.packages is None:
             cls.packages = find_packages(cls.root_directory)
         if cls.install_requires is None:
@@ -286,7 +298,9 @@ class Package:
         cls.prepare()
         setuptools.setup(
             name=cls.name, version=cls.version, description=cls.description,
-            long_description=cls.long_description, url=cls.url, download_url=cls.download_url,
+            long_description=cls.long_description,
+            long_description_content_type=cls.long_description_content_type,
+            url=cls.url, download_url=cls.download_url,
             author=cls.author, author_email=cls.author_email,
             maintainer=cls.try_fields('maintainer', 'author'),
             maintainer_email=cls.try_fields('maintainer_email', 'author_email'),

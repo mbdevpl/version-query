@@ -255,9 +255,10 @@ class PackageTests(unittest.TestCase):
 
         with tempfile.NamedTemporaryFile('w', suffix='.md', delete=False) as temp_file:
             temp_file.write('test test test')
-        result = Package.parse_readme(temp_file.name)
+        result, content_type = Package.parse_readme(temp_file.name)
         os.remove(temp_file.name)
         self.assertIsInstance(result, str)
+        self.assertIsInstance(content_type, str)
 
         prefix = 'https://github.com/example/blob/v1.2.3.4/'
         for name, link, done in LINK_EXAMPLES:
@@ -265,9 +266,10 @@ class PackageTests(unittest.TestCase):
             text = 'Please see `{}<{}>`_ for details.'.format(name, link)
             with tempfile.NamedTemporaryFile('w', suffix='.rst', delete=False) as temp_file:
                 temp_file.write(text)
-            result = Package.parse_readme(temp_file.name)
+            result, content_type = Package.parse_readme(temp_file.name)
             os.remove(temp_file.name)
             self.assertIsInstance(result, str)
+            self.assertIsInstance(content_type, str)
             if not done:
                 self.assertEqual(result, text)
                 continue
