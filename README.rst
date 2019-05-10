@@ -163,11 +163,13 @@ Information about Python metadata files:
 
 *   `PEP 345 -- Metadata for Python Software Packages 1.2 <https://www.python.org/dev/peps/pep-0345/>`_,
     which replaced `PEP 314 -- Metadata for Python Software Packages v1.1 <https://www.python.org/dev/peps/pep-0314/>`_,
-    which in turn replaced `PEP 241 -- Metadata for Python Software Packages <https://www.python.org/dev/peps/pep-0241/>`_;
+    which in turn replaced `PEP 241 -- Metadata for Python Software Packages <https://www.python.org/dev/peps/pep-0241/>`_.
+    According to PEP 345, version of package should conform to what has been defined in PEP 440.
 
-*   PEP 345 might be at some point in time replaced by
-    `PEP 426 -- Metadata for Python Software Packages 2.0 <https://www.python.org/dev/peps/pep-0426/>`_,
-    but for now PEP 345 is the current standard.
+*   `PEP 566 -- Metadata for Python Software Packages 2.1 <https://www.python.org/dev/peps/pep-0566/>`_
+    which replaced the PEP 345. This new standard doesn't however modify the version handling
+    in any way other than ensuring that requirements specification conforms with PEP 508,
+    which is not related to Python package version querying.
 
 
 Version query from git repository
