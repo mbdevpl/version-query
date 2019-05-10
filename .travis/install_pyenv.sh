@@ -18,4 +18,6 @@ if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
   # export PATH="${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin:${PATH}"
   ln -s "${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin/python" "${HOME}/.local/bin/python"
   ln -s "${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin/pip" "${HOME}/.local/bin/pip"
+  ln -s "${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin/coverage" "${HOME}/.local/bin/coverage"
+  ln -s "${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin/codecov" "${HOME}/.local/bin/codecov"
 fi

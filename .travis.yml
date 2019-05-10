@@ -62,7 +62,7 @@ script:
 
 after_success:
   - python -m coverage report --show-missing
-  - python -m codecov
+  - codecov
 
 before_deploy:
   - pip3 install -U --user version_query || pip3 install -U version_query
