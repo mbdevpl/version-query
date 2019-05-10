@@ -8,10 +8,11 @@ import runpy
 import subprocess
 import sys
 import tempfile
+import types
 import typing as t
 import unittest
 
-__updated__ = '2018-02-14'
+__updated__ = '2019-05-10'
 
 
 def run_program(*args, glob: bool = False):
@@ -41,7 +42,7 @@ def run_module(name: str, *args, run_name: str = '__main__') -> None:
     sys.argv = backup_sys_argv
 
 
-def import_module(name: str = 'setup') -> 'module':
+def import_module(name: str = 'setup') -> types.ModuleType:
     setup_module = importlib.import_module(name)
     return setup_module
 
@@ -64,28 +65,17 @@ CLASSIFIERS_LICENSES = (
 
 CLASSIFIERS_PYTHON_VERSIONS = tuple("""Programming Language :: Python
 Programming Language :: Python :: 2
-Programming Language :: Python :: 2.3
-Programming Language :: Python :: 2.4
-Programming Language :: Python :: 2.5
-Programming Language :: Python :: 2.6
+Programming Language :: Python :: 2.2
 Programming Language :: Python :: 2.7
 Programming Language :: Python :: 2 :: Only
 Programming Language :: Python :: 3
 Programming Language :: Python :: 3.0
-Programming Language :: Python :: 3.1
-Programming Language :: Python :: 3.2
-Programming Language :: Python :: 3.3
-Programming Language :: Python :: 3.4
 Programming Language :: Python :: 3.5
-Programming Language :: Python :: 3.6
-Programming Language :: Python :: 3.7
 Programming Language :: Python :: 3 :: Only""".splitlines())
 
 CLASSIFIERS_PYTHON_IMPLEMENTATIONS = tuple("""Programming Language :: Python :: Implementation
 Programming Language :: Python :: Implementation :: CPython
-Programming Language :: Python :: Implementation :: IronPython
 Programming Language :: Python :: Implementation :: Jython
-Programming Language :: Python :: Implementation :: MicroPython
 Programming Language :: Python :: Implementation :: PyPy
 Programming Language :: Python :: Implementation :: Stackless""".splitlines())
 
@@ -261,13 +251,14 @@ class PackageTests(unittest.TestCase):
             name = 'package name'
             description = 'package description'
             version = '1.2.3.4'
-            download_url = 'https://github.com/example'
+            url = 'https://github.com/example'
 
         with tempfile.NamedTemporaryFile('w', suffix='.md', delete=False) as temp_file:
             temp_file.write('test test test')
-        result = Package.parse_readme(temp_file.name)
+        result, content_type = Package.parse_readme(temp_file.name)
         os.remove(temp_file.name)
         self.assertIsInstance(result, str)
+        self.assertIsInstance(content_type, str)
 
         prefix = 'https://github.com/example/blob/v1.2.3.4/'
         for name, link, done in LINK_EXAMPLES:
@@ -275,9 +266,10 @@ class PackageTests(unittest.TestCase):
             text = 'Please see `{}<{}>`_ for details.'.format(name, link)
             with tempfile.NamedTemporaryFile('w', suffix='.rst', delete=False) as temp_file:
                 temp_file.write(text)
-            result = Package.parse_readme(temp_file.name)
+            result, content_type = Package.parse_readme(temp_file.name)
             os.remove(temp_file.name)
             self.assertIsInstance(result, str)
+            self.assertIsInstance(content_type, str)
             if not done:
                 self.assertEqual(result, text)
                 continue

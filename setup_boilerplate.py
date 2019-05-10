@@ -17,7 +17,7 @@ import docutils.parsers.rst
 import docutils.utils
 import setuptools
 
-__updated__ = '2018-04-18'
+__updated__ = '2019-05-10'
 
 SETUP_TEMPLATE = '''"""Setup script."""
 
@@ -30,10 +30,9 @@ class Package(setup_boilerplate.Package):
 
     name = ''
     description = ''
-    download_url = 'https://github.com/mbdevpl/...'
+    url = 'https://github.com/mbdevpl/...'
     classifiers = [
         'Development Status :: 1 - Planning',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only']
@@ -137,15 +136,15 @@ def parse_rst(text: str) -> docutils.nodes.document:
 
 
 class SimpleRefCounter(docutils.nodes.NodeVisitor):
-
     """Find all simple references in a given docutils document."""
 
     def __init__(self, *args, **kwargs):
+        """Initialize the SimpleRefCounter object."""
         super().__init__(*args, **kwargs)
         self.references = []
 
     def visit_reference(self, node: docutils.nodes.reference) -> None:
-        """Called for "reference" nodes."""
+        """Call for "reference" nodes."""
         if len(node.children) != 1 or not isinstance(node.children[0], docutils.nodes.Text) \
                 or not all(_ in node.attributes for _ in ('name', 'refuri')):
             return
@@ -168,8 +167,8 @@ class SimpleRefCounter(docutils.nodes.NodeVisitor):
         self.references.append(node)
 
     def unknown_visit(self, node: docutils.nodes.Node) -> None:
-        """Called for unknown node types."""
-        pass
+        """Call for unknown node types."""
+        return
 
 
 def resolve_relative_rst_links(text: str, base_link: str):
@@ -192,7 +191,6 @@ def resolve_relative_rst_links(text: str, base_link: str):
 
 
 class Package:
-
     """Default metadata and behaviour for a Python package setup script."""
 
     root_directory = '.'  # type: str
@@ -208,10 +206,16 @@ class Package:
     long_description = None  # type: str
     """If None, it will be generated from readme."""
 
-    url = 'https://mbdevpl.github.io/'  # type: str
-    download_url = 'https://github.com/mbdevpl'  # type: str
+    long_description_content_type = None  # type: str
+    """If None, it will be set accodring to readme file extension.
+
+    For this field to be automatically set, also long_description field has to be None.
+    """
+
+    url = 'https://github.com/mbdevpl'  # type: str
+    download_url = None  # type: str
     author = 'Mateusz Bysiek'  # type: str
-    author_email = 'mb@mbdev.pl'  # type: str
+    author_email = 'mateusz.bysiek@gmail.com'  # type: str
     # maintainer = None  # type: str
     # maintainer_email = None  # type: str
     license_str = 'Apache License 2.0'  # type: str
@@ -254,19 +258,25 @@ class Package:
         raise AttributeError((cls, names))
 
     @classmethod
-    def parse_readme(cls, readme_path: str = 'README.rst', encoding: str = 'utf-8') -> str:
+    def parse_readme(cls, readme_path: str = 'README.rst',
+                     encoding: str = 'utf-8') -> t.Tuple[str, str]:
         """Parse readme and resolve relative links in it if it is feasible.
 
         Links are resolved if readme is in rst format and the package is hosted on GitHub.
         """
+        readme_path = pathlib.Path(readme_path)
         with HERE.joinpath(readme_path).open(encoding=encoding) as readme_file:
             long_description = readme_file.read()  # type: str
 
-        if readme_path.endswith('.rst') and cls.download_url.startswith('https://github.com/'):
-            base_url = '{}/blob/v{}/'.format(cls.download_url, cls.version)
+        if readme_path.suffix.lower() == '.rst' and cls.url.startswith('https://github.com/'):
+            base_url = '{}/blob/v{}/'.format(cls.url, cls.version)
             long_description = resolve_relative_rst_links(long_description, base_url)
 
-        return long_description
+        long_description_content_type = {'.rst': 'text/x-rst', '.md': 'text/markdown'}.get(
+            readme_path.suffix.lower(), 'text/plain')
+        long_description_content_type += '; charset=UTF-8'
+
+        return long_description, long_description_content_type
 
     @classmethod
     def prepare(cls) -> None:
@@ -274,7 +284,7 @@ class Package:
         if cls.version is None:
             cls.version = find_version(cls.name)
         if cls.long_description is None:
-            cls.long_description = cls.parse_readme()
+            cls.long_description, cls.long_description_content_type = cls.parse_readme()
         if cls.packages is None:
             cls.packages = find_packages(cls.root_directory)
         if cls.install_requires is None:
@@ -284,11 +294,13 @@ class Package:
 
     @classmethod
     def setup(cls) -> None:
-        """Run setuptools.setup() with correct arguments."""
+        """Call setuptools.setup with correct arguments."""
         cls.prepare()
         setuptools.setup(
             name=cls.name, version=cls.version, description=cls.description,
-            long_description=cls.long_description, url=cls.url, download_url=cls.download_url,
+            long_description=cls.long_description,
+            long_description_content_type=cls.long_description_content_type,
+            url=cls.url, download_url=cls.download_url,
             author=cls.author, author_email=cls.author_email,
             maintainer=cls.try_fields('maintainer', 'author'),
             maintainer_email=cls.try_fields('maintainer_email', 'author_email'),

@@ -9,7 +9,7 @@ class Package(setup_boilerplate.Package):
 
     name = 'version-query'
     description = 'Package version query toolkit for Python'
-    download_url = 'https://github.com/mbdevpl/version-query'
+    url = 'https://github.com/mbdevpl/version-query'
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',

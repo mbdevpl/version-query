@@ -1,4 +1,4 @@
 GitPython
 packaging
 semver
-setuptools >= 20.5
+setuptools >= 41.0
