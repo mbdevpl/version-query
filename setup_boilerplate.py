@@ -17,7 +17,7 @@ import docutils.parsers.rst
 import docutils.utils
 import setuptools
 
-__updated__ = '2019-03-26'
+__updated__ = '2019-05-10'
 
 SETUP_TEMPLATE = '''"""Setup script."""
 
@@ -136,15 +136,15 @@ def parse_rst(text: str) -> docutils.nodes.document:
 
 
 class SimpleRefCounter(docutils.nodes.NodeVisitor):
-
     """Find all simple references in a given docutils document."""
 
     def __init__(self, *args, **kwargs):
+        """Initialize the SimpleRefCounter object."""
         super().__init__(*args, **kwargs)
         self.references = []
 
     def visit_reference(self, node: docutils.nodes.reference) -> None:
-        """Called for "reference" nodes."""
+        """Call for "reference" nodes."""
         if len(node.children) != 1 or not isinstance(node.children[0], docutils.nodes.Text) \
                 or not all(_ in node.attributes for _ in ('name', 'refuri')):
             return
@@ -167,8 +167,8 @@ class SimpleRefCounter(docutils.nodes.NodeVisitor):
         self.references.append(node)
 
     def unknown_visit(self, node: docutils.nodes.Node) -> None:
-        """Called for unknown node types."""
-        pass
+        """Call for unknown node types."""
+        return
 
 
 def resolve_relative_rst_links(text: str, base_link: str):
@@ -191,7 +191,6 @@ def resolve_relative_rst_links(text: str, base_link: str):
 
 
 class Package:
-
     """Default metadata and behaviour for a Python package setup script."""
 
     root_directory = '.'  # type: str
@@ -283,7 +282,7 @@ class Package:
 
     @classmethod
     def setup(cls) -> None:
-        """Run setuptools.setup() with correct arguments."""
+        """Call setuptools.setup with correct arguments."""
         cls.prepare()
         setuptools.setup(
             name=cls.name, version=cls.version, description=cls.description,

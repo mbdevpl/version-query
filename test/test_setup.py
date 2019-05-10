@@ -12,7 +12,7 @@ import types
 import typing as t
 import unittest
 
-__updated__ = '2019-03-26'
+__updated__ = '2019-05-10'
 
 
 def run_program(*args, glob: bool = False):
@@ -65,28 +65,17 @@ CLASSIFIERS_LICENSES = (
 
 CLASSIFIERS_PYTHON_VERSIONS = tuple("""Programming Language :: Python
 Programming Language :: Python :: 2
-Programming Language :: Python :: 2.3
-Programming Language :: Python :: 2.4
-Programming Language :: Python :: 2.5
-Programming Language :: Python :: 2.6
+Programming Language :: Python :: 2.2
 Programming Language :: Python :: 2.7
 Programming Language :: Python :: 2 :: Only
 Programming Language :: Python :: 3
 Programming Language :: Python :: 3.0
-Programming Language :: Python :: 3.1
-Programming Language :: Python :: 3.2
-Programming Language :: Python :: 3.3
-Programming Language :: Python :: 3.4
 Programming Language :: Python :: 3.5
-Programming Language :: Python :: 3.6
-Programming Language :: Python :: 3.7
 Programming Language :: Python :: 3 :: Only""".splitlines())
 
 CLASSIFIERS_PYTHON_IMPLEMENTATIONS = tuple("""Programming Language :: Python :: Implementation
 Programming Language :: Python :: Implementation :: CPython
-Programming Language :: Python :: Implementation :: IronPython
 Programming Language :: Python :: Implementation :: Jython
-Programming Language :: Python :: Implementation :: MicroPython
 Programming Language :: Python :: Implementation :: PyPy
 Programming Language :: Python :: Implementation :: Stackless""".splitlines())
 
