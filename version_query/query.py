@@ -46,14 +46,29 @@ def query_version_str() -> str:
     return query_caller(2).to_str()
 
 
+def predict_folder(path: pathlib.Path, search_parent_directories: bool = True) -> Version:
+    priority_cutoff = 2
+    paths = [path] + (list(path.parents)[:priority_cutoff] if search_parent_directories else [])
+    for pth in paths:
+        try:
+            return predict_git_repo(pth, search_parent_directories=False)
+        except git.InvalidGitRepositoryError:
+            pass
+    try:
+        return query_package_folder(path, search_parent_directories=False)
+    except ValueError:
+        pass
+    try:
+        return predict_git_repo(path, search_parent_directories=search_parent_directories)
+    except git.InvalidGitRepositoryError:
+        pass
+    return query_folder(path, search_parent_directories=search_parent_directories)
+
+
 def predict_caller(stack_level: int = 1) -> Version:
     """Predict the version of code associated with the caller of this function."""
     here = _caller_folder(stack_level + 1)
-    try:
-        return predict_git_repo(here, True)
-    except git.InvalidGitRepositoryError:
-        pass
-    return query_folder(here, True)
+    return predict_folder(here, True)
 
 
 def predict_version_str() -> str:
@@ -84,7 +99,7 @@ def main(args=None) -> None:
         raise ValueError(
             'choose one: either increment current version, or predict upcoming version')
     if args.predict:
-        version = predict_git_repo(args.path)
+        version = predict_folder(args.path)
     else:
         version = query_folder(args.path)
     if args.increment:
