@@ -77,7 +77,7 @@ def main(args=None) -> None:
     parser.add_argument('-p', '--predict', action='store_true', help='''operate in prediction mode,
                         i.e. assume existence of git repository and infer current version from
                         its tags, history and working tree status''')
-    parser.add_argument('path')
+    parser.add_argument('path', type=pathlib.Path)
     parser.add_argument('--version', action='version')
     args = parser.parse_args(args)
     if args.predict and args.increment:
