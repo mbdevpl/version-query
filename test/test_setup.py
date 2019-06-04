@@ -12,7 +12,7 @@ import types
 import typing as t
 import unittest
 
-__updated__ = '2019-05-10'
+__updated__ = '2019-06-04'
 
 
 def run_program(*args, glob: bool = False):
@@ -305,7 +305,7 @@ class PackageTests(unittest.TestCase):
         Package.prepare()
 
         Package.version = None
-        with self.assertRaises(ImportError):
+        with self.assertRaises(FileNotFoundError):
             Package.prepare()
 
 
