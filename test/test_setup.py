@@ -52,11 +52,6 @@ def import_module_member(module_name: str, member_name: str) -> t.Any:
     return getattr(module, member_name)
 
 
-# def import_module_members(module_name: str, member_names: t.Iterable[str]) -> t.List[t.Any]:
-#    module = import_module(module_name)
-#    return [getattr(module, member_name) for member_name in member_names]
-
-
 CLASSIFIERS_LICENSES = (
     'License :: OSI Approved :: Python License (CNRI Python License)',
     'License :: OSI Approved :: Python Software Foundation License',
@@ -94,11 +89,6 @@ CLASSIFIERS_LICENSES_TUPLES = tuple((_,) for _ in CLASSIFIERS_LICENSES) + ((),)
 CLASSIFIERS_PYTHON_VERSIONS_COMBINATIONS = tuple((_,) for _ in CLASSIFIERS_PYTHON_VERSIONS)
 
 CLASSIFIERS_PYTHON_IMPLEMENTATIONS_TUPLES = tuple((_,) for _ in CLASSIFIERS_PYTHON_IMPLEMENTATIONS)
-
-# CLASSIFIERS_VARIOUS_PERMUTATIONS = tuple(itertools.chain.from_iterable(
-#    itertools.permutations(..., n)
-#    for n in range(...)
-#    ))
 
 CLASSIFIERS_VARIOUS_COMBINATIONS = tuple(itertools.combinations(
     CLASSIFIERS_VARIOUS, len(CLASSIFIERS_VARIOUS) - 1)) + (CLASSIFIERS_VARIOUS,)

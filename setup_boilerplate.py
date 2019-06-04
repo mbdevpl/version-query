@@ -7,7 +7,6 @@ See the implementation of setup_boilerplate.Package for default metadata values 
 options.
 """
 
-import importlib
 import pathlib
 import runpy
 import sys
