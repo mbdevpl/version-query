@@ -12,9 +12,6 @@ import runpy
 import sys
 import typing as t
 
-import docutils.nodes
-import docutils.parsers.rst
-import docutils.utils
 import setuptools
 
 __updated__ = '2019-06-04'
@@ -131,57 +128,59 @@ def find_required_python_version(
     return None
 
 
-def parse_rst(text: str) -> docutils.nodes.document:
-    """Parse text assuming it's an RST markup."""
-    parser = docutils.parsers.rst.Parser()
-    components = (docutils.parsers.rst.Parser,)
-    settings = docutils.frontend.OptionParser(components=components).get_default_values()
-    document = docutils.utils.new_document('<rst-doc>', settings=settings)
-    parser.parse(text, document)
-    return document
-
-
-class SimpleRefCounter(docutils.nodes.NodeVisitor):
-    """Find all simple references in a given docutils document."""
-
-    def __init__(self, *args, **kwargs):
-        """Initialize the SimpleRefCounter object."""
-        super().__init__(*args, **kwargs)
-        self.references = []
-
-    def visit_reference(self, node: docutils.nodes.reference) -> None:
-        """Call for "reference" nodes."""
-        if len(node.children) != 1 or not isinstance(node.children[0], docutils.nodes.Text) \
-                or not all(_ in node.attributes for _ in ('name', 'refuri')):
-            return
-        path = pathlib.Path(node.attributes['refuri'])
-        try:
-            if path.is_absolute():
-                return
-            resolved_path = path.resolve()
-        except FileNotFoundError:  # in resolve(), prior to Python 3.6
-            return
-        except OSError:  # in is_absolute() and resolve(), on URLs in Windows
-            return
-        try:
-            resolved_path.relative_to(HERE)
-        except ValueError:
-            return
-        if not path.is_file():
-            return
-        assert node.attributes['name'] == node.children[0].astext()
-        self.references.append(node)
-
-    def unknown_visit(self, node: docutils.nodes.Node) -> None:
-        """Call for unknown node types."""
-        return
-
-
 def resolve_relative_rst_links(text: str, base_link: str):
     """Resolve all relative links in a given RST document.
 
     All links of form `link`_ become `link <base_link/link>`_.
     """
+    import docutils.nodes
+    import docutils.parsers.rst
+    import docutils.utils
+
+    def parse_rst(text: str) -> docutils.nodes.document:
+        """Parse text assuming it's an RST markup."""
+        parser = docutils.parsers.rst.Parser()
+        components = (docutils.parsers.rst.Parser,)
+        settings = docutils.frontend.OptionParser(components=components).get_default_values()
+        document = docutils.utils.new_document('<rst-doc>', settings=settings)
+        parser.parse(text, document)
+        return document
+
+    class SimpleRefCounter(docutils.nodes.NodeVisitor):
+        """Find all simple references in a given docutils document."""
+
+        def __init__(self, *args, **kwargs):
+            """Initialize the SimpleRefCounter object."""
+            super().__init__(*args, **kwargs)
+            self.references = []
+
+        def visit_reference(self, node: docutils.nodes.reference) -> None:
+            """Call for "reference" nodes."""
+            if len(node.children) != 1 or not isinstance(node.children[0], docutils.nodes.Text) \
+                    or not all(_ in node.attributes for _ in ('name', 'refuri')):
+                return
+            path = pathlib.Path(node.attributes['refuri'])
+            try:
+                if path.is_absolute():
+                    return
+                resolved_path = path.resolve()
+            except FileNotFoundError:  # in resolve(), prior to Python 3.6
+                return
+            except OSError:  # in is_absolute() and resolve(), on URLs in Windows
+                return
+            try:
+                resolved_path.relative_to(HERE)
+            except ValueError:
+                return
+            if not path.is_file():
+                return
+            assert node.attributes['name'] == node.children[0].astext()
+            self.references.append(node)
+
+        def unknown_visit(self, node: docutils.nodes.Node) -> None:
+            """Call for unknown node types."""
+            return
+
     document = parse_rst(text)
     visitor = SimpleRefCounter(document)
     document.walk(visitor)
