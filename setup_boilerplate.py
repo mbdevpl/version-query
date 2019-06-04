@@ -1,7 +1,7 @@
 """Below code is generic boilerplate and normally should not be changed.
 
-To avoid setup script boilerplate, create "setup.py" file with the following minimal contents
-and modify them according to the specifics of your package.
+To avoid setup script boilerplate, create "setup.py" file with the minimal contents as given
+in SETUP_TEMPLATE below, and modify it according to the specifics of your package.
 
 See the implementation of setup_boilerplate.Package for default metadata values and available
 options.
@@ -9,6 +9,7 @@ options.
 
 import importlib
 import pathlib
+import runpy
 import sys
 import typing as t
 
@@ -17,7 +18,7 @@ import docutils.parsers.rst
 import docutils.utils
 import setuptools
 
-__updated__ = '2019-05-10'
+__updated__ = '2019-06-04'
 
 SETUP_TEMPLATE = '''"""Setup script."""
 
@@ -35,6 +36,8 @@ class Package(setup_boilerplate.Package):
         'Development Status :: 1 - Planning',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3 :: Only']
     keywords = []
 
@@ -49,10 +52,14 @@ HERE = pathlib.Path(__file__).resolve().parent
 def find_version(
         package_name: str, version_module_name: str = '_version',
         version_variable_name: str = 'VERSION') -> str:
-    """Simulate behaviour of "from package_name._version import VERSION", and return VERSION."""
-    version_module = importlib.import_module(
-        '{}.{}'.format(package_name.replace('-', '_'), version_module_name))
-    return getattr(version_module, version_variable_name)
+    """Simulate behaviour of "from package_name._version import VERSION", and return VERSION.
+
+    To avoid importing whole package only to read the version, just module containing the version
+    is imported. Therefore relative imports in that module will break the setup.
+    """
+    version_module_path = '{}/{}.py'.format(package_name.replace('-', '_'), version_module_name)
+    version_module_vars = runpy.run_path(version_module_path)
+    return version_module_vars[version_variable_name]
 
 
 def find_packages(root_directory: str = '.') -> t.List[str]:
@@ -221,7 +228,7 @@ class Package:
     license_str = 'Apache License 2.0'  # type: str
 
     classifiers = []  # type: t.List[str]
-    """List of valid project classifiers: https://pypi.python.org/pypi?:action=list_classifiers"""
+    """List of valid project classifiers: https://pypi.org/pypi?:action=list_classifiers"""
 
     keywords = []  # type: t.List[str]
 
