@@ -1,5 +1,5 @@
 docutils
-pip >= 9.0
+pip >= 10.0
 pygments
 wheel
 -rrequirements.txt
