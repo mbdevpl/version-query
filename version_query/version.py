@@ -46,8 +46,8 @@ class Version(collections.abc.Hashable):
     _pattern_alphanumeric = re.compile(_re_alphanumeric)
     _re_sep = r'(?:[\.-])'
 
-    _re_release_parts = r'(?P<major>{})(?:\.(?P<minor>{}))?(?:\.(?P<patch>{}))?'.format(
-        _re_number, _re_number, _re_number)
+    _re_release_parts = \
+        r'(?P<major>{n})(?:\.(?P<minor>{n}))?(?:\.(?P<patch>{n}))?'.format(n=_re_number)
     _pattern_release = re.compile(_re_release_parts)
 
     @classmethod
@@ -110,7 +110,7 @@ class Version(collections.abc.Hashable):
     @classmethod
     def from_str(cls, version_str: str):
         """Create version from string."""
-        match = cls._pattern_version.fullmatch(version_str)  # type: re.???
+        match = cls._pattern_version.fullmatch(version_str)  # type: t.Match[str]
         if match is None:
             raise ValueError('version string {} is invalid'.format(repr(version_str)))
         _LOG.debug('version_query parsed version string %s into %s: %s %s',
