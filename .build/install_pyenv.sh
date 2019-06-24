@@ -2,12 +2,12 @@
 set -Eeuxo pipefail
 
 # pyenv installer (for macOS)
-# updated: 2019-05-10
+# updated: 2019-05-13
 
 # use the following to enable diagnostics
 # export PYENV_DIAGNOSE=1
 
-if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+if [[ "$(uname)" == "Darwin" ]]; then
   if [ -n "${DIAGNOSE_PYENV-}" ] ; then
     pyenv install --list
   fi
@@ -16,6 +16,7 @@ if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
   fi
   pyenv install "${TRAVIS_PYTHON_VERSION}"
   # export PATH="${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin:${PATH}"
+  mkdir -p "${HOME}/.local/bin"
   ln -s "${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin/python" "${HOME}/.local/bin/python"
   ln -s "${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin/pip" "${HOME}/.local/bin/pip"
   ln -s "${HOME}/.pyenv/versions/${TRAVIS_PYTHON_VERSION}/bin/coverage" "${HOME}/.local/bin/coverage"
