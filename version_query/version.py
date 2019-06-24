@@ -8,7 +8,6 @@ import re
 import typing as t
 
 import packaging.version
-import pkg_resources
 import semver
 
 _LOG = logging.getLogger(__name__)
@@ -111,20 +110,6 @@ class Version(collections.abc.Hashable):
     @classmethod
     def from_str(cls, version_str: str):
         """Create version from string."""
-        py_version = pkg_resources.parse_version(version_str)  # type: packaging.version.Version
-        _LOG.debug('packaging parsed version string %s into %s: %s',
-                   repr(version_str), type(py_version), py_version)
-
-        try:
-            sem_version = semver.parse(version_str)  # type: dict
-            _LOG.debug('semver parsed version string %s into %s: %s',
-                       repr(version_str), type(sem_version), sem_version)
-            sem_version_info = semver.parse_version_info(version_str)  # type: semver.VersionInfo
-            _LOG.debug('semver parsed version string %s into %s: %s',
-                       repr(version_str), type(sem_version_info), sem_version_info)
-        except ValueError:
-            _LOG.debug('semver could not parse version string %s', repr(version_str))
-
         match = cls._pattern_version.fullmatch(version_str)  # type: re.???
         if match is None:
             raise ValueError('version string {} is invalid'.format(repr(version_str)))

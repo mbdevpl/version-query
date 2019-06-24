@@ -1,5 +1,6 @@
 """Tests of version string parsing, generation and comparison."""
 
+import logging
 import unittest
 
 import packaging.version
@@ -11,6 +12,8 @@ from .examples import \
     INIT_CASES, BAD_INIT_CASES, COMPATIBLE_STR_CASES, STR_CASES, case_to_version_tuple, \
     INCREMENT_CASES, DEVEL_INCREMENT_CASES, COMPARISON_CASES_LESS, COMPARISON_CASES_EQUAL
 
+_LOG = logging.getLogger(__name__)
+
 
 class Tests(unittest.TestCase):
 
@@ -20,6 +23,23 @@ class Tests(unittest.TestCase):
         for version_str, (args, kwargs) in STR_CASES.items():
             version_tuple = case_to_version_tuple(args, kwargs)
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
+
+                py_version = \
+                    pkg_resources.parse_version(version_str)  # type: packaging.version.Version
+                _LOG.debug('packaging parsed version string %s into %s: %s',
+                           repr(version_str), type(py_version), py_version)
+
+                try:
+                    sem_version = semver.parse(version_str)  # type: dict
+                    _LOG.debug('semver parsed version string %s into %s: %s',
+                               repr(version_str), type(sem_version), sem_version)
+                    sem_version_info = \
+                        semver.parse_version_info(version_str)  # type: semver.VersionInfo
+                    _LOG.debug('semver parsed version string %s into %s: %s',
+                               repr(version_str), type(sem_version_info), sem_version_info)
+                except ValueError:
+                    _LOG.debug('semver could not parse version string %s', repr(version_str))
+
                 self.assertEqual(Version.from_str(version_str).to_tuple(), version_tuple)
 
     def test_from_str_bad(self):
