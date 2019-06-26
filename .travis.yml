@@ -27,7 +27,7 @@ matrix:
       python: "pypy3.5-7.0"
     - os: linux
       language: python
-      python: "pypy3.6-7.1.0"
+      python: "pypy3.6-7.1"
     - os: linux
       language: python
       python: "pypy3.6-7.1.1"
