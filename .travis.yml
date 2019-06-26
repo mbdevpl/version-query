@@ -42,7 +42,7 @@ matrix:
     - env: TRAVIS_PYTHON_VERSION="3.8-dev"
 
 before_install:
-  - .build/install_pyenv.sh
+  - DIAGNOSE_PYENV=1 .build/install_pyenv.sh
 
 install:
   - pip install -U pip
