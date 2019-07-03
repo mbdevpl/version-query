@@ -89,6 +89,7 @@ class Tests(unittest.TestCase):
         self._check_examples_count('metadata.json', METADATA_JSON_EXAMPLE_PATHS)
         self._query_test_case(METADATA_JSON_EXAMPLE_PATHS, query_metadata_json)
 
+    @unittest.skipIf(not PKG_INFO_EXAMPLE_PATHS, 'no "PKG-INFO" files found')
     def test_query_pkg_info(self):
         self._check_examples_count('PKG-INFO', PKG_INFO_EXAMPLE_PATHS)
         self._query_test_case(PKG_INFO_EXAMPLE_PATHS, query_pkg_info)
