@@ -9,6 +9,8 @@
 version-query
 =============
 
+No overhead package versioning for Python, based on git.
+
 .. image:: https://img.shields.io/pypi/v/version-query.svg
     :target: https://pypi.org/project/version-query
     :alt: package version from PyPI
@@ -33,12 +35,17 @@ version-query
     :target: https://github.com/mbdevpl/version-query/blob/master/NOTICE
     :alt: license
 
-Package version query toolkit for Python.
+Package versioning toolkit for Python which relies on git tags, git history traversal
+and status of git repository to generate a very fine-grained version number.
 
-This script is motivated by wish to avoid hardcoding the version number when maintaining
-a Python package.
+Aren't you tired hardcoding the version numbers when maintaining a Python package?!
 
-Instead of hardcoding:
+And wouldn't you like have fine-grained versioning scheme with version changing with each commit,
+for easier development, testing and pre-release deployment?!
+
+Search no more!
+
+As long as you mark your releases using git tags, instead of hardcoding:
 
 .. code:: python
 
@@ -52,7 +59,11 @@ You can do:
 
     __version__ = predict_version_str()
 
-As long as you mark your releases using git tags.
+It's 21st century, stop hardcoding version numbers!
+
+This will set the version to release version when you really release a new version,
+and it will automatically generate a suitable development version at development/pre-release phase.
+
 
 .. contents::
     :backlinks: none
