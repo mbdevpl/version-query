@@ -1,5 +1,10 @@
 include setup_boilerplate.py
 include *requirements.txt
+include pyproject.toml
 include LICENSE
 include NOTICE
 include ./*/py.typed
+recursive-include test *.py
+exclude appveyor.yml
+recursive-exclude .build *
+exclude .build
