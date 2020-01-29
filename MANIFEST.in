@@ -1,10 +1,9 @@
 include setup_boilerplate.py
-include *requirements.txt
-include pyproject.toml
+include requirements.txt
 include LICENSE
 include NOTICE
 include ./*/py.typed
-recursive-include test *.py
-exclude appveyor.yml
-recursive-exclude .build *
-exclude .build
+
+include test_requirements.txt
+recursive-include ./test __init__.py
+include test/examples.py
