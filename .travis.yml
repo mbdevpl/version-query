@@ -7,9 +7,6 @@ matrix:
   include:
     - os: linux
       language: python
-      python: "3.5"
-    - os: linux
-      language: python
       python: "3.6"
     - os: linux
       language: python
@@ -26,10 +23,6 @@ matrix:
     - os: linux
       language: python
       python: "pypy3.6-7.1.1"
-    - os: osx
-      osx_image: xcode11
-      language: generic
-      env: TRAVIS_PYTHON_VERSION="3.5"
     - os: osx
       osx_image: xcode11
       language: generic
