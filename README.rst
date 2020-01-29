@@ -15,8 +15,8 @@ No overhead package versioning for Python, based on git.
     :target: https://pypi.org/project/version-query
     :alt: package version from PyPI
 
-.. image:: https://travis-ci.org/mbdevpl/version-query.svg?branch=master
-    :target: https://travis-ci.org/mbdevpl/version-query
+.. image:: https://travis-ci.com/mbdevpl/version-query.svg?branch=master
+    :target: https://travis-ci.com/mbdevpl/version-query
     :alt: build status from Travis CI
 
 .. image:: https://ci.appveyor.com/api/projects/status/github/mbdevpl/version-query?branch=master&svg=true
