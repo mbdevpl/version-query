@@ -83,7 +83,7 @@ def main(args=None) -> None:
         prog='version_query',
         description='''Tool for querying current versions of Python packages. Use LOGGING_LEVEL
         environment variable to adjust logging level.''',
-        epilog='Copyright 2017-2018 Mateusz Bysiek https://mbdevpl.github.io/ , Apache License 2.0',
+        epilog='Copyright 2017-2020 Mateusz Bysiek https://mbdevpl.github.io/ , Apache License 2.0',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     from ._version import VERSION
     parser.version = VERSION
