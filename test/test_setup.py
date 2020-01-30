@@ -12,7 +12,7 @@ import types
 import typing as t
 import unittest
 
-__updated__ = '2019-06-04'
+__updated__ = '2020-01-29'
 
 
 def run_program(*args, glob: bool = False):
@@ -25,7 +25,7 @@ def run_program(*args, glob: bool = False):
     process = subprocess.Popen(args)
     process.wait()
     if process.returncode != 0:
-        raise AssertionError('execution of {} returned {}'.format(args, process.returncode))
+        raise AssertionError(f'execution of {args} returned {process.returncode}')
     return process
 
 
@@ -59,10 +59,6 @@ CLASSIFIERS_LICENSES = (
     'License :: Public Domain')
 
 CLASSIFIERS_PYTHON_VERSIONS = tuple("""Programming Language :: Python
-Programming Language :: Python :: 2
-Programming Language :: Python :: 2.2
-Programming Language :: Python :: 2.7
-Programming Language :: Python :: 2 :: Only
 Programming Language :: Python :: 3
 Programming Language :: Python :: 3.0
 Programming Language :: Python :: 3.5
@@ -253,7 +249,7 @@ class PackageTests(unittest.TestCase):
         prefix = 'https://github.com/example/blob/v1.2.3.4/'
         for name, link, done in LINK_EXAMPLES:
             name = '' if name is None else name + ' '
-            text = 'Please see `{}<{}>`_ for details.'.format(name, link)
+            text = f'Please see `{name}<{link}>`_ for details.'
             with tempfile.NamedTemporaryFile('w', suffix='.rst', delete=False) as temp_file:
                 temp_file.write(text)
             result, content_type = Package.parse_readme(temp_file.name)
@@ -265,7 +261,7 @@ class PackageTests(unittest.TestCase):
                 continue
             if name == '':
                 name = link + ' '
-            self.assertIn('`{}<{}{}>`_'.format(name, prefix, link), result)
+            self.assertIn(f'`{name}<{prefix}{link}>`_', result)
 
     def test_prepare(self):
         package = import_module_member('setup_boilerplate', 'Package')
@@ -326,19 +322,19 @@ class IntergrationTests(unittest.TestCase):
     def test_install_source_tar(self):
         find_version = import_module_member('setup_boilerplate', 'find_version')
         version = find_version(self.pkg_name)
-        run_pip('install', 'dist/*-{}.tar.gz'.format(version), glob=True)
+        run_pip('install', f'dist/*-{version}.tar.gz', glob=True)
         run_pip('uninstall', '-y', self.pkg_name)
 
     def test_install_source_zip(self):
         find_version = import_module_member('setup_boilerplate', 'find_version')
         version = find_version(self.pkg_name)
-        run_pip('install', 'dist/*-{}.zip'.format(version), glob=True)
+        run_pip('install', f'dist/*-{version}.zip', glob=True)
         run_pip('uninstall', '-y', self.pkg_name)
 
     def test_install_wheel(self):
         find_version = import_module_member('setup_boilerplate', 'find_version')
         version = find_version(self.pkg_name)
-        run_pip('install', 'dist/*-{}-*.whl'.format(version), glob=True)
+        run_pip('install', f'dist/*-{version}-*.whl', glob=True)
         run_pip('uninstall', '-y', self.pkg_name)
 
     def test_pip_error(self):
