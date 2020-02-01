@@ -1,13 +1,12 @@
 """High-level utility functions for querying, manipulating and generating version information."""
 
-import argparse
 import inspect
 import logging
 import pathlib
 
 import git
 
-from .version import VersionComponent, Version
+from .version import Version
 from .git_query import query_git_repo, predict_git_repo
 from .py_query import query_package_folder
 
@@ -73,35 +72,3 @@ def predict_caller(stack_level: int = 1) -> Version:
 
 def predict_version_str() -> str:
     return predict_caller(2).to_str()
-
-
-def main(args=None) -> None:
-    """Entry point of the command-line interface."""
-    from ._logging import setup_basic_logging
-    setup_basic_logging()
-    parser = argparse.ArgumentParser(
-        prog='version_query',
-        description='''Tool for querying current versions of Python packages. Use LOGGING_LEVEL
-        environment variable to adjust logging level.''',
-        epilog='Copyright 2017-2020 Mateusz Bysiek https://mbdevpl.github.io/ , Apache License 2.0',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    from ._version import VERSION
-    parser.version = VERSION
-    parser.add_argument('-i', '--increment', action='store_true', help='''output version string for
-                        next patch release, i.e. if version is 1.0.3, output 1.0.4''')
-    parser.add_argument('-p', '--predict', action='store_true', help='''operate in prediction mode,
-                        i.e. assume existence of git repository and infer current version from
-                        its tags, history and working tree status''')
-    parser.add_argument('path', type=pathlib.Path)
-    parser.add_argument('--version', action='version')
-    args = parser.parse_args(args)
-    if args.predict and args.increment:
-        raise ValueError(
-            'choose one: either increment current version, or predict upcoming version')
-    if args.predict:
-        version = predict_folder(args.path)
-    else:
-        version = query_folder(args.path)
-    if args.increment:
-        version.increment(VersionComponent.Patch)
-    print(version)
