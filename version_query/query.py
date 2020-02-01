@@ -37,15 +37,27 @@ def query_folder(path: pathlib.Path, search_parent_directories: bool = False) ->
 
 
 def query_caller(stack_level: int = 1) -> Version:
+    """Determine the version of code associated with the caller of this function."""
     here = _caller_folder(stack_level + 1)
     return query_folder(here, True)
 
 
 def query_version_str() -> str:
+    """Determine the version of code that calls this function and get it as string.
+
+    You can use this utility function like this:
+
+    '''
+    from version_query import query_version_str
+
+    VERSION = query_version_str()
+    '''
+    """
     return query_caller(2).to_str()
 
 
 def predict_folder(path: pathlib.Path, search_parent_directories: bool = True) -> Version:
+    """Predict version of code residing in a given folder."""
     priority_cutoff = 2
     paths = [path] + (list(path.parents)[:priority_cutoff] if search_parent_directories else [])
     for pth in paths:
@@ -71,4 +83,14 @@ def predict_caller(stack_level: int = 1) -> Version:
 
 
 def predict_version_str() -> str:
+    """Predict version of the code that calls this function and get it as string.
+
+    You can use this utility function like this:
+
+    '''
+    from version_query import predict_version_str
+
+    VERSION = predict_version_str()
+    '''
+    """
     return predict_caller(2).to_str()

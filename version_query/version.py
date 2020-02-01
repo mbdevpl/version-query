@@ -15,7 +15,6 @@ _LOG = logging.getLogger(__name__)
 
 @enum.unique
 class VersionComponent(enum.IntEnum):
-
     """Enumeration of standard version components."""
 
     Major = 1 << 1
@@ -31,8 +30,7 @@ def _version_tuple_checker(version_tuple, flags):
     return all([(_ is not None if flag else _ is None) for _, flag in zip(version_tuple, flags)])
 
 
-class Version(collections.abc.Hashable):
-
+class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-methods
     """For storing and manipulating version information.
 
     Definitions of acceptable version formats are provided in readme.
@@ -63,20 +61,17 @@ class Version(collections.abc.Hashable):
             patch = int(patch)
         return major, minor, patch
 
-    _re_pre_separator = r'(?P<preseparator>{})'.format(_re_sep)
-    _re_pre_type = r'(?P<pretype>{})'.format(_re_letters)
-    _re_pre_patch = r'(?P<prepatch>{})'.format(_re_number)
-    _re_pre_release_part = r'{}?{}?{}?'.format(_re_pre_separator, _re_pre_type, _re_pre_patch)
+    _re_pre_separator = rf'(?P<preseparator>{_re_sep})'
+    _re_pre_type = rf'(?P<pretype>{_re_letters})'
+    _re_pre_patch = rf'(?P<prepatch>{_re_number})'
+    _re_pre_release_part = rf'{_re_pre_separator}?{_re_pre_type}?{_re_pre_patch}?'
     _pattern_pre_release_part = re.compile(_re_pre_release_part)
     _re_pre_release_parts = r'(?:{0}{2})|(?:{0}?{1}{2}?)'.format(_re_sep, _re_letters, _re_number)
     _pattern_pre_release = re.compile(_re_pre_release_parts)
-    _pattern_pre_release_check = re.compile(r'(?:{})+'.format(_re_pre_release_parts))
+    _pattern_pre_release_check = re.compile(rf'(?:{_re_pre_release_parts})+')
 
     @classmethod
     def _parse_pre_release_str(cls, pre_release: str) -> tuple:
-        # check_match = cls._pattern_pre_release_check.fullmatch(pre_release)
-        # if check_match is None:
-        #     raise ValueError('given pre-release string {} is invalid'.format(repr(pre_release)))
         parts = cls._pattern_pre_release.findall(pre_release)
         _LOG.debug('parsed pre-release string %s into %s',
                    repr(pre_release), parts)
@@ -89,9 +84,9 @@ class Version(collections.abc.Hashable):
             tuples.append((match.group('preseparator'), match.group('pretype'), pre_patch))
         return tuples
 
-    _re_local_separator = r'({})'.format(_re_sep)
-    _re_local_part = r'({})'.format(_re_alphanumeric)
-    _re_local_parts = r'\+{}(?:{}{})*'.format(_re_local_part, _re_local_separator, _re_local_part)
+    _re_local_separator = rf'({_re_sep})'
+    _re_local_part = rf'({_re_alphanumeric})'
+    _re_local_parts = r'\+{_re_local_part}(?:{_re_local_separator}{_re_local_part})*'
     _pattern_local = re.compile(_re_local_parts)
 
     @classmethod
@@ -99,7 +94,7 @@ class Version(collections.abc.Hashable):
         match = cls._pattern_local.fullmatch(local)
         return tuple([_ for _ in match.groups() if _ is not None])
 
-    _re_release = r'(?P<release>{0}(?:\.{0})?(?:\.{0})?)'.format(_re_number)
+    _re_release = r'(?P<release>{n}(?:\.{n})?(?:\.{n})?)'.format(n=_re_number)
     _re_pre_release = r'(?P<prerelease>(?:(?:{0}{2})|(?:{0}?{1}{2}?))+)'.format(
         _re_sep, _re_letters, _re_number)
     _re_local = r'(?P<local>\+{0}([\.-]{0})*)'.format(_re_alphanumeric)
@@ -140,32 +135,32 @@ class Version(collections.abc.Hashable):
         if not isinstance(py_version, packaging.version.Version):
             _LOG.warning('attempting to parse %s as packaging.version.Version...', type(py_version))
         ver = py_version._version
-        major, minor, patch = [ver.release[i] if len(ver.release) > i
+        major, minor, patch = [py_version.release[i] if len(py_version.release) > i
                                else None for i in range(3)]
         pre_release = None
         local = None
-        if len(ver.release) == 4:
-            pre_ver = (None, ver.release[3])
-        elif len(ver.release) > 4:
-            raise NotImplementedError(ver)
+        if len(py_version.release) == 4:
+            pre_ver = (None, py_version.release[3])
+        elif len(py_version.release) > 4:
+            raise NotImplementedError(py_version)
         else:
             pre_ver = None
-        pre_ver_present = sum(1 for _ in (ver.post, ver.dev, ver.pre) if _)
+        pre_ver_present = sum(1 for _ in (ver.post, ver.dev, py_version.pre) if _)
         if pre_ver and pre_ver_present:
-            raise NotImplementedError(ver)
+            raise NotImplementedError(py_version)
         if pre_ver_present > 1:
-            raise NotImplementedError(ver)
+            raise NotImplementedError(py_version)
         if ver.dev:
             pre_ver = ver.dev
-        elif ver.pre:
-            pre_ver = ver.pre
+        elif py_version.pre:
+            pre_ver = py_version.pre
         if pre_ver:
             pre_release = [('.',) + tuple(pre_ver[i] if pre_ver and len(pre_ver) > i else None
                                           for i in range(2))]
         if ver.local:
             local = tuple(itertools.chain.from_iterable(
                 (dot, str(_)) for dot, _ in zip('.' * len(ver.local), ver.local)))[1:]
-        _LOG.debug('parsing %s %s', type(py_version), ver)
+        _LOG.debug('parsing %s %s', type(py_version), py_version)
         return cls(major, minor, patch, pre_release=pre_release, local=local)
 
     @classmethod
@@ -208,37 +203,7 @@ class Version(collections.abc.Hashable):
                              .format(args, pre_release, local, repr(self)))
 
         if pre_release is None:
-            pre_release = []
-            consumed_args = 0
-            if args and isinstance(args[0], tuple):
-                for i, arg in enumerate(args):
-                    if not isinstance(arg, tuple):
-                        break
-                    if len(arg) == 3 and arg[0] in (None, '.', '-'):
-                        pre_release.append(arg)
-                        consumed_args += 1
-                        continue
-                    if i == len(args) - 1:
-                        break
-                    raise ValueError('pre-release segment arg={} (index {} in args={} in {})'
-                                     ' must be a 3-tuple'
-                                     .format(arg, i, args, repr(self)))
-            else:
-                accumulated = []
-                for i, arg in enumerate(args):
-                    if not accumulated:
-                        if arg in (None, '.', '-'):
-                            if len(args) < i + 3:
-                                raise ValueError(
-                                    'expected 3 consecutive values from index {} in args={} in {}'
-                                    .format(i, args, repr(self)))
-                        else:
-                            break
-                    accumulated.append(arg)
-                    consumed_args += 1
-                    if len(accumulated) == 3:
-                        pre_release.append(tuple(accumulated))
-                        accumulated = []
+            pre_release, consumed_args = self._get_pre_release_from_args(args)
             if consumed_args > 0:
                 args = args[consumed_args:]
             else:
@@ -259,6 +224,40 @@ class Version(collections.abc.Hashable):
         elif isinstance(local, str):
             local = (local,)
         self.local = local
+
+    def _get_pre_release_from_args(self, args) -> t.Tuple[list, int]:
+        pre_release = []
+        consumed_args = 0
+        if args and isinstance(args[0], tuple):
+            for i, arg in enumerate(args):
+                if not isinstance(arg, tuple):
+                    break
+                if len(arg) == 3 and arg[0] in (None, '.', '-'):
+                    pre_release.append(arg)
+                    consumed_args += 1
+                    continue
+                if i == len(args) - 1:
+                    break
+                raise ValueError('pre-release segment arg={} (index {} in args={} in {})'
+                                 ' must be a 3-tuple'
+                                 .format(arg, i, args, repr(self)))
+        else:
+            accumulated = []
+            for i, arg in enumerate(args):
+                if not accumulated:
+                    if arg in (None, '.', '-'):
+                        if len(args) < i + 3:
+                            raise ValueError(
+                                'expected 3 consecutive values from index {} in args={} in {}'
+                                .format(i, args, repr(self)))
+                    else:
+                        break
+                accumulated.append(arg)
+                consumed_args += 1
+                if len(accumulated) == 3:
+                    pre_release.append(tuple(accumulated))
+                    accumulated = []
+        return pre_release, consumed_args
 
     @property
     def release(self) -> t.Tuple[int, t.Optional[int], t.Optional[int]]:
@@ -303,6 +302,7 @@ class Version(collections.abc.Hashable):
     @property
     def pre_release(self) -> t.Optional[
             t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]]:
+        """Pre-release version component."""
         if self._pre_release is None:
             return None
         return self._pre_release.copy()
@@ -330,34 +330,38 @@ class Version(collections.abc.Hashable):
                 raise ValueError('pre-release part={} has wrong length {} in {}'
                                  .format(repr(pre), len(pre), repr(self)))
             pre_separator, pre_type, pre_patch = pre
-            if pre_separator is not None and not isinstance(pre_separator, str):
-                raise TypeError('pre_separator={} is of wrong type {} in {}'
-                                .format(repr(pre_separator), type(pre_separator), repr(self)))
-            if pre_separator is not None and pre_separator not in ('-', '.'):
-                raise ValueError('pre_separator={} has wrong value in {}'
-                                 .format(repr(pre_separator), repr(self)))
-            if pre_type is not None and not isinstance(pre_type, str):
-                raise TypeError('pre_type={} is of wrong type {} in {}'
-                                .format(repr(pre_type), type(pre_type), repr(self)))
-            if pre_type is not None and type(self)._pattern_letters.fullmatch(pre_type) is None:
-                raise ValueError('pre_type={} has wrong value in {}'
-                                 .format(repr(pre_type), repr(self)))
-            if pre_patch is not None and not isinstance(pre_patch, int):
-                raise TypeError('pre_patch={} is of wrong type {} in {}'
-                                .format(repr(pre_patch), type(pre_patch), repr(self)))
-            if pre_patch is not None and pre_patch < 0:
-                raise ValueError('pre_patch={} has wrong value in {}'
-                                 .format(repr(pre_patch), repr(self)))
-            if pre_separator is None and pre_type is None and pre_patch is not None:
-                raise ValueError(
-                    'neither pre_separator nor pre_type is set but pre_patch={} is in {}'
-                    .format(repr(pre_patch), repr(self)))
-            if pre_separator is not None and pre_type is None and pre_patch is None:
-                raise ValueError(
-                    'pre_separator={} is present but neither pre_type nor pre_patch is in {}'
-                    .format(repr(pre_separator), repr(self)))
+            self._check_pre_release_parts(pre_separator, pre_type, pre_patch)
 
         self._pre_release = pre_release
+
+    def _check_pre_release_parts(self, pre_separator, pre_type, pre_patch):
+        """Verify that the given pre-release version identifier parts are valid."""
+        if pre_separator is not None and not isinstance(pre_separator, str):
+            raise TypeError('pre_separator={} is of wrong type {} in {}'
+                            .format(repr(pre_separator), type(pre_separator), repr(self)))
+        if pre_separator is not None and pre_separator not in ('-', '.'):
+            raise ValueError('pre_separator={} has wrong value in {}'
+                             .format(repr(pre_separator), repr(self)))
+        if pre_type is not None and not isinstance(pre_type, str):
+            raise TypeError('pre_type={} is of wrong type {} in {}'
+                            .format(repr(pre_type), type(pre_type), repr(self)))
+        if pre_type is not None and type(self)._pattern_letters.fullmatch(pre_type) is None:
+            raise ValueError('pre_type={} has wrong value in {}'
+                             .format(repr(pre_type), repr(self)))
+        if pre_patch is not None and not isinstance(pre_patch, int):
+            raise TypeError('pre_patch={} is of wrong type {} in {}'
+                            .format(repr(pre_patch), type(pre_patch), repr(self)))
+        if pre_patch is not None and pre_patch < 0:
+            raise ValueError('pre_patch={} has wrong value in {}'
+                             .format(repr(pre_patch), repr(self)))
+        if pre_separator is None and pre_type is None and pre_patch is not None:
+            raise ValueError(
+                'neither pre_separator nor pre_type is set but pre_patch={} is in {}'
+                .format(repr(pre_patch), repr(self)))
+        if pre_separator is not None and pre_type is None and pre_patch is None:
+            raise ValueError(
+                'pre_separator={} is present but neither pre_type nor pre_patch is in {}'
+                .format(repr(pre_separator), repr(self)))
 
     @property
     def has_pre_release(self):
@@ -409,40 +413,10 @@ class Version(collections.abc.Hashable):
             raise ValueError('amount={} has wrong value'.format(amount))
 
         if component in (VersionComponent.Major, VersionComponent.Minor, VersionComponent.Patch):
-
-            if component in (VersionComponent.Major, VersionComponent.Minor):
-                if component is VersionComponent.Major:
-                    self._major += amount
-                    if self._minor is not None:
-                        self._minor = 0
-                else:
-                    if self._minor is None:
-                        self._minor = amount
-                    else:
-                        self._minor += amount
-
-                if self._patch is not None:
-                    self._patch = 0
-
-            else:
-                if self._minor is None:
-                    self._minor = 0
-                if self._patch is None:
-                    self._patch = amount
-                else:
-                    self._patch += amount
-
-            self._pre_release = None
-            self._local = None
+            self._increment_release(component, amount)
 
         elif component is VersionComponent.PrePatch:
-            if self._pre_release is None or self.pre_release_to_tuple(True)[0][1] != '':
-                self._pre_release = [('-', None, amount)]
-            else:
-                pre_sep, pre_type, pre_patch = self._pre_release[0]
-                assert isinstance(pre_patch, int), (type(pre_patch), pre_patch)
-                pre_patch += amount
-                self.pre_release = [(pre_sep, pre_type, pre_patch)]
+            self._increment_pre_path(amount)
 
         elif component is VersionComponent.DevPatch:
             if self._pre_release is None:
@@ -460,6 +434,41 @@ class Version(collections.abc.Hashable):
             raise ValueError('incrementing component={} is not possible'.format(repr(component)))
 
         return self
+
+    def _increment_release(self, component: VersionComponent, amount: int):
+        if component in (VersionComponent.Major, VersionComponent.Minor):
+            if component is VersionComponent.Major:
+                self._major += amount
+                if self._minor is not None:
+                    self._minor = 0
+            else:
+                if self._minor is None:
+                    self._minor = amount
+                else:
+                    self._minor += amount
+
+            if self._patch is not None:
+                self._patch = 0
+
+        else:
+            if self._minor is None:
+                self._minor = 0
+            if self._patch is None:
+                self._patch = amount
+            else:
+                self._patch += amount
+
+        self._pre_release = None
+        self._local = None
+
+    def _increment_pre_path(self, amount):
+        if self._pre_release is None or self.pre_release_to_tuple(True)[0][1] != '':
+            self._pre_release = [('-', None, amount)]
+        else:
+            pre_sep, pre_type, pre_patch = self._pre_release[0]
+            assert isinstance(pre_patch, int), (type(pre_patch), pre_patch)
+            pre_patch += amount
+            self.pre_release = [(pre_sep, pre_type, pre_patch)]
 
     def devel_increment(self, new_commits: int = 1) -> 'Version':
         """Increment version depending on current version number and return self.
@@ -480,9 +489,9 @@ class Version(collections.abc.Hashable):
         version_tuple = self._major, self._minor, self._patch
         if _version_tuple_checker(version_tuple, (True, False, False)):
             return '.'.join(str(_) for _ in version_tuple[:1])
-        elif _version_tuple_checker(version_tuple, (True, True, False)):
+        if _version_tuple_checker(version_tuple, (True, True, False)):
             return '.'.join(str(_) for _ in version_tuple[:2])
-        elif _version_tuple_checker(version_tuple, (True, True, True)):
+        if _version_tuple_checker(version_tuple, (True, True, True)):
             return '.'.join(str(_) for _ in version_tuple[:3])
         raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
 
@@ -490,9 +499,9 @@ class Version(collections.abc.Hashable):
         version_tuple = self._pre_release[segment]
         if _version_tuple_checker(version_tuple, (True, True, False)):
             return '{}{}'.format(*version_tuple[:2])
-        elif _version_tuple_checker(version_tuple, (True, False, True)):
+        if _version_tuple_checker(version_tuple, (True, False, True)):
             return '{}{}'.format(version_tuple[0], version_tuple[2])
-        elif _version_tuple_checker(version_tuple, (True, True, True)):
+        if _version_tuple_checker(version_tuple, (True, True, True)):
             return '{}{}{}'.format(*version_tuple)
         raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
 

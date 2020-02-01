@@ -1,4 +1,4 @@
-"""Tool for querying current versions of Python packages."""
+"""Entry point of the command-line interface of version_query package."""
 
 from .main import main
 

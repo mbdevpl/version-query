@@ -40,6 +40,30 @@ def _git_version_tags(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
     return versions
 
 
+def _latest_git_version_tag_on_branches(
+        repo: git.Repo, assume_if_none: bool, commit: git.Commit, commit_distance: int,
+        skip_commits: t.Set[git.Commit]):
+    _LOG.log(logging.NOTSET, 'entering %i branches...', len(commit.parents))
+    results = []
+    main_commit_distance = None
+    for parent in commit.parents:
+        try:
+            result = _latest_git_version_tag(
+                repo, assume_if_none, parent, commit_distance, skip_commits)
+            if main_commit_distance is None:
+                main_commit_distance = result[3]
+        except ValueError:
+            continue
+        if result[2] is not None:
+            results.append(result)
+    if not results:
+        return main_commit_distance
+    final_result = sorted(results, key=lambda _: _[2])[-1]
+    _LOG.log(logging.NOTSET, 'result from %i branches is %s and %s',
+             len(commit.parents), *final_result[1:3])
+    return final_result
+
+
 MAX_COMMIT_DISTANCE = 999
 
 
@@ -76,31 +100,35 @@ def _latest_git_version_tag(
         commit_distance += 1
         if len(commit.parents) <= 1:
             continue
-        _LOG.log(logging.NOTSET, 'entering %i branches...', len(commit.parents))
-        results = []
-        main_commit_distance = None
-        for parent in commit.parents:
-            try:
-                result = _latest_git_version_tag(
-                    repo, assume_if_none, parent, commit_distance, skip_commits)
-                if main_commit_distance is None:
-                    main_commit_distance = result[3]
-            except ValueError:
-                continue
-            if result[2] is not None:
-                results.append(result)
-        if not results:
-            commit_distance = main_commit_distance
+        result = _latest_git_version_tag_on_branches(
+            repo, assume_if_none, commit, commit_distance, skip_commits)
+        if not isinstance(result, tuple):
+            commit_distance = result  # main_commit_distance
             break
-        result = sorted(results, key=lambda _: _[2])[-1]
-        _LOG.log(logging.NOTSET, 'result from %i branches is %s and %s',
-                 len(commit.parents), *result[1:3])
+        # _LOG.log(logging.NOTSET, 'entering %i branches...', len(commit.parents))
+        # results = []
+        # main_commit_distance = None
+        # for parent in commit.parents:
+        #     try:
+        #         result = _latest_git_version_tag(
+        #             repo, assume_if_none, parent, commit_distance, skip_commits)
+        #         if main_commit_distance is None:
+        #             main_commit_distance = result[3]
+        #     except ValueError:
+        #         continue
+        #     if result[2] is not None:
+        #         results.append(result)
+        # if not results:
+        #     commit_distance = main_commit_distance
+        #     break
+        # result = sorted(results, key=lambda _: _[2])[-1]
+        # _LOG.log(logging.NOTSET, 'result from %i branches is %s and %s',
+        #          len(commit.parents), *result[1:3])
         return result
     if not current_version_tags:
         if assume_if_none:
             return commit, None, Version.from_str('0.1.0.dev0'), commit_distance
-        else:
-            raise ValueError('the given repo {} has no version tags'.format(repo))
+        raise ValueError('the given repo {} has no version tags'.format(repo))
     tag, version = sorted(current_version_tags.items(), key=lambda _: _[1])[-1]
     _LOG.log(logging.NOTSET, 'result is %s and %s', tag, version)
     return commit, tag, version, commit_distance

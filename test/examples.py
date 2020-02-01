@@ -148,6 +148,10 @@ BAD_STR_CASES = {
 
 
 def case_to_version_tuple(args, kwargs):
+    """Convert parameters of a given test case to a version tuple.
+
+    To be converted are args and kwargs meant for Version.__init__().
+    """
     return args + tuple(
         v for _, v in sorted(kwargs.items(), key=lambda _: KWARG_NAMES.index(_[0])))
 
