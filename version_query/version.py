@@ -86,7 +86,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
 
     _re_local_separator = rf'({_re_sep})'
     _re_local_part = rf'({_re_alphanumeric})'
-    _re_local_parts = r'\+{_re_local_part}(?:{_re_local_separator}{_re_local_part})*'
+    _re_local_parts = rf'\+{_re_local_part}(?:{_re_local_separator}{_re_local_part})*'
     _pattern_local = re.compile(_re_local_parts)
 
     @classmethod
@@ -135,25 +135,25 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         if not isinstance(py_version, packaging.version.Version):
             _LOG.warning('attempting to parse %s as packaging.version.Version...', type(py_version))
         ver = py_version._version
-        major, minor, patch = [py_version.release[i] if len(py_version.release) > i
+        major, minor, patch = [ver.release[i] if len(ver.release) > i
                                else None for i in range(3)]
         pre_release = None
         local = None
-        if len(py_version.release) == 4:
-            pre_ver = (None, py_version.release[3])
-        elif len(py_version.release) > 4:
+        if len(ver.release) == 4:
+            pre_ver = (None, ver.release[3])
+        elif len(ver.release) > 4:
             raise NotImplementedError(py_version)
         else:
             pre_ver = None
-        pre_ver_present = sum(1 for _ in (ver.post, ver.dev, py_version.pre) if _)
+        pre_ver_present = sum(1 for _ in (ver.post, ver.dev, ver.pre) if _)
         if pre_ver and pre_ver_present:
             raise NotImplementedError(py_version)
         if pre_ver_present > 1:
             raise NotImplementedError(py_version)
         if ver.dev:
             pre_ver = ver.dev
-        elif py_version.pre:
-            pre_ver = py_version.pre
+        elif ver.pre:
+            pre_ver = ver.pre
         if pre_ver:
             pre_release = [('.',) + tuple(pre_ver[i] if pre_ver and len(pre_ver) > i else None
                                           for i in range(2))]
