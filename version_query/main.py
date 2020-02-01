@@ -1,9 +1,10 @@
 """Command-line interface of version_query package."""
 
 import argparse
+import logging
+import os
 import pathlib
 
-from ._logging import setup_basic_logging
 from ._version import VERSION
 from .version import VersionComponent
 from .query import query_folder, predict_folder
@@ -11,7 +12,10 @@ from .query import query_folder, predict_folder
 
 def main(args=None) -> None:
     """Entry point of the command-line interface."""
-    setup_basic_logging()
+    logging_level = getattr(logging, os.environ.get('LOGGING_LEVEL', 'warning').upper())
+    logging.basicConfig(level=min(logging_level, logging.WARNING))
+    logging.getLogger().setLevel(logging.WARNING)
+    logging.getLogger('version_query').setLevel(logging_level)
     parser = argparse.ArgumentParser(
         prog='version_query',
         description='''Tool for querying current versions of Python packages. Use LOGGING_LEVEL

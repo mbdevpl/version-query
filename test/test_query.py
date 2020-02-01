@@ -73,8 +73,7 @@ class Tests(unittest.TestCase):
                                    'def caller():\n    predict_caller()\n\n\ncaller()\n')
             sys.path.insert(0, project_path_str)
             _LOG.warning('inserted %s to sys.path', project_path_str)
-            print(project_file_path)
-            print(project_path_str)
+            _LOG.info('temporary project file path: %s', project_file_path)
             with self.assertRaises(ValueError):
                 importlib.import_module(project_file_path.with_suffix('').name)
             sys.path.remove(project_path_str)

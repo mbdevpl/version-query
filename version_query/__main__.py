@@ -1,6 +1,6 @@
 """Tool for querying current versions of Python packages."""
 
-from .query import main
+from .main import main
 
 
 if __name__ == '__main__':
