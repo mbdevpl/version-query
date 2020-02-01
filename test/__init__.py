@@ -1,4 +1,4 @@
-"""Initialization of unit tests of version_query package."""
+"""Initialization of tests of version_query package."""
 
 from version_query import _logging
 
