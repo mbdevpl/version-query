@@ -25,14 +25,6 @@ _LOG = logging.getLogger(__name__)
 
 class Tests(unittest.TestCase):
 
-    def test_deprecated(self):
-        import warnings
-        warnings.warn('remove this test after removing deprecated function', DeprecationWarning)
-        from version_query import generate_version_str
-        with self.assertWarns(DeprecationWarning):
-            version_str = generate_version_str()
-        self.assertIsInstance(version_str, str)
-
     def _check_examples_count(self, description, examples):
         lvl = logging.WARNING if len(examples) < 10 else logging.INFO
         _LOG.log(lvl, '%s count: %i', description, len(examples))
@@ -146,7 +138,7 @@ class Tests(unittest.TestCase):
         _LOG.debug('caller: %s', version)
         self.assertIsInstance(version, Version)
 
-    def test_not_as_main(self):
+    def test_not_as_main(self):  # pylint: disable = no-self-use
         run_module('version_query', run_name=None)
 
     def test_help(self):
