@@ -29,7 +29,9 @@ def query_pkg_info(path: pathlib.Path) -> Version:
 
 def query_package_folder(path: pathlib.Path, search_parent_directories: bool = False) -> Version:
     """Get version from Python package folder."""
-    paths = [path] + (list(path.parents) if search_parent_directories else [])
+    paths = [path]
+    if search_parent_directories:
+        paths += path.parents
     metadata_json_paths, pkg_info_paths = None, None
     for pth in paths:
         metadata_json_paths = list(pth.parent.glob('{}*.dist-info/metadata.json'.format(pth.name)))
