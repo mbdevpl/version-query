@@ -19,29 +19,19 @@ matrix:
       python: "3.9-dev"
     - os: linux
       language: python
-      python: "pypy3.5-7.0"
-    - os: linux
-      language: python
       python: "pypy3.6-7.1.1"
     - os: osx
-      osx_image: xcode11
+      osx_image: xcode11.2
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.6"
     - os: osx
-      osx_image: xcode11
+      osx_image: xcode11.2
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7"
     - os: osx
-      osx_image: xcode11
+      osx_image: xcode11.2
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.8"
-    - os: osx
-      osx_image: xcode11
-      language: generic
-      env: TRAVIS_PYTHON_VERSION="3.9-dev"
-  allow_failures:
-    - python: "3.9-dev"
-    - env: TRAVIS_PYTHON_VERSION="3.9-dev"
 
 before_install:
   - DIAGNOSE_PYENV=1 .build/install_pyenv.sh
