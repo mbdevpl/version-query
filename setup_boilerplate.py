@@ -17,7 +17,7 @@ import docutils.parsers.rst
 import docutils.utils
 import setuptools
 
-__updated__ = '2020-01-29'
+__updated__ = '2020-02-02'
 
 SETUP_TEMPLATE = '''"""Setup script."""
 
@@ -84,9 +84,10 @@ def parse_requirements(
 
 def partition_version_classifiers(
         classifiers: t.Sequence[str], version_prefix: str = 'Programming Language :: Python :: ',
-        only_suffix: str = ' :: Only') -> t.Tuple[t.List[str], t.List[str]]:
+        only_suffix: str = ' :: Only') -> t.Tuple[t.List[t.Sequence[int]], t.List[t.Sequence[int]]]:
     """Find version number classifiers in given list and partition them into 2 groups."""
-    versions_min, versions_only = [], []
+    versions_min: t.List[t.Sequence[int]] = []
+    versions_only: t.List[t.Sequence[int]] = []
     for classifier in classifiers:
         version = classifier.replace(version_prefix, '')
         versions = versions_min
@@ -148,6 +149,7 @@ class SimpleRefCounter(docutils.nodes.NodeVisitor):
 
     def visit_reference(self, node: docutils.nodes.reference) -> None:
         """Call for "reference" nodes."""
+        assert isinstance(node, docutils.nodes.TextElement), type(node)
         if len(node.children) != 1 or not isinstance(node.children[0], docutils.nodes.Text) \
                 or not all(_ in node.attributes for _ in ('name', 'refuri')):
             return
@@ -229,8 +231,8 @@ class Package:
     packages = None  # type: t.List[str]
     """If None, determined with help of setuptools."""
 
-    package_data = {}
-    exclude_package_data = {}
+    package_data = {}  # type: t.Dict[str, t.List[str]]
+    exclude_package_data = {}  # type: t.Dict[str, t.List[str]]
 
     install_requires = None  # type: t.List[str]
     """If None, determined using requirements.txt."""
@@ -259,14 +261,14 @@ class Package:
         raise AttributeError((cls, names))
 
     @classmethod
-    def parse_readme(cls, readme_path: str = 'README.rst',
+    def parse_readme(cls, readme_filename: str = 'README.rst',
                      encoding: str = 'utf-8') -> t.Tuple[str, str]:
         """Parse readme and resolve relative links in it if it is feasible.
 
         Links are resolved if readme is in rst format and the package is hosted on GitHub.
         """
-        readme_path = pathlib.Path(readme_path)
-        with HERE.joinpath(readme_path).open(encoding=encoding) as readme_file:
+        readme_path = HERE.joinpath(readme_filename)
+        with readme_path.open(encoding=encoding) as readme_file:
             long_description = readme_file.read()  # type: str
 
         if readme_path.suffix.lower() == '.rst' and cls.url.startswith('https://github.com/'):
