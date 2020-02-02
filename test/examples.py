@@ -69,7 +69,7 @@ PACKAGE_FOLDER_EXAMPLES = [pth for pth in [
 
 KWARG_NAMES = ('major', 'minor', 'patch', 'pre_release', 'local')
 
-INIT_CASES = {
+INIT_CASES: t.Dict[str, t.Tuple[tuple, dict]] = {
     '1': ((1,), {}),
     '1.0': ((1, 0), {}),
     '1.0.0': ((1, 0, 0), {}),
@@ -79,7 +79,7 @@ INIT_CASES = {
     '1.0.0.rc3+local': ((1, 0, 0, ('.', 'rc', 3), 'local'), {}),
     '1.0.0.rc4+local': ((1, 0, 0, ('.', 'rc', 4), ('local',)), {})}
 
-BAD_INIT_CASES = {
+BAD_INIT_CASES: t.Dict[t.Tuple[tuple, tuple], t.Type[Exception]] = {
     (('spam',), ()): TypeError,
     ((-1,), ()): ValueError,
     ((1, 'ham'), ()): TypeError,

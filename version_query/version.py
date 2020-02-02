@@ -51,14 +51,20 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     @classmethod
     def _parse_release_str(cls, release: str) -> tuple:
         match = cls._pattern_release.fullmatch(release)
-        major = match.group('major')
-        major = int(major)
-        minor = match.group('minor')
-        if minor is not None:
-            minor = int(minor)
-        patch = match.group('patch')
-        if patch is not None:
-            patch = int(patch)
+        assert match is not None
+        major_match = match.group('major')
+        assert major_match is not None
+        major = int(major_match)
+        minor_match = match.group('minor')
+        if minor_match is not None:
+            minor = int(minor_match)
+        else:
+            minor = None
+        patch_match = match.group('patch')
+        if patch_match is not None:
+            patch = int(patch_match)
+        else:
+            patch = None
         return major, minor, patch
 
     _re_pre_separator = rf'(?P<preseparator>{_re_sep})'
@@ -71,16 +77,20 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     _pattern_pre_release_check = re.compile(rf'(?:{_re_pre_release_parts})+')
 
     @classmethod
-    def _parse_pre_release_str(cls, pre_release: str) -> tuple:
+    def _parse_pre_release_str(cls, pre_release: str) -> t.Sequence[
+            t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]:
         parts = cls._pattern_pre_release.findall(pre_release)
         _LOG.debug('parsed pre-release string %s into %s',
                    repr(pre_release), parts)
         tuples = []
         for part in parts:
             match = cls._pattern_pre_release_part.fullmatch(part)
-            pre_patch = match.group('prepatch')
-            if pre_patch is not None:
-                pre_patch = int(pre_patch)
+            assert match is not None
+            pre_patch_match = match.group('prepatch')
+            if pre_patch_match is not None:
+                pre_patch = int(pre_patch_match)
+            else:
+                pre_patch = None
             tuples.append((match.group('preseparator'), match.group('pretype'), pre_patch))
         return tuples
 
@@ -92,6 +102,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     @classmethod
     def _parse_local_str(cls, local: str) -> tuple:
         match = cls._pattern_local.fullmatch(local)
+        assert match is not None
         return tuple([_ for _ in match.groups() if _ is not None])
 
     _re_release = r'(?P<release>{n}(?:\.{n})?(?:\.{n})?)'.format(n=_re_number)
@@ -105,7 +116,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     @classmethod
     def from_str(cls, version_str: str):
         """Create version from string."""
-        match = cls._pattern_version.fullmatch(version_str)  # type: t.Match[str]
+        match = cls._pattern_version.fullmatch(version_str)  # type: t.Optional[t.Match[str]]
         if match is None:
             raise ValueError('version string {} is invalid'.format(repr(version_str)))
         _LOG.debug('version_query parsed version string %s into %s: %s %s',
@@ -137,8 +148,10 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         ver = py_version._version
         major, minor, patch = [ver.release[i] if len(ver.release) > i
                                else None for i in range(3)]
-        pre_release = None
+        pre_release: t.Optional[t.Sequence[
+            t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]] = None
         local = None
+        pre_ver: t.Optional[t.Tuple[None, int]]
         if len(ver.release) == 4:
             pre_ver = (None, ver.release[3])
         elif len(ver.release) > 4:
@@ -155,8 +168,8 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         elif ver.pre:
             pre_ver = ver.pre
         if pre_ver:
-            pre_release = [('.',) + tuple(pre_ver[i] if pre_ver and len(pre_ver) > i else None
-                                          for i in range(2))]
+            pre_release = [('.', pre_ver[0] if len(pre_ver) > 0 else None,
+                            pre_ver[1] if len(pre_ver) > 1 else None)]
         if ver.local:
             local = tuple(itertools.chain.from_iterable(
                 (dot, str(_)) for dot, _ in zip('.' * len(ver.local), ver.local)))[1:]
@@ -190,9 +203,9 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
             pre_release: t.Sequence[
                 t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]] = None,
             local: t.Union[str, tuple] = None):
-        self._major = None
-        self._minor = None
-        self._patch = None
+        self._major: t.Optional[int] = None
+        self._minor: t.Optional[int] = None
+        self._patch: t.Optional[int] = None
         self._pre_release = None
         self._local = None
 
@@ -225,8 +238,9 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
             local = (local,)
         self.local = local
 
-    def _get_pre_release_from_args(self, args) -> t.Tuple[list, int]:
-        pre_release = []
+    def _get_pre_release_from_args(self, args) -> t.Tuple[
+            t.Sequence[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]], int]:
+        pre_release: t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]] = []
         consumed_args = 0
         if args and isinstance(args[0], tuple):
             for i, arg in enumerate(args):
@@ -242,7 +256,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
                                  ' must be a 3-tuple'
                                  .format(arg, i, args, repr(self)))
         else:
-            accumulated = []
+            accumulated: t.List[t.Union[int, str]] = []
             for i, arg in enumerate(args):
                 if not accumulated:
                     if arg in (None, '.', '-'):
@@ -261,6 +275,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
 
     @property
     def release(self) -> t.Tuple[int, t.Optional[int], t.Optional[int]]:
+        assert self._major is not None
         return self._major, self._minor, self._patch
 
     @release.setter
@@ -301,7 +316,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
 
     @property
     def pre_release(self) -> t.Optional[
-            t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]]:
+            t.Sequence[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]]:
         """Pre-release version component."""
         if self._pre_release is None:
             return None
