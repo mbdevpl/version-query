@@ -134,7 +134,7 @@ COMPATIBLE_STR_CASES = {
     '0.4.4.dev5+84e1d430': ((0, 4, 4, '.', 'dev', 5, '84e1d430'), {}),
     '0.4.4.dev5+20171003.84e1d430': ((0, 4, 4, '.', 'dev', 5, '20171003', '.', '84e1d430'), {})}
 
-INCOMPATIBLE_STR_CASES = {
+INCOMPATIBLE_STR_CASES: t.Dict[str, t.Tuple[tuple, dict]] = {
     '1.0.0-2': ((1, 0, 0, '-', None, 2), {}),
     '1.0.0-0.2': ((1, 0, 0, '-', None, 0, '.', None, 2), {}),
     '4.5.0.dev': ((4, 5, 0, '.', 'dev', None), {})}

@@ -42,7 +42,8 @@ def _git_version_tags(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
 
 def _latest_git_version_tag_on_branches(
         repo: git.Repo, assume_if_none: bool, commit: git.Commit, commit_distance: int,
-        skip_commits: t.Set[git.Commit]):
+        skip_commits: t.Set[git.Commit]) -> t.Union[int, t.Tuple[
+            git.Commit, t.Optional[git.TagReference], t.Optional[Version], int]]:
     _LOG.log(logging.NOTSET, 'entering %i branches...', len(commit.parents))
     results = []
     main_commit_distance = None
@@ -57,6 +58,7 @@ def _latest_git_version_tag_on_branches(
         if result[2] is not None:
             results.append(result)
     if not results:
+        assert main_commit_distance is not None
         return main_commit_distance
     final_result = sorted(results, key=lambda _: _[2])[-1]
     _LOG.log(logging.NOTSET, 'result from %i branches is %s and %s',
@@ -70,10 +72,10 @@ MAX_COMMIT_DISTANCE = 999
 def _latest_git_version_tag(
         repo: git.Repo, assume_if_none: bool = False, base_commit: git.Commit = None,
         commit_distance: int = 0, skip_commits: t.Set[git.Commit] = None) -> t.Tuple[
-            git.Commit, t.Optional[git.TagReference], Version, int]:
+            git.Commit, t.Optional[git.TagReference], t.Optional[Version], int]:
     """Retrun (commit, tag at that commit if any, latest version, distance from the version)."""
     version_tags = _git_version_tags(repo)
-    version_tag_commits = {}
+    version_tag_commits: t.Dict[git.Commit, set] = {}
     for tag, version in version_tags.items():
         commit = tag.commit
         if commit not in version_tag_commits:
@@ -159,7 +161,8 @@ def predict_git_repo(repo_path: pathlib.Path, search_parent_directories: bool = 
     if is_repo_dirty:
         dt_ = 'dirty{}'.format(datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S'))
         if version.has_local:
-            version.local += ('.', dt_)
+            assert version.local is not None  # mypy needs this
+            version.local = (*version.local, '.', dt_)
         else:
             version.local = (dt_,)
     return version

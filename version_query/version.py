@@ -206,8 +206,9 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         self._major: t.Optional[int] = None
         self._minor: t.Optional[int] = None
         self._patch: t.Optional[int] = None
-        self._pre_release = None
-        self._local = None
+        self._pre_release: t.Optional[
+            t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]] = None
+        self._local: t.Optional[t.Sequence[str]] = None
 
         self.release = major, minor, patch
 
@@ -453,6 +454,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     def _increment_release(self, component: VersionComponent, amount: int):
         if component in (VersionComponent.Major, VersionComponent.Minor):
             if component is VersionComponent.Major:
+                assert self._major is not None
                 self._major += amount
                 if self._minor is not None:
                     self._minor = 0
@@ -511,6 +513,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
 
     def _pre_release_segment_to_str(self, segment: int) -> str:
+        assert self._pre_release is not None
         version_tuple = self._pre_release[segment]
         if _version_tuple_checker(version_tuple, (True, True, False)):
             return '{}{}'.format(*version_tuple[:2])
@@ -541,6 +544,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
             (0 if sort else None) if self._patch is None else self._patch
 
     def pre_release_segment_to_tuple(self, segment: int, sort: bool = False) -> tuple:
+        assert self._pre_release is not None
         pre_separator, pre_type, pre_patch = self._pre_release[segment]
         return (1 if pre_type is None else 0) if sort else pre_separator, \
             ('' if pre_type is None else pre_type.lower()) if sort else pre_type, \
@@ -549,7 +553,9 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     def pre_release_to_tuple(self, sort: bool = False) -> tuple:
         """Create tuple from this version's pre-release component."""
         if self._pre_release is None:
-            return ((1, '', 0),) if sort else ()
+            if sort:
+                return ((1, '', 0),)
+            return ()
         parts = [self.pre_release_segment_to_tuple(i, sort)
                  for i, _ in enumerate(self._pre_release)]
         return tuple(parts) if sort else tuple(itertools.chain.from_iterable(parts))
