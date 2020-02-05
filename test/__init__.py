@@ -13,3 +13,4 @@ logging.basicConfig(level=logging.DEBUG, handlers=[_HANDLER])
 logging.getLogger().setLevel(logging.WARNING)
 logging.getLogger('version_query').setLevel(
     getattr(logging, os.environ.get('LOGGING_LEVEL', 'debug').upper()))
+logging.getLogger('test').setLevel(logging.DEBUG)

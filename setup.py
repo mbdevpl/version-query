@@ -22,7 +22,11 @@ class Package(setup_boilerplate.Package):
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3 :: Only',
-        'Topic :: Utilities']
+        'Topic :: Software Development :: Version Control',
+        'Topic :: Software Development :: Version Control :: Git',
+        'Topic :: System :: Software Distribution',
+        'Topic :: Utilities',
+        'Typing :: Typed']
     keywords = [
         'automation', 'continous integration', 'git', 'releasing', 'semantic versioning', 'tagging',
         'versioning']
