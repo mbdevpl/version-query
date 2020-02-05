@@ -34,9 +34,9 @@ def query_package_folder(path: pathlib.Path, search_parent_directories: bool = F
         paths += path.parents
     metadata_json_paths, pkg_info_paths = None, None
     for pth in paths:
-        metadata_json_paths = list(pth.parent.glob('{}*.dist-info/metadata.json'.format(pth.name)))
-        pkg_info_paths = list(pth.parent.glob('{}*.egg-info/PKG-INFO'.format(pth.name)))
-        pkg_info_paths += list(pth.parent.glob('{}*.dist-info/METADATA'.format(pth.name)))
+        metadata_json_paths = list(pth.parent.glob(f'{pth.name}*.dist-info/metadata.json'))
+        pkg_info_paths = list(pth.parent.glob(f'{pth.name}*.egg-info/PKG-INFO'))
+        pkg_info_paths += list(pth.parent.glob(f'{pth.name}*.dist-info/METADATA'))
         if len(metadata_json_paths) == 1 and not pkg_info_paths:
             return query_metadata_json(metadata_json_paths[0])
         if not metadata_json_paths and len(pkg_info_paths) == 1:

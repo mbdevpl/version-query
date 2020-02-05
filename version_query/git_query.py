@@ -20,7 +20,7 @@ def preprocess_git_version_tag(tag: str):
         return tag[1:]
     if tag and tag[0] in ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'):
         return tag
-    raise ValueError('given tag "{}" does not appear to be a version tag'.format(tag))
+    raise ValueError(f'given tag "{tag}" does not appear to be a version tag')
 
 
 def _git_version_tags(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
@@ -59,8 +59,8 @@ def _latest_git_version_tag_on_branches(
             results.append(result)
     if not results:
         if main_commit_distance is None:
-            raise ValueError('reached max commit distance {} with no version tags in repo {}'
-                             .format(MAX_COMMIT_DISTANCE, repo))
+            raise ValueError(f'reached max commit distance {MAX_COMMIT_DISTANCE}'
+                             f' with no version tags in repo {repo}')
         return main_commit_distance
     final_result = sorted(results, key=lambda _: _[2])[-1]
     _LOG.log(logging.NOTSET, 'result from %i branches is %s and %s',
@@ -99,8 +99,8 @@ def _latest_git_version_tag(
             _LOG.log(logging.NOTSET, 'found version data %s', current_version_tags)
             break
         if commit_distance >= MAX_COMMIT_DISTANCE:
-            raise ValueError('reached max commit distance {} with no version tags in repo {}'
-                             .format(MAX_COMMIT_DISTANCE, repo))
+            raise ValueError(f'reached max commit distance {MAX_COMMIT_DISTANCE}'
+                             f' with no version tags in repo {repo}')
         commit_distance += 1
         if len(commit.parents) <= 1:
             continue
@@ -113,7 +113,7 @@ def _latest_git_version_tag(
     if not current_version_tags:
         if assume_if_none:
             return commit, None, Version.from_str('0.1.0.dev0'), commit_distance
-        raise ValueError('the given repo {} has no version tags'.format(repo))
+        raise ValueError(f'the given repo {repo} has no version tags')
     tag, version = sorted(current_version_tags.items(), key=lambda _: _[1])[-1]
     _LOG.log(logging.NOTSET, 'result is %s and %s', tag, version)
     return commit, tag, version, commit_distance
@@ -142,7 +142,7 @@ def predict_git_repo(repo_path: pathlib.Path, search_parent_directories: bool = 
         version.devel_increment(commit_distance)
         version.local = (repo.head.commit.hexsha[:8],)
     if is_repo_dirty:
-        dt_ = 'dirty{}'.format(datetime.datetime.strftime(datetime.datetime.now(), '%Y%m%d%H%M%S'))
+        dt_ = f'dirty{datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d%H%M%S")}'
         if version.has_local:
             assert version.local is not None  # mypy needs this
             version.local = (*version.local, '.', dt_)

@@ -191,7 +191,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         if pre_release is not None:
             raise NotImplementedError(sem_version)
         if local is not None:
-            local = cls._parse_local_str('+{}'.format(local))
+            local = cls._parse_local_str(f'+{local}')
         return cls(major, minor, patch, pre_release=pre_release, local=local)
 
     @classmethod
@@ -213,8 +213,8 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         self.release = major, minor, patch
 
         if args and pre_release is not None and local is not None:
-            raise ValueError('args={}, pre_release={} and local={} are all present in {}'
-                             .format(args, pre_release, local, repr(self)))
+            raise ValueError(f'args={args}, pre_release={pre_release} and local={local}'
+                             f' are all present in {repr(self)}')
 
         if pre_release is None:
             pre_release, consumed_args = self._get_pre_release_from_args(args)
@@ -225,8 +225,8 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         self.pre_release = pre_release
 
         if args and local is not None:
-            raise ValueError('args={} and local={} are present at the same time in {}'
-                             .format(args, local, repr(self)))
+            raise ValueError(f'args={args} and local={local} are present at the same time'
+                             f' in {repr(self)}')
 
         if local is None:
             if len(args) == 1 and isinstance(args[0], tuple):
@@ -253,18 +253,16 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
                     continue
                 if i == len(args) - 1:
                     break
-                raise ValueError('pre-release segment arg={} (index {} in args={} in {})'
-                                 ' must be a 3-tuple'
-                                 .format(arg, i, args, repr(self)))
+                raise ValueError(f'pre-release segment arg={arg} (index {i} in args={args}'
+                                 f' in {repr(self)}) must be a 3-tuple')
         else:
             accumulated: t.List[t.Union[int, str]] = []
             for i, arg in enumerate(args):
                 if not accumulated:
                     if arg in (None, '.', '-'):
                         if len(args) < i + 3:
-                            raise ValueError(
-                                'expected 3 consecutive values from index {} in args={} in {}'
-                                .format(i, args, repr(self)))
+                            raise ValueError(f'expected 3 consecutive values from index {i}'
+                                             f' in args={args} in {repr(self)}')
                     else:
                         break
                 accumulated.append(arg)
@@ -283,33 +281,28 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     def release(self, release: t.Tuple[int, t.Optional[int], t.Optional[int]]):
         # major: int, minor: t.Optional[int] = None, patch: t.Optional[int] = None):
         if not isinstance(release, tuple):
-            raise TypeError('release={} is of wrong type {} in {}'
-                            .format(repr(release), type(release), repr(self)))
+            raise TypeError(
+                f'release={repr(release)} is of wrong type {type(release)} in {repr(self)}')
         if len(release) != 3:
-            raise ValueError('release={} has wrong length {} in {}'
-                             .format(repr(release), len(release), repr(self)))
+            raise ValueError(
+                f'release={repr(release)} has wrong length {len(release)} in {repr(self)}')
 
         major, minor, patch = release
 
         if not isinstance(major, int):
-            raise TypeError('major={} is of wrong type {} in {}'
-                            .format(repr(major), type(major), repr(self)))
+            raise TypeError(f'major={repr(major)} is of wrong type {type(major)} in {repr(self)}')
         if major < 0:
-            raise ValueError('major={} has wrong value in {}'.format(repr(major), repr(self)))
+            raise ValueError(f'major={repr(major)} has wrong value in {repr(self)}')
         if minor is not None and not isinstance(minor, int):
-            raise TypeError('minor={} is of wrong type {} in {}'
-                            .format(repr(minor), type(minor), repr(self)))
+            raise TypeError(f'minor={repr(minor)} is of wrong type {type(minor)} in {repr(self)}')
         if minor is not None and minor < 0:
-            raise ValueError('minor={} has wrong value in {}'.format(repr(minor), repr(self)))
+            raise ValueError(f'minor={repr(minor)} has wrong value in {repr(self)}')
         if patch is not None and not isinstance(patch, int):
-            raise TypeError('patch={} is of wrong type {} in {}'
-                            .format(repr(patch), type(patch), repr(self)))
+            raise TypeError(f'patch={repr(patch)} is of wrong type {type(patch)} in {repr(self)}')
         if patch is not None and patch < 0:
-            raise ValueError('patch={} has wrong value in {}'.format(repr(patch), repr(self)))
+            raise ValueError(f'patch={repr(patch)} has wrong value in {repr(self)}')
         if minor is None and patch is not None:
-            raise ValueError(
-                'patch={} is present but not minor in {}'
-                .format(repr(patch), repr(self)))
+            raise ValueError(f'patch={repr(patch)} is present but not minor in {repr(self)}')
 
         self._major = major
         self._minor = minor
@@ -332,19 +325,18 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
             return
 
         if not isinstance(pre_release, collections.abc.Sequence):
-            raise TypeError('pre_release={} is of wrong type {} in {}'
-                            .format(repr(pre_release), type(pre_release), repr(self)))
+            raise TypeError(f'pre_release={repr(pre_release)} is of wrong type {type(pre_release)}'
+                            f' in {repr(self)}')
         if len(pre_release) == 0:
-            raise ValueError('pre_release has no elements although it is set in {}'
-                             .format(repr(self)))
+            raise ValueError(f'pre_release has no elements although it is set in {repr(self)}')
 
         for pre in pre_release:
             if not isinstance(pre, tuple):
-                raise TypeError('pre-release part {} is of wrong type {} in {}'
-                                .format(repr(pre), type(pre), repr(self)))
+                raise TypeError(
+                    f'pre-release part {repr(pre)} is of wrong type {type(pre)} in {repr(self)}')
             if len(pre) != 3:
-                raise ValueError('pre-release part={} has wrong length {} in {}'
-                                 .format(repr(pre), len(pre), repr(self)))
+                raise ValueError(
+                    f'pre-release part={repr(pre)} has wrong length {len(pre)} in {repr(self)}')
             pre_separator, pre_type, pre_patch = pre
             self._check_pre_release_parts(pre_separator, pre_type, pre_patch)
 
@@ -353,31 +345,26 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     def _check_pre_release_parts(self, pre_separator, pre_type, pre_patch):
         """Verify that the given pre-release version identifier parts are valid."""
         if pre_separator is not None and not isinstance(pre_separator, str):
-            raise TypeError('pre_separator={} is of wrong type {} in {}'
-                            .format(repr(pre_separator), type(pre_separator), repr(self)))
+            raise TypeError(f'pre_separator={repr(pre_separator)} is of wrong type'
+                            f' {type(pre_separator)} in {repr(self)}')
         if pre_separator is not None and pre_separator not in ('-', '.'):
-            raise ValueError('pre_separator={} has wrong value in {}'
-                             .format(repr(pre_separator), repr(self)))
+            raise ValueError(f'pre_separator={repr(pre_separator)} has wrong value in {repr(self)}')
         if pre_type is not None and not isinstance(pre_type, str):
-            raise TypeError('pre_type={} is of wrong type {} in {}'
-                            .format(repr(pre_type), type(pre_type), repr(self)))
+            raise TypeError(
+                f'pre_type={repr(pre_type)} is of wrong type {type(pre_type)} in {repr(self)}')
         if pre_type is not None and type(self)._pattern_letters.fullmatch(pre_type) is None:
-            raise ValueError('pre_type={} has wrong value in {}'
-                             .format(repr(pre_type), repr(self)))
+            raise ValueError(f'pre_type={repr(pre_type)} has wrong value in {repr(self)}')
         if pre_patch is not None and not isinstance(pre_patch, int):
-            raise TypeError('pre_patch={} is of wrong type {} in {}'
-                            .format(repr(pre_patch), type(pre_patch), repr(self)))
+            raise TypeError(
+                f'pre_patch={repr(pre_patch)} is of wrong type {type(pre_patch)} in {repr(self)}')
         if pre_patch is not None and pre_patch < 0:
-            raise ValueError('pre_patch={} has wrong value in {}'
-                             .format(repr(pre_patch), repr(self)))
+            raise ValueError(f'pre_patch={repr(pre_patch)} has wrong value in {repr(self)}')
         if pre_separator is None and pre_type is None and pre_patch is not None:
-            raise ValueError(
-                'neither pre_separator nor pre_type is set but pre_patch={} is in {}'
-                .format(repr(pre_patch), repr(self)))
+            raise ValueError(f'neither pre_separator nor pre_type is set'
+                             f' but pre_patch={repr(pre_patch)} is in {repr(self)}')
         if pre_separator is not None and pre_type is None and pre_patch is None:
-            raise ValueError(
-                'pre_separator={} is present but neither pre_type nor pre_patch is in {}'
-                .format(repr(pre_separator), repr(self)))
+            raise ValueError(f'pre_separator={repr(pre_separator)} is present'
+                             f' but neither pre_type nor pre_patch is in {repr(self)}')
 
     @property
     def has_pre_release(self):
@@ -603,7 +590,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
 
     def __lt__(self, other):
         if not isinstance(other, Version):
-            raise TypeError('cannot compare {} and {}'.format(type(self), type(other)))
+            raise TypeError(f'cannot compare {type(self)} and {type(other)}')
 
         self_release = self.release_to_tuple(True)
         other_release = other.release_to_tuple(True)
