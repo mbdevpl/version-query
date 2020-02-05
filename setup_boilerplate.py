@@ -7,6 +7,7 @@ See the implementation of setup_boilerplate.Package for default metadata values 
 options.
 """
 
+import logging
 import pathlib
 import runpy
 import sys
@@ -18,6 +19,8 @@ import docutils.utils
 import setuptools
 
 __updated__ = '2020-02-05'
+
+_LOG = logging.getLogger(__name__)
 
 SETUP_TEMPLATE = '''"""Setup script."""
 
@@ -151,7 +154,7 @@ class RelativeRefFinder(docutils.nodes.NodeVisitor):
     def visit_reference(self, node: docutils.nodes.reference) -> None:
         """Call for "reference" nodes."""
         assert isinstance(node, docutils.nodes.TextElement), type(node)
-        # print(f'  RelativeRefFinder: examining reference {node}')
+        _LOG.debug('RelativeRefFinder: examining reference %s', node)
         if len(node.children) != 1 or 'refuri' not in node.attributes \
                 or any(node.attributes['refuri'].startswith(_) for _ in {'http://', 'https://'}):
             return
@@ -169,7 +172,7 @@ class RelativeRefFinder(docutils.nodes.NodeVisitor):
             return
         if not path.is_file():
             return
-        # print('  RelativeRefFinder: reference points to existing file')
+        _LOG.debug('RelativeRefFinder: reference points to existing file')
         self.references.append(node)
 
     def unknown_visit(self, node: docutils.nodes.Node) -> None:
@@ -190,7 +193,7 @@ def resolve_relative_rst_links(text: str, base_link: str) -> str:
     finder = RelativeRefFinder(HERE, document)
     document.walk(finder)
     for target in finder.references:
-        print(f'  resolve_relative_rst_links: resolving reference {target}')
+        _LOG.info('resolve_relative_rst_links: resolving reference %s', target)
         assert isinstance(target, docutils.nodes.TextElement), type(target)
         refuri = target.attributes['refuri']
         if 'name' in target.attributes:
@@ -204,7 +207,7 @@ def resolve_relative_rst_links(text: str, base_link: str) -> str:
             old_link = f' :target: {refuri}'
             new_link = f' :target: {base_link}{refuri}'
         text = text.replace(old_link, new_link)
-        print(f'  resolve_relative_rst_links: replaced "{old_link}" with "{new_link}"')
+        _LOG.info('resolve_relative_rst_links: replaced "%s" with "%s"', old_link, new_link)
     return text
 
 
