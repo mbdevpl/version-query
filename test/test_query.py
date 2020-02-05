@@ -23,6 +23,22 @@ from .test_setup import run_module
 _LOG = logging.getLogger(__name__)
 
 
+@contextlib.contextmanager
+def temporarily_set_logger_level(logger_name: str, level: int):
+    """Change logger level on enter and restore on exit of this context."""
+    logger = logging.getLogger(logger_name)
+    level_ = logger.level
+    logger.setLevel(level)
+    try:
+        yield
+    finally:
+        logger.setLevel(level_)
+
+
+def preserve_logger_level(logger_name: str):
+    return temporarily_set_logger_level(logger_name, logging.getLogger(logger_name).level)
+
+
 class Tests(unittest.TestCase):
 
     def _check_examples_count(self, description, examples):
@@ -87,7 +103,8 @@ class Tests(unittest.TestCase):
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_query_pkg_info_current(self):
-        run_module('setup', 'build')
+        with preserve_logger_level('system_query'):
+            run_module('setup', 'build')
         paths = list(pathlib.Path.cwd().glob('*.egg-info/PKG-INFO'))
         self.assertEqual(len(paths), 1)
         path = paths[0]
@@ -118,7 +135,8 @@ class Tests(unittest.TestCase):
 
     @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
     def test_query_package_folder_current(self):
-        run_module('setup', 'build')
+        with preserve_logger_level('system_query'):
+            run_module('setup', 'build')
         path = pathlib.Path.cwd().joinpath('version_query')
         version = query_package_folder(path)
         _LOG.debug('%s: %s', path, version)
@@ -144,34 +162,39 @@ class Tests(unittest.TestCase):
     def test_help(self):
         sio = io.StringIO()
         with contextlib.redirect_stderr(sio):
-            with self.assertRaises(SystemExit):
-                run_module('version_query')
+            with preserve_logger_level('system_query'):
+                with self.assertRaises(SystemExit):
+                    run_module('version_query')
         _LOG.info('%s', sio.getvalue())
 
     def test_bad_usage(self):
         sio = io.StringIO()
         with contextlib.redirect_stderr(sio):
-            with self.assertRaises(ValueError):
-                run_module('version_query', '-p', '-i', '.')
+            with preserve_logger_level('system_query'):
+                with self.assertRaises(ValueError):
+                    run_module('version_query', '-p', '-i', '.')
         _LOG.info('%s', sio.getvalue())
 
     def test_here(self):
         sio = io.StringIO()
         with contextlib.redirect_stdout(sio):
-            run_module('version_query', '.')
+            with preserve_logger_level('system_query'):
+                run_module('version_query', '.')
         self.assertEqual(sio.getvalue().rstrip(), query_caller().to_str())
         self.assertEqual(sio.getvalue().rstrip(), query_version_str())
 
     def test_increment_here(self):
         sio = io.StringIO()
         with contextlib.redirect_stdout(sio):
-            run_module('version_query', '-i', '.')
+            with preserve_logger_level('system_query'):
+                run_module('version_query', '-i', '.')
         self.assertEqual(sio.getvalue().rstrip(),
                          query_caller().increment(VersionComponent.Patch).to_str())
 
     def test_predict_here(self):
         sio = io.StringIO()
         with contextlib.redirect_stdout(sio):
-            run_module('version_query', '-p', '.')
+            with preserve_logger_level('system_query'):
+                run_module('version_query', '-p', '.')
         self.assertEqual(sio.getvalue().rstrip(), predict_caller().to_str())
         self.assertEqual(sio.getvalue().rstrip(), predict_version_str())
