@@ -9,7 +9,7 @@
 version-query
 =============
 
-No overhead package versioning for Python, based on git.
+Zero-overhead package versioning for Python.
 
 .. image:: https://img.shields.io/pypi/v/version-query.svg
     :target: https://pypi.org/project/version-query

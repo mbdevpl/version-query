@@ -7,7 +7,7 @@ class Package(setup_boilerplate.Package):
     """Package metadata."""
 
     name = 'version-query'
-    description = 'Package version query toolkit for Python'
+    description = 'Zero-overhead package versioning for Python.'
     url = 'https://github.com/mbdevpl/version-query'
     author = 'Mateusz Bysiek, John Vandenberg'
     maintainer = 'Mateusz Bysiek'
