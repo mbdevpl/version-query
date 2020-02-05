@@ -17,7 +17,7 @@ import docutils.parsers.rst
 import docutils.utils
 import setuptools
 
-__updated__ = '2020-02-02'
+__updated__ = '2020-02-05'
 
 SETUP_TEMPLATE = '''"""Setup script."""
 
@@ -139,20 +139,25 @@ def parse_rst(text: str) -> docutils.nodes.document:
     return document
 
 
-class SimpleRefCounter(docutils.nodes.NodeVisitor):
-    """Find all simple references in a given docutils document."""
+class RelativeRefFinder(docutils.nodes.NodeVisitor):
+    """Find all relative references in a given docutils document that point to existing files."""
 
-    def __init__(self, *args, **kwargs):
-        """Initialize the SimpleRefCounter object."""
+    def __init__(self, root_dir: pathlib.Path, *args, **kwargs):
+        """Initialize the RelativeRefFinder object."""
         super().__init__(*args, **kwargs)
-        self.references = []
+        self.root_dir = root_dir
+        self.references: t.List[docutils.nodes.reference] = []
 
     def visit_reference(self, node: docutils.nodes.reference) -> None:
         """Call for "reference" nodes."""
         assert isinstance(node, docutils.nodes.TextElement), type(node)
-        if len(node.children) != 1 or not isinstance(node.children[0], docutils.nodes.Text) \
-                or not all(_ in node.attributes for _ in ('name', 'refuri')):
+        # print(f'  RelativeRefFinder: examining reference {node}')
+        # if len(node.children) != 1 or not isinstance(node.children[0], docutils.nodes.Text) \
+        #         or not all(_ in node.attributes for _ in ('name', 'refuri')):
+        if len(node.children) != 1 or 'refuri' not in node.attributes \
+                or any(node.attributes['refuri'].startswith(_) for _ in {'http://', 'https://'}):
             return
+        # print('  RelativeRefFinder: reference passed initial check')
         path = pathlib.Path(node.attributes['refuri'])
         try:
             if path.is_absolute():
@@ -161,12 +166,13 @@ class SimpleRefCounter(docutils.nodes.NodeVisitor):
         except OSError:  # in is_absolute() and resolve(), on URLs in Windows
             return
         try:
-            resolved_path.relative_to(HERE)
+            resolved_path.relative_to(self.root_dir)
         except ValueError:
             return
         if not path.is_file():
             return
-        assert node.attributes['name'] == node.children[0].astext()
+        # print('  RelativeRefFinder: reference points to existing file')
+        # assert node.attributes['name'] == node.children[0].astext()
         self.references.append(node)
 
     def unknown_visit(self, node: docutils.nodes.Node) -> None:
@@ -177,19 +183,30 @@ class SimpleRefCounter(docutils.nodes.NodeVisitor):
 def resolve_relative_rst_links(text: str, base_link: str) -> str:
     """Resolve all relative links in a given string representing an RST document.
 
+    Links are resolved only if they point to files existing in the project's working directory.
+
     All links of form `link`_ become `link <base_link/link>`_.
+
+    And all
     """
     document = parse_rst(text)
-    visitor = SimpleRefCounter(document)
-    document.walk(visitor)
-    for target in visitor.references:
-        name = target.attributes['name']
-        uri = target.attributes['refuri']
-        new_link = f'`{name} <{base_link}{uri}>`_'
-        if name == uri:
-            text = text.replace(f'`<{uri}>`_', new_link)
+    finder = RelativeRefFinder(HERE, document)
+    document.walk(finder)
+    for target in finder.references:
+        print(f'  resolve_relative_rst_links: resolving reference {target}')
+        refuri = target.attributes['refuri']
+        if 'name' in target.attributes:
+            name = target.attributes['name']
+            if name == refuri:
+                old_link = f'`<{refuri}>`_'
+            else:
+                old_link = f'`{name} <{refuri}>`_'
+            new_link = f'`{name} <{base_link}{refuri}>`_'
         else:
-            text = text.replace(f'`{name} <{uri}>`_', new_link)
+            old_link = f' :target: {refuri}'
+            new_link = f' :target: {base_link}{refuri}'
+        text = text.replace(old_link, new_link)
+        print(f'  resolve_relative_rst_links: replaced "{old_link}" with "{new_link}"')
     return text
 
 

@@ -32,7 +32,7 @@ No overhead package versioning for Python, based on git.
     :alt: test coverage from Codecov
 
 .. image:: https://img.shields.io/github/license/mbdevpl/version-query.svg
-    :target: https://github.com/mbdevpl/version-query/blob/master/NOTICE
+    :target: NOTICE
     :alt: license
 
 Package versioning toolkit for Python which relies on git tags, git history traversal
