@@ -110,7 +110,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         _re_sep, _re_letters, _re_number)
     _re_local = r'(?P<local>\+{0}([\.-]{0})*)'.format(_re_alphanumeric)
     # _re_named_parts_count = 3 + 3
-    _re_version = r'{}{}?{}?'.format(_re_release, _re_pre_release, _re_local)
+    _re_version = rf'{_re_release}{_re_pre_release}?{_re_local}?'
     _pattern_version = re.compile(_re_version)
 
     @classmethod
@@ -118,7 +118,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         """Create version from string."""
         match = cls._pattern_version.fullmatch(version_str)  # type: t.Optional[t.Match[str]]
         if match is None:
-            raise ValueError('version string {} is invalid'.format(repr(version_str)))
+            raise ValueError(f'version string {repr(version_str)} is invalid')
         _LOG.debug('version_query parsed version string %s into %s: %s %s',
                    repr(version_str), type(match), match.groupdict(), match.groups())
 
@@ -381,23 +381,20 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
             return
 
         if not isinstance(local, collections.abc.Sequence):
-            raise TypeError('local={} is of wrong type {} in {}'
-                            .format(repr(local), type(local), repr(self)))
+            raise TypeError(f'local={repr(local)} is of wrong type {type(local)} in {repr(self)}')
 
         if len(local) % 2 != 1:
-            raise ValueError('local={} has wrong length {} in {}'
-                             .format(repr(local), len(local), repr(self)))
+            raise ValueError(f'local={repr(local)} has wrong length {len(local)} in {repr(self)}')
 
         for i, part in enumerate(local):
             if not isinstance(part, str):
-                raise TypeError('local_part or local_separator {} is of wrong type {} in {}'
-                                .format(repr(part), type(part), repr(self)))
-            if i % 2 == 0 and type(self)._pattern_alphanumeric.fullmatch(part) is None:
-                raise ValueError('local_part={} has wrong value in {}'
-                                 .format(repr(part), repr(self)))
-            if i % 2 == 1 and part not in ('-', '.'):
-                raise ValueError('local_separator={} has wrong value in {}'
-                                 .format(repr(part), repr(self)))
+                raise TypeError(f'local_part or local_separator {repr(part)} is of wrong type'
+                                f' {type(part)} in {repr(self)}')
+            if i % 2 == 0:
+                if type(self)._pattern_alphanumeric.fullmatch(part) is None:
+                    raise ValueError(f'local_part={repr(part)} has wrong value in {repr(self)}')
+            elif part not in ('-', '.'):
+                raise ValueError(f'local_separator={repr(part)} has wrong value in {repr(self)}')
 
         self._local = tuple(local)
 
@@ -408,12 +405,11 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     def increment(self, component: VersionComponent, amount: int = 1) -> 'Version':
         """Increment a selected version component and return self."""
         if not isinstance(component, VersionComponent):
-            raise TypeError('component={} is of wrong type {}'
-                            .format(repr(component), type(component)))
+            raise TypeError(f'component={repr(component)} is of wrong type {type(component)}')
         if not isinstance(amount, int):
-            raise TypeError('amount={} is of wrong type {}'.format(repr(amount), type(amount)))
+            raise TypeError(f'amount={repr(amount)} is of wrong type {type(amount)}')
         if amount < 1:
-            raise ValueError('amount={} has wrong value'.format(amount))
+            raise ValueError(f'amount={amount} has wrong value')
 
         if component in (VersionComponent.Major, VersionComponent.Minor, VersionComponent.Patch):
             self._increment_release(component, amount)
@@ -434,7 +430,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
                     pre_patch += amount
                 self._pre_release[-1] = (pre_sep, pre_type, pre_patch)
         else:
-            raise ValueError('incrementing component={} is not possible'.format(repr(component)))
+            raise ValueError(f'incrementing component={repr(component)} is not possible')
 
         return self
 
@@ -497,7 +493,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
             return '.'.join(str(_) for _ in version_tuple[:2])
         if _version_tuple_checker(version_tuple, (True, True, True)):
             return '.'.join(str(_) for _ in version_tuple[:3])
-        raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
+        raise ValueError(f'cannot generate valid version string from {repr(self)}')
 
     def _pre_release_segment_to_str(self, segment: int) -> str:
         assert self._pre_release is not None
@@ -505,10 +501,10 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         if _version_tuple_checker(version_tuple, (True, True, False)):
             return '{}{}'.format(*version_tuple[:2])
         if _version_tuple_checker(version_tuple, (True, False, True)):
-            return '{}{}'.format(version_tuple[0], version_tuple[2])
+            return f'{version_tuple[0]}{version_tuple[2]}'
         if _version_tuple_checker(version_tuple, (True, True, True)):
             return '{}{}{}'.format(*version_tuple)
-        raise ValueError('cannot generate valid version string from {}'.format(repr(self)))
+        raise ValueError(f'cannot generate valid version string from {repr(self)}')
 
     def pre_release_to_str(self) -> str:
         if self._pre_release is None:
@@ -519,11 +515,10 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     def local_to_str(self) -> str:
         if not self._local:
             return ''
-        return '+{}'.format(''.join(self._local))
+        return f'+{"".join(self._local)}'
 
     def to_str(self) -> str:
-        return '{}{}{}'.format(self.release_to_str(), self.pre_release_to_str(),
-                               self.local_to_str())
+        return f'{self.release_to_str()}{self.pre_release_to_str()}{self.local_to_str()}'
 
     def release_to_tuple(self, sort: bool = False) -> tuple:
         return (0 if sort else None) if self._major is None else self._major, \
@@ -567,8 +562,8 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         return semver.parse(self.to_str())
 
     def __repr__(self):
-        return '{}({})'.format(type(self).__name__, ', '.join(
-            '{}: {}'.format(field[1:], repr(value)) for field, value in vars(self).items()))
+        fields = ', '.join(f'{field[1:]}: {repr(value)}' for field, value in vars(self).items())
+        return f'{type(self).__name__}({fields})'
 
     def __str__(self):
         return self.to_str()
