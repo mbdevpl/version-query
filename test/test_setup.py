@@ -12,7 +12,7 @@ import types
 import typing as t
 import unittest
 
-__updated__ = '2020-01-29'
+__updated__ = '2020-02-05'
 
 
 def run_program(*args, glob: bool = False):
@@ -99,7 +99,7 @@ ALL_CLASSIFIERS_VARIANTS = [
 LINK_EXAMPLES = [
     (None, 'setup.py', True), ('this file', 'setup.py', True), (None, 'test/test_setup.py', True),
     (None, 'http://site.com', False), (None, '../something/else', False), (None, 'no.thing', False),
-    (None, '/my/abs/path', False)]
+    (None, '/my/abs/path', False), (None, 'ftp://server.com', False)]
 
 
 def get_package_folder_name():
