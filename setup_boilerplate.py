@@ -152,8 +152,6 @@ class RelativeRefFinder(docutils.nodes.NodeVisitor):
         """Call for "reference" nodes."""
         assert isinstance(node, docutils.nodes.TextElement), type(node)
         # print(f'  RelativeRefFinder: examining reference {node}')
-        # if len(node.children) != 1 or not isinstance(node.children[0], docutils.nodes.Text) \
-        #         or not all(_ in node.attributes for _ in ('name', 'refuri')):
         if len(node.children) != 1 or 'refuri' not in node.attributes \
                 or any(node.attributes['refuri'].startswith(_) for _ in {'http://', 'https://'}):
             return
@@ -172,7 +170,6 @@ class RelativeRefFinder(docutils.nodes.NodeVisitor):
         if not path.is_file():
             return
         # print('  RelativeRefFinder: reference points to existing file')
-        # assert node.attributes['name'] == node.children[0].astext()
         self.references.append(node)
 
     def unknown_visit(self, node: docutils.nodes.Node) -> None:
@@ -194,6 +191,7 @@ def resolve_relative_rst_links(text: str, base_link: str) -> str:
     document.walk(finder)
     for target in finder.references:
         print(f'  resolve_relative_rst_links: resolving reference {target}')
+        assert isinstance(target, docutils.nodes.TextElement), type(target)
         refuri = target.attributes['refuri']
         if 'name' in target.attributes:
             name = target.attributes['name']
