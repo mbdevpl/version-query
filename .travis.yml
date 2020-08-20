@@ -21,20 +21,21 @@ jobs:
       language: python
       python: "pypy3.6-7.1.1"
     - os: osx
-      osx_image: xcode11.2
+      osx_image: xcode12u
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.6"
     - os: osx
-      osx_image: xcode11.2
+      osx_image: xcode12u
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.7"
     - os: osx
-      osx_image: xcode11.2
+      osx_image: xcode12u
       language: generic
       env: TRAVIS_PYTHON_VERSION="3.8"
 
 before_install:
   - DIAGNOSE_PYENV=1 .build/install_pyenv.sh
+  - if [[ "$(uname)" == "Darwin" ]]; then source ~/.bash_profile; fi
 
 install:
   - pip install -U pip
