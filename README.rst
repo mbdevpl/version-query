@@ -15,21 +15,17 @@ Zero-overhead package versioning for Python.
     :target: https://pypi.org/project/version-query
     :alt: package version from PyPI
 
-.. image:: https://travis-ci.com/mbdevpl/version-query.svg?branch=master
-    :target: https://travis-ci.com/mbdevpl/version-query
-    :alt: build status from Travis CI
-
-.. image:: https://ci.appveyor.com/api/projects/status/github/mbdevpl/version-query?branch=master&svg=true
-    :target: https://ci.appveyor.com/project/mbdevpl/version-query
-    :alt: build status from AppVeyor
-
-.. image:: https://api.codacy.com/project/badge/Grade/437ab82bd6324530847fe8ed833f8d78
-    :target: https://www.codacy.com/app/mbdevpl/version-query
-    :alt: grade from Codacy
+.. image:: https://github.com/mbdevpl/version-query/actions/workflows/python.yml/badge.svg?branch=main
+    :target: https://github.com/mbdevpl/version-query/actions
+    :alt: build status from GitHub
 
 .. image:: https://codecov.io/gh/mbdevpl/version-query/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/mbdevpl/version-query
     :alt: test coverage from Codecov
+
+.. image:: https://api.codacy.com/project/badge/Grade/437ab82bd6324530847fe8ed833f8d78
+    :target: https://www.codacy.com/app/mbdevpl/version-query
+    :alt: grade from Codacy
 
 .. image:: https://img.shields.io/github/license/mbdevpl/version-query.svg
     :target: NOTICE
