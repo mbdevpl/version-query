@@ -1,10 +1,35 @@
 """Below code is generic boilerplate and normally should not be changed.
 
-To avoid setup script boilerplate, create "setup.py" file with the minimal contents as given
-in SETUP_TEMPLATE below, and modify it according to the specifics of your package.
+See the implementation of setup_boilerplate.Package for available options.
+Also, some fields have default values. See DEFAULT_* constants below for those values.
 
-See the implementation of setup_boilerplate.Package for default metadata values and available
-options.
+To avoid setup script boilerplate, create "setup.py" file with the minimal contents as given
+below and modify it according to the specifics of your package.
+Note: string limiters need to be adjusted.
+
+"" "Setup script." ""
+
+import setup_boilerplate
+
+
+class Package(setup_boilerplate.Package):
+    "" "Package metadata." ""
+
+    name = ''
+    description = ''
+    url = 'https://github.com/mbdevpl/...'
+    classifiers = [
+        'Development Status :: 1 - Planning',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3 :: Only']
+    keywords = []
+
+
+if __name__ == '__main__':
+    Package.setup()
 """
 
 import logging
@@ -13,41 +38,22 @@ import runpy
 import sys
 import typing as t
 
+import docutils.frontend
 import docutils.nodes
 import docutils.parsers.rst
 import docutils.utils
 import setuptools
 
-__updated__ = '2020-02-05'
+__version__ = '2022.01.03'
 
 _LOG = logging.getLogger(__name__)
 
-SETUP_TEMPLATE = '''"""Setup script."""
-
-import setup_boilerplate
-
-
-class Package(setup_boilerplate.Package):
-
-    """Package metadata."""
-
-    name = ''
-    description = ''
-    url = 'https://github.com/mbdevpl/...'
-    classifiers = [
-        'Development Status :: 1 - Planning',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3 :: Only']
-    keywords = []
-
-
-if __name__ == '__main__':
-    Package.setup()
-'''
-
 HERE = pathlib.Path(__file__).resolve().parent
+
+DEFAULT_URL = 'https://github.com/mbdevpl'
+DEFAULT_AUTHOR = 'Mateusz Bysiek'
+DEFAULT_AUTHOR_EMAIL = 'mateusz.bysiek@gmail.com'
+DEFAULT_LICENSE_STR = 'Apache License 2.0'
 
 
 def find_version(
@@ -57,6 +63,11 @@ def find_version(
 
     To avoid importing whole package only to read the version, just module containing the version
     is imported. Therefore relative imports in that module will break the setup.
+
+    :param package_name: name of the package
+    :param version_module_name: name of the module containing the version
+    :param version_variable_name: name of the variable containing the version
+    :return: version string
     """
     version_module_path = f'{package_name.replace("-", "_")}/{version_module_name}.py'
     version_module_vars = runpy.run_path(version_module_path)
@@ -64,7 +75,11 @@ def find_version(
 
 
 def find_packages(root_directory: str = '.') -> t.List[str]:
-    """Find packages to pack."""
+    """Find packages to pack.
+
+    :param root_directory: directory to start searching from
+    :return: list of packages
+    """
     exclude = ['test', 'test.*'] if ('bdist_wheel' in sys.argv or 'bdist' in sys.argv) else []
     packages_list = setuptools.find_packages(root_directory, exclude=exclude)
     return packages_list
@@ -75,10 +90,13 @@ def parse_requirements(
     """Read contents of requirements.txt file and return data from its relevant lines.
 
     Only non-empty and non-comment lines are relevant.
+
+    :param requirements_path: path to the requirements file if custom one is used
+    :return: list of requirements
     """
     requirements = []
-    with HERE.joinpath(requirements_path).open() as reqs_file:
-        for requirement in [line.strip() for line in reqs_file.read().splitlines()]:
+    with HERE.joinpath(requirements_path).open(encoding='utf-8') as requirements_file:
+        for requirement in [line.strip() for line in requirements_file.read().splitlines()]:
             if not requirement or requirement.startswith('#'):
                 continue
             requirements.append(requirement)
@@ -87,10 +105,21 @@ def parse_requirements(
 
 def partition_version_classifiers(
         classifiers: t.Sequence[str], version_prefix: str = 'Programming Language :: Python :: ',
-        only_suffix: str = ' :: Only') -> t.Tuple[t.List[t.Sequence[int]], t.List[t.Sequence[int]]]:
-    """Find version number classifiers in given list and partition them into 2 groups."""
-    versions_min: t.List[t.Sequence[int]] = []
-    versions_only: t.List[t.Sequence[int]] = []
+        only_suffix: str = ' :: Only'
+        ) -> t.Tuple[t.List[t.Tuple[int, ...]], t.List[t.Tuple[int, ...]]]:
+    """Find version number classifiers in given list and partition them into 2 groups.
+
+    The 2 groups being:
+    1. minimum versions, any version at least as high this is compatible
+    2. only versions, this specific version is compatible, but nothing is said about other versions
+
+    :param classifiers: sequence of trove classifiers to be analysed
+    :param version_prefix: prefix that identifies a version classifier
+    :param only_suffix: prefix that identifies an "only version" classifier
+    :return: parsed and partitioned version tuples
+    """
+    versions_min: t.List[t.Tuple[int, ...]] = []
+    versions_only: t.List[t.Tuple[int, ...]] = []
     for classifier in classifiers:
         version = classifier.replace(version_prefix, '')
         versions = versions_min
@@ -98,7 +127,7 @@ def partition_version_classifiers(
             version = version.replace(only_suffix, '')
             versions = versions_only
         try:
-            versions.append(tuple([int(_) for _ in version.split('.')]))
+            versions.append(tuple(int(_) for _ in version.split('.')))
         except ValueError:
             pass
     return versions_min, versions_only
@@ -107,7 +136,13 @@ def partition_version_classifiers(
 def find_required_python_version(
         classifiers: t.Sequence[str], version_prefix: str = 'Programming Language :: Python :: ',
         only_suffix: str = ' :: Only') -> t.Optional[str]:
-    """Determine the minimum required Python version."""
+    """Determine the minimum required Python version.
+
+    :param classifiers: sequence of trove classifiers to be analysed
+    :param version_prefix: prefix that identifies a version classifier
+    :param only_suffix: prefix that identifies an "only version" classifier
+    :return: minimum required Python version string, if any
+    """
     versions_min, versions_only = partition_version_classifiers(
         classifiers, version_prefix, only_suffix)
     if len(versions_only) > 1:
@@ -156,15 +191,15 @@ class RelativeRefFinder(docutils.nodes.NodeVisitor):
         assert isinstance(node, docutils.nodes.TextElement), type(node)
         _LOG.debug('RelativeRefFinder: examining reference %s', node)
         if len(node.children) != 1 or 'refuri' not in node.attributes \
-                or any(node.attributes['refuri'].startswith(_) for _ in {'http://', 'https://'}):
+                or node.attributes['refuri'].startswith(('http://', 'https://')):
             return
-        # print('  RelativeRefFinder: reference passed initial check')
+        # _LOG.debug('  RelativeRefFinder: reference passed initial check')
         path = pathlib.Path(node.attributes['refuri'])
+        if path.is_absolute():
+            return
         try:
-            if path.is_absolute():
-                return
-            resolved_path = path.resolve()
-        except OSError:  # in is_absolute() and resolve(), on URLs in Windows
+            resolved_path = path.resolve(strict=True)
+        except FileNotFoundError:
             return
         try:
             resolved_path.relative_to(self.root_dir)
@@ -185,9 +220,12 @@ def resolve_relative_rst_links(text: str, base_link: str) -> str:
 
     Links are resolved only if they point to files existing in the project's working directory.
 
-    All links of form `link`_ become `link <base_link/link>`_.
+    All links of form `link`_ become `link <absolute_link>`_.
 
-    And all
+    And all link of the form :target: link become :target: absolute_link.
+
+    Where absolute_link is made by concatenating base_link to link with no separator added
+    in between. So in most cases base_link should and with a slash.
     """
     document = parse_rst(text)
     finder = RelativeRefFinder(HERE, document)
@@ -214,61 +252,80 @@ def resolve_relative_rst_links(text: str, base_link: str) -> str:
 class Package:
     """Default metadata and behaviour for a Python package setup script."""
 
-    root_directory = '.'  # type: str
+    root_directory: str = '.'
     """Root directory of the source code of the package, relative to the setup.py file location."""
 
-    name = None  # type: str
+    name: str
+    """Package name."""
 
-    version = None  # type: str
-    """"If None, it will be obtained from "package_name._version.VERSION" variable."""
+    version: str
+    """Package version as string.
 
-    description = None  # type: str
-
-    long_description = None  # type: str
-    """If None, it will be generated from readme."""
-
-    long_description_content_type = None  # type: str
-    """If None, it will be set accodring to readme file extension.
-
-    For this field to be automatically set, also long_description field has to be None.
+    If None, it will be obtained from "package_name._version.VERSION" variable.
     """
 
-    url = 'https://github.com/mbdevpl'  # type: str
-    download_url = None  # type: str
-    author = 'Mateusz Bysiek'  # type: str
-    author_email = 'mateusz.bysiek@gmail.com'  # type: str
-    # maintainer = None  # type: str
-    # maintainer_email = None  # type: str
-    license_str = 'Apache License 2.0'  # type: str
+    description: str
+    """One line of text that shortly describes the package."""
 
-    classifiers = []  # type: t.List[str]
-    """List of valid project classifiers: https://pypi.org/pypi?:action=list_classifiers"""
+    long_description: str
+    """Full description of the package, can be arbitrarily long.
 
-    keywords = []  # type: t.List[str]
+    If not set, it will be generated from readme.
+    """
 
-    packages = None  # type: t.List[str]
-    """If None, determined with help of setuptools."""
+    long_description_content_type: str
+    """Content type of the long description.
 
-    package_data = {}  # type: t.Dict[str, t.List[str]]
-    exclude_package_data = {}  # type: t.Dict[str, t.List[str]]
+    Usually one of 'text/x-rst', 'text/markdown' or 'text/plain'.
 
-    install_requires = None  # type: t.List[str]
+    If not set, it will be set according to readme file extension.
+    For this field to be automatically set, also long_description field cannot be set.
+    """
+
+    url: str = DEFAULT_URL
+    download_url: str = ''
+    author: str = DEFAULT_AUTHOR
+    author_email: str = DEFAULT_AUTHOR_EMAIL
+    maintainer: str
+    maintainer_email: str
+    license_str: str = DEFAULT_LICENSE_STR
+
+    classifiers: t.List[str] = []
+    """List of trove classifiers for the package.
+
+    List of valid classifiers: https://pypi.org/pypi?:action=list_classifiers
+    """
+
+    keywords: t.List[str] = []
+
+    packages: t.List[str]
+    """List of Python packages to be included in the distributed file.
+
+    Usually it's just one package per distributed file, but any number is supported.
+
+    If not set, determined with help of setuptools.
+    """
+
+    package_data: t.Dict[str, t.List[str]] = {}
+    exclude_package_data: t.Dict[str, t.List[str]] = {}
+
+    install_requires: t.Optional[t.List[str]] = None
     """If None, determined using requirements.txt."""
 
-    extras_require = {}  # type: t.Mapping[str, t.List[str]]
+    extras_require: t.Mapping[str, t.List[str]] = {}
     """A dictionary containing entries of type 'some_feature': ['requirement1', 'requirement2']."""
 
-    python_requires = None  # type: str
+    python_requires: t.Optional[str] = None
     """If None, determined from provided classifiers."""
 
-    entry_points = {}  # type: t.Mapping[str, t.List[str]]
+    entry_points: t.Mapping[str, t.List[str]] = {}
     """A dictionary used to enable automatic creation of console scripts, gui scripts and plugins.
 
     Example entry:
     'console_scripts': ['script_name = package.subpackage:function']
     """
 
-    test_suite = 'test'  # type: str
+    test_suite: str = 'test'
 
     @classmethod
     def try_fields(cls, *names) -> t.Optional[t.Any]:
@@ -287,7 +344,7 @@ class Package:
         """
         readme_path = HERE.joinpath(readme_filename)
         with readme_path.open(encoding=encoding) as readme_file:
-            long_description = readme_file.read()  # type: str
+            long_description: str = readme_file.read()
 
         if readme_path.suffix.lower() == '.rst' and cls.url.startswith('https://github.com/'):
             base_url = f'{cls.url}/blob/v{cls.version}/'
@@ -302,11 +359,15 @@ class Package:
     @classmethod
     def prepare(cls) -> None:
         """Fill in possibly missing package metadata."""
-        if cls.version is None:
+        if not hasattr(cls, 'version'):
             cls.version = find_version(cls.name)
-        if cls.long_description is None:
+        if not hasattr(cls, 'long_description'):
             cls.long_description, cls.long_description_content_type = cls.parse_readme()
-        if cls.packages is None:
+        if not hasattr(cls, 'maintainer'):
+            cls.maintainer = cls.author
+        if not hasattr(cls, 'maintainer_email'):
+            cls.maintainer_email = cls.author_email
+        if not hasattr(cls, 'packages'):
             cls.packages = find_packages(cls.root_directory)
         if cls.install_requires is None:
             cls.install_requires = parse_requirements()
@@ -323,8 +384,8 @@ class Package:
             long_description_content_type=cls.long_description_content_type,
             url=cls.url, download_url=cls.download_url,
             author=cls.author, author_email=cls.author_email,
-            maintainer=cls.try_fields('maintainer', 'author'),
-            maintainer_email=cls.try_fields('maintainer_email', 'author_email'),
+            maintainer=cls.maintainer,
+            maintainer_email=cls.maintainer_email,
             license=cls.license_str, classifiers=cls.classifiers, keywords=cls.keywords,
             packages=cls.packages, package_dir={'': cls.root_directory},
             include_package_data=True,

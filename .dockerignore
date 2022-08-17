@@ -1,3 +1,5 @@
+## /.gitignore
+
 # IDE: Visual Studio Code
 /.vscode
 
@@ -22,3 +24,7 @@ __pycache__
 # Python: coverage
 /htmlcov
 /.coverage
+
+# Python: Jupyter notebooks
+.ipynb_checkpoints
+*-checkpoint.ipynb

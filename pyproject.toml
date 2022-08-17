@@ -1,2 +1,26 @@
 [build-system]
-requires=['docutils', 'GitPython', 'packaging', 'semver', 'setuptools', 'wheel']
+requires = ['docutils', 'GitPython', 'packaging', 'semver', 'setuptools', 'wheel']
+
+[tool.pydocstyle]
+ignore = ['D102', 'D103', 'D105', 'D107', 'D203', 'D213', 'D406', 'D407', 'D412', 'D413']
+
+[tool.pylint.MASTER]
+load-plugins = [
+    'pylint.extensions.mccabe',
+    'pylint.extensions.redefined_variable_type',
+    'pylint.extensions.broad_try_clause'
+]
+
+[tool.pylint.'MESSAGES CONTROL']
+docstring-min-length = 5
+
+[tool.pylint.SIMILARITIES]
+ignore-imports = 'yes'
+min-similarity-lines = 5
+
+[tool.pylint.BASIC]
+no-docstring-rgx = '^(test)?_|.*Tests$'
+unsafe-load-any-extension = 'yes'
+
+[tool.pylint.REPORTS]
+output-format = 'colorized'
