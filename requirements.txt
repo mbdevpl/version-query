@@ -1,4 +1,4 @@
-GitPython ~= 3.0
-packaging >= 20.1
-semver ~= 2.9
-setuptools >= 45.1
+GitPython ~= 3.1
+packaging >= 21.0
+semver ~= 2.13
+setuptools >= 60.4
