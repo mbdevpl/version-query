@@ -58,17 +58,17 @@ VOLUME ["/home/user/version-query"]
 ENV EXAMPLE_PROJECTS_PATH="/home/user"
 
 RUN set -Eeuxo pipefail && \
-  git clone https://github.com/PyCQA/pycodestyle ../pycodestyle && \
-  cd ../pycodestyle && \
+  git clone https://github.com/PyCQA/pycodestyle pycodestyle && \
+  cd pycodestyle && \
   python setup.py build && \
   cd - && \
-  git clone https://github.com/mbdevpl/argunparse ../argunparse && \
-  cd ../argunparse && \
+  git clone https://github.com/mbdevpl/argunparse argunparse && \
+  cd argunparse && \
   pip install -r test_requirements.txt && \
   python setup.py build && \
   cd - && \
-  git clone https://github.com/python-semver/python-semver ../semver && \
-  cd ../semver && \
+  git clone https://github.com/python-semver/python-semver semver && \
+  cd semver && \
   python setup.py build && \
   cd - && \
   pip install jupyter
