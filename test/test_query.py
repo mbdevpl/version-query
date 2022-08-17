@@ -104,7 +104,7 @@ class Tests(unittest.TestCase):
     @unittest.skipUnless(
             os.environ.get('TEST_PACKAGING') or os.environ.get('CI'), 'skipping packaging test')
     def test_query_pkg_info_current(self):
-        with preserve_logger_level('system_query'):
+        with preserve_logger_level('version_query'):
             run_module('setup', 'build')
         paths = list(pathlib.Path.cwd().glob('*.egg-info/PKG-INFO'))
         self.assertEqual(len(paths), 1)
@@ -137,7 +137,7 @@ class Tests(unittest.TestCase):
     @unittest.skipUnless(
             os.environ.get('TEST_PACKAGING') or os.environ.get('CI'), 'skipping packaging test')
     def test_query_package_folder_current(self):
-        with preserve_logger_level('system_query'):
+        with preserve_logger_level('version_query'):
             run_module('setup', 'build')
         path = pathlib.Path.cwd().joinpath('version_query')
         version = query_package_folder(path)
@@ -164,7 +164,7 @@ class Tests(unittest.TestCase):
     def test_help(self):
         sio = io.StringIO()
         with contextlib.redirect_stderr(sio):
-            with preserve_logger_level('system_query'):
+            with preserve_logger_level('version_query'):
                 with self.assertRaises(SystemExit):
                     run_module('version_query')
         _LOG.info('%s', sio.getvalue())
@@ -172,7 +172,7 @@ class Tests(unittest.TestCase):
     def test_bad_usage(self):
         sio = io.StringIO()
         with contextlib.redirect_stderr(sio):
-            with preserve_logger_level('system_query'):
+            with preserve_logger_level('version_query'):
                 with self.assertRaises(ValueError):
                     run_module('version_query', '-p', '-i', '.')
         _LOG.info('%s', sio.getvalue())
@@ -180,7 +180,7 @@ class Tests(unittest.TestCase):
     def test_here(self):
         sio = io.StringIO()
         with contextlib.redirect_stdout(sio):
-            with preserve_logger_level('system_query'):
+            with preserve_logger_level('version_query'):
                 run_module('version_query', '.')
         self.assertEqual(sio.getvalue().rstrip(), query_caller().to_str())
         self.assertEqual(sio.getvalue().rstrip(), query_version_str())
@@ -188,7 +188,7 @@ class Tests(unittest.TestCase):
     def test_increment_here(self):
         sio = io.StringIO()
         with contextlib.redirect_stdout(sio):
-            with preserve_logger_level('system_query'):
+            with preserve_logger_level('version_query'):
                 run_module('version_query', '-i', '.')
         self.assertEqual(sio.getvalue().rstrip(),
                          query_caller().increment(VersionComponent.Patch).to_str())
@@ -196,7 +196,7 @@ class Tests(unittest.TestCase):
     def test_predict_here(self):
         sio = io.StringIO()
         with contextlib.redirect_stdout(sio):
-            with preserve_logger_level('system_query'):
+            with preserve_logger_level('version_query'):
                 run_module('version_query', '-p', '.')
         self.assertEqual(sio.getvalue().rstrip(), predict_caller().to_str())
         self.assertEqual(sio.getvalue().rstrip(), predict_version_str())
