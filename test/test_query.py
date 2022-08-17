@@ -101,7 +101,8 @@ class Tests(unittest.TestCase):
         self._check_examples_count('PKG-INFO', PKG_INFO_EXAMPLE_PATHS)
         self._query_test_case(PKG_INFO_EXAMPLE_PATHS, query_pkg_info)
 
-    @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
+    @unittest.skipUnless(
+            os.environ.get('TEST_PACKAGING') or os.environ.get('CI'), 'skipping packaging test')
     def test_query_pkg_info_current(self):
         with preserve_logger_level('system_query'):
             run_module('setup', 'build')
@@ -133,7 +134,8 @@ class Tests(unittest.TestCase):
         self._check_examples_count('package folder', PACKAGE_FOLDER_EXAMPLES)
         self._query_test_case(PACKAGE_FOLDER_EXAMPLES, query_package_folder)
 
-    @unittest.skipUnless(os.environ.get('TEST_PACKAGING'), 'skipping packaging test')
+    @unittest.skipUnless(
+            os.environ.get('TEST_PACKAGING') or os.environ.get('CI'), 'skipping packaging test')
     def test_query_package_folder_current(self):
         with preserve_logger_level('system_query'):
             run_module('setup', 'build')
