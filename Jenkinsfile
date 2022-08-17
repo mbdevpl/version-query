@@ -9,7 +9,7 @@ pipeline {
   }
 
   environment {
-    PYTHON_MODULES = 'ingit test *.py'
+    PYTHON_MODULES = 'version_query test *.py'
   }
 
   agent any
