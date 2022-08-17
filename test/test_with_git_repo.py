@@ -10,18 +10,17 @@ import git
 
 _LOG = logging.getLogger(__name__)
 
-__updated__ = '2020-01-29'
+__version__ = '2022.08.18'
 
 
 class GitRepoTests(unittest.TestCase):
-
     """Provide several utility propertied and methods named repo_* and git_*."""
 
     repo = None  # type: git.Repo
     repo_path = None  # type: pathlib.Path
 
     def setUp(self):
-        self._tmpdir = tempfile.TemporaryDirectory()
+        self._tmpdir = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
         self.repo_path = pathlib.Path(self._tmpdir.name)
         self.assertTrue(self.repo_path.is_dir())
         self.repo = None
@@ -84,6 +83,7 @@ class GitRepoTests(unittest.TestCase):
 
 
 class GitRepoSelfTests(GitRepoTests):
+    """Check that GitRepoTests class works."""
 
     def test_typical(self):
         self.git_init()
