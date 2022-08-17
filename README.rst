@@ -19,7 +19,7 @@ Zero-overhead package versioning for Python.
     :target: https://github.com/mbdevpl/version-query/actions
     :alt: build status from GitHub
 
-.. image:: https://codecov.io/gh/mbdevpl/version-query/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/mbdevpl/version-query/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/mbdevpl/version-query
     :alt: test coverage from Codecov
 
