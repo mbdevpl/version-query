@@ -4,6 +4,6 @@ include LICENSE
 include NOTICE
 include ./*/py.typed
 
-include test_requirements.txt
+include requirements_test.txt
 recursive-include ./test __init__.py
 include test/examples.py

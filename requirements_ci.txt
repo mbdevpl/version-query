@@ -1,0 +1,9 @@
+codecov ~= 2.1
+coverage ~= 6.2
+mypy ~= 0.930
+pycodestyle ~= 2.8
+pydocstyle ~= 6.1
+pylint ~= 2.12
+types-docutils ~= 0.17
+types-setuptools ~= 57.4
+-r requirements_test.txt

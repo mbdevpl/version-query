@@ -12,27 +12,24 @@ import types
 import typing as t
 import unittest
 
-__updated__ = '2020-02-05'
+__version__ = '2022.08.15'
 
 
-def run_program(*args, glob: bool = False):
+def run_program(*args, glob: bool = False) -> None:
     """Run subprocess with given args. Use path globbing for each arg that contains an asterisk."""
     if glob:
         cwd = pathlib.Path.cwd()
         args = tuple(itertools.chain.from_iterable(
             list(str(_.relative_to(cwd)) for _ in cwd.glob(arg)) if '*' in arg else [arg]
             for arg in args))
-    process = subprocess.Popen(args)
-    process.wait()
-    if process.returncode != 0:
-        raise AssertionError(f'execution of {args} returned {process.returncode}')
-    return process
+    try:
+        subprocess.run(args, check=True)
+    except subprocess.CalledProcessError as err:
+        raise AssertionError(f'execution of {args} failed') from err
 
 
-def run_pip(*args, **kwargs):
-    python_exec_name = pathlib.Path(sys.executable).name
-    pip_exec_name = python_exec_name.replace('python', 'pip')
-    run_program(pip_exec_name, *args, **kwargs)
+def run_pip(*args, **kwargs) -> None:
+    run_program(sys.executable, '-m', 'pip', *args, **kwargs)
 
 
 def run_module(name: str, *args, run_name: str = '__main__') -> None:
@@ -99,7 +96,7 @@ ALL_CLASSIFIERS_VARIANTS = [
 LINK_EXAMPLES = [
     (None, 'setup.py', True), ('this file', 'setup.py', True), (None, 'test/test_setup.py', True),
     (None, 'http://site.com', False), (None, '../something/else', False), (None, 'no.thing', False),
-    (None, '/my/abs/path', False), (None, 'ftp://server.com', False)]
+    (None, '/my/abs/path', False)]
 
 
 def get_package_folder_name():
@@ -135,8 +132,8 @@ class UnitTests(unittest.TestCase):
 
     def test_requirements_empty(self):
         parse_requirements = import_module_member('setup_boilerplate', 'parse_requirements')
-        reqs_file = tempfile.NamedTemporaryFile('w', delete=False)
-        reqs_file.close()
+        with tempfile.NamedTemporaryFile('w', delete=False) as reqs_file:
+            pass
         results = parse_requirements(reqs_file.name)
         self.assertIsInstance(results, list)
         self.assertEqual(len(results), 0)
@@ -145,10 +142,9 @@ class UnitTests(unittest.TestCase):
     def test_requirements_comments(self):
         parse_requirements = import_module_member('setup_boilerplate', 'parse_requirements')
         reqs = ['# comment', 'numpy', '', '# another comment', 'scipy', '', '# one more comment']
-        reqs_file = tempfile.NamedTemporaryFile('w', delete=False)
-        for req in reqs:
-            print(req, file=reqs_file)
-        reqs_file.close()
+        with tempfile.NamedTemporaryFile('w', delete=False) as reqs_file:
+            for req in reqs:
+                print(req, file=reqs_file)
         results = parse_requirements(reqs_file.name)
         self.assertIsInstance(results, list)
         self.assertGreater(len(results), 0)
@@ -214,7 +210,6 @@ class UnitTests(unittest.TestCase):
 
 
 class PackageTests(unittest.TestCase):
-
     """Test methods of Package class."""
 
     def test_try_fields(self):
@@ -284,13 +279,13 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(Package.version, version_)
         self.assertEqual(Package.long_description, long_description_)
 
-        Package.long_description = None
-        Package.packages = None
-        Package.install_requires = None
-        Package.python_requires = None
+        del Package.long_description
+        del Package.packages
+        del Package.install_requires
+        del Package.python_requires
         Package.prepare()
 
-        Package.version = None
+        del Package.version
         with self.assertRaises(FileNotFoundError):
             Package.prepare()
 
@@ -298,7 +293,6 @@ class PackageTests(unittest.TestCase):
 @unittest.skipUnless(os.environ.get('TEST_PACKAGING') or os.environ.get('CI'),
                      'skipping packaging tests for actual package')
 class IntergrationTests(unittest.TestCase):
-
     """Test if the boilerplate can actually create a valid package."""
 
     pkg_name = get_package_folder_name()
@@ -316,26 +310,32 @@ class IntergrationTests(unittest.TestCase):
         self.assertTrue(os.path.isdir('dist'))
 
     def test_install_code(self):
-        run_pip('install', '.')
-        run_pip('uninstall', '-y', self.pkg_name)
+        with tempfile.TemporaryDirectory() as temporary_folder:
+            run_pip('install', '--prefix', temporary_folder, '.')
+        self.assertFalse(pathlib.Path(temporary_folder).exists())
 
     def test_install_source_tar(self):
         find_version = import_module_member('setup_boilerplate', 'find_version')
         version = find_version(self.pkg_name)
-        run_pip('install', f'dist/*-{version}.tar.gz', glob=True)
-        run_pip('uninstall', '-y', self.pkg_name)
+        with tempfile.TemporaryDirectory() as temporary_folder:
+            run_pip(
+                'install', '--prefix', temporary_folder, f'dist/*-{version}.tar.gz', glob=True)
+        self.assertFalse(pathlib.Path(temporary_folder).exists())
 
     def test_install_source_zip(self):
         find_version = import_module_member('setup_boilerplate', 'find_version')
         version = find_version(self.pkg_name)
-        run_pip('install', f'dist/*-{version}.zip', glob=True)
-        run_pip('uninstall', '-y', self.pkg_name)
+        with tempfile.TemporaryDirectory() as temporary_folder:
+            run_pip('install', '--prefix', temporary_folder, f'dist/*-{version}.zip', glob=True)
+        self.assertFalse(pathlib.Path(temporary_folder).exists())
 
     def test_install_wheel(self):
         find_version = import_module_member('setup_boilerplate', 'find_version')
         version = find_version(self.pkg_name)
-        run_pip('install', f'dist/*-{version}-*.whl', glob=True)
-        run_pip('uninstall', '-y', self.pkg_name)
+        with tempfile.TemporaryDirectory() as temporary_folder:
+            run_pip(
+                'install', '--prefix', temporary_folder, f'dist/*-{version}-*.whl', glob=True)
+        self.assertFalse(pathlib.Path(temporary_folder).exists())
 
     def test_pip_error(self):
         with self.assertRaises(AssertionError):
