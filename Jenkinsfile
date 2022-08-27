@@ -47,8 +47,8 @@ pipeline {
                 echo "\${PIPESTATUS[0]}" | tee pylint_status.log
                 python -m mypy ${PYTHON_MODULES} |& tee mypy.log
                 echo "\${PIPESTATUS[0]}" | tee mypy_status.log
-                python -m pycodestyle ${PYTHON_MODULES} |& tee pycodestyle.log
-                echo "\${PIPESTATUS[0]}" | tee pycodestyle_status.log
+                python -m flake518 ${PYTHON_MODULES} |& tee flake518.log
+                echo "\${PIPESTATUS[0]}" | tee flake518_status.log
                 python -m pydocstyle ${PYTHON_MODULES} |& tee pydocstyle.log
                 echo "\${PIPESTATUS[0]}" | tee pydocstyle_status.log
               """
