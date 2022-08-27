@@ -558,8 +558,8 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     def to_py_version(self) -> packaging.version.Version:
         return packaging.version.Version(self.to_str())
 
-    def to_sem_version(self) -> dict:
-        return semver.parse(self.to_str())
+    def to_sem_version(self) -> semver.VersionInfo:
+        return semver.VersionInfo.parse(self.to_str())
 
     def __repr__(self):
         fields = ', '.join(f'{field[1:]}: {repr(value)}' for field, value in vars(self).items())

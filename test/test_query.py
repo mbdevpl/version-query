@@ -22,6 +22,8 @@ from .test_setup import run_module
 
 _LOG = logging.getLogger(__name__)
 
+IGNORED_FOLDER_NAMES = ['opencv']
+
 
 @contextlib.contextmanager
 def temporarily_set_logger_level(logger_name: str, level: int):
@@ -59,13 +61,16 @@ class Tests(unittest.TestCase):
 
     def _query_test_case(self, paths, query_function):
         for path in paths:
+            if any(_ in path.parts for _ in IGNORED_FOLDER_NAMES):
+                continue
             with self.subTest(path=path, query_function=query_function):
                 _LOG.debug('testing %s() on %s', query_function.__name__, path)
                 try:
                     version = query_function(path)
-                    _LOG.debug('%s: %s', path, version)
                 except ValueError:
                     _LOG.info('failed to get version from %s', path, exc_info=True)
+                else:
+                    _LOG.debug('%s: %s', path, version)
 
     def test_query_git_repo(self):
         self._check_examples_count('git repo', GIT_REPO_EXAMPLES)
@@ -76,7 +81,7 @@ class Tests(unittest.TestCase):
             with tempfile.NamedTemporaryFile(suffix='.py', dir=project_path_str,
                                              delete=False) as project_file:
                 project_file_path = pathlib.Path(project_file.name)
-            with project_file_path.open('a') as project_file:
+            with project_file_path.open('a', encoding='utf-8') as project_file:
                 project_file.write('from version_query.query import predict_caller\n\n\n'
                                    'def caller():\n    predict_caller()\n\n\ncaller()\n')
             sys.path.insert(0, project_path_str)
@@ -118,12 +123,12 @@ class Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             query_pkg_info(bad_file_path)
 
-        with bad_file_path.open('a') as bad_file:
+        with bad_file_path.open('a', encoding='utf-8') as bad_file:
             bad_file.write('blah blah blah')
         with self.assertRaises(ValueError):
             query_pkg_info(bad_file_path)
 
-        with bad_file_path.open('a') as bad_file:
+        with bad_file_path.open('a', encoding='utf-8') as bad_file:
             bad_file.write('Version: hello world')
         with self.assertRaises(ValueError):
             query_pkg_info(bad_file_path)

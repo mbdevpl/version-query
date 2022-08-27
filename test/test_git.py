@@ -14,7 +14,6 @@ _LOG = logging.getLogger(__name__)
 
 
 class Tests(GitRepoTests):
-
     """Test suite for automated tests of generated git repositories.
 
     Each case is executed in a fresh empty repository.

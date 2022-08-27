@@ -26,19 +26,18 @@ class Tests(unittest.TestCase):
 
                 py_version = \
                     pkg_resources.parse_version(version_str)  # type: packaging.version.Version
+                # self.assertIsInstance(
+                #     py_version, packaging.version.Version, msg=(type(py_version), py_version))
                 _LOG.debug('packaging parsed version string %s into %s: %s',
                            repr(version_str), type(py_version), py_version)
 
                 try:
-                    sem_version = semver.parse(version_str)  # type: dict
-                    _LOG.debug('semver parsed version string %s into %s: %s',
-                               repr(version_str), type(sem_version), sem_version)
-                    sem_version_info = \
-                        semver.parse_version_info(version_str)  # type: semver.VersionInfo
-                    _LOG.debug('semver parsed version string %s into %s: %s',
-                               repr(version_str), type(sem_version_info), sem_version_info)
+                    sem_version = semver.VersionInfo.parse(version_str)  # type: semver.VersionInfo
                 except ValueError:
                     _LOG.debug('semver could not parse version string %s', repr(version_str))
+                else:
+                    _LOG.debug('semver parsed version string %s into %s: %s',
+                               repr(version_str), type(sem_version), sem_version)
 
                 self.assertEqual(Version.from_str(version_str).to_tuple(), version_tuple)
 
@@ -77,36 +76,33 @@ class Tests(unittest.TestCase):
             version_tuple = case_to_version_tuple(args, kwargs)
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 try:
-                    sem_version = semver.parse(version_str)
+                    sem_version = semver.VersionInfo.parse(version_str)  # type: semver.VersionInfo
                 except ValueError:
-                    pass
+                    continue
                 else:
                     self.assertEqual(Version.from_sem_version(sem_version).to_tuple(),
                                      version_tuple, sem_version)
-                try:
-                    sem_version_info = semver.parse_version_info(version_str)
-                except ValueError:
-                    pass
-                else:
-                    self.assertEqual(Version.from_sem_version(sem_version_info).to_tuple(),
-                                     version_tuple, sem_version_info)
+                sem_version_dict = sem_version.to_dict()
+                self.assertEqual(Version.from_sem_version(sem_version_dict).to_tuple(),
+                                 version_tuple, sem_version_dict)
 
     def test_to_sem_version(self):
         for version_str, (args, kwargs) in COMPATIBLE_STR_CASES.items():
             version_tuple = case_to_version_tuple(args, kwargs)
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 try:
-                    sem_version = semver.parse(version_str)
+                    sem_version = semver.VersionInfo.parse(version_str)
                 except ValueError:
                     continue
                 version = Version.from_str(version_str)
                 self.assertEqual(version.to_sem_version(), sem_version)
 
     def test_from_version(self):
-        for version_str, (args, kwargs) in INIT_CASES.items():
+        for version_str, args_kwargs_tuple in INIT_CASES.items():
+            args, kwargs = args_kwargs_tuple
             with self.subTest(args=args, kwargs=kwargs, version_str=version_str):
                 version = Version.from_str(version_str)
-                created_version = Version(*args, **dict(kwargs))
+                created_version = Version(*args, **kwargs)
                 self.assertIsInstance(created_version, Version)
                 self.assertEqual(version, created_version)
                 version_copy = Version.from_version(created_version)
@@ -114,9 +110,10 @@ class Tests(unittest.TestCase):
                 self.assertEqual(version_copy, created_version)
 
     def test_init(self):
-        for version_str, (args, kwargs) in INIT_CASES.items():
+        for version_str, args_kwargs_tuple in INIT_CASES.items():
+            args, kwargs = args_kwargs_tuple
             with self.subTest(args=args, kwargs=kwargs, version_str=version_str):
-                version = Version(*args, **dict(kwargs))
+                version = Version(*args, **kwargs)
                 self.assertIsInstance(version, Version)
                 self.assertEqual(Version.from_str(version_str), version)
                 self.assertIsInstance(version.release, tuple)

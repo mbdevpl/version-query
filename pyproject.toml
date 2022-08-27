@@ -2,13 +2,18 @@
 requires = ['docutils', 'GitPython', 'packaging', 'semver', 'setuptools', 'wheel']
 
 [tool.pydocstyle]
-ignore = ['D102', 'D103', 'D105', 'D107', 'D203', 'D213', 'D406', 'D407', 'D412', 'D413']
+ignore = [
+    'D102', 'D103', 'D105', 'D107',
+    'D203', 'D213',
+    'D406', 'D407', 'D412', 'D413'
+]
 
 [tool.pylint.MASTER]
 load-plugins = [
+    'pylint.extensions.broad_try_clause',
     'pylint.extensions.mccabe',
-    'pylint.extensions.redefined_variable_type',
-    'pylint.extensions.broad_try_clause'
+    'pylint.extensions.no_self_use',
+    'pylint.extensions.redefined_variable_type'
 ]
 
 [tool.pylint.'MESSAGES CONTROL']

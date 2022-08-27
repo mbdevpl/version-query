@@ -41,9 +41,10 @@ def _git_version_tags(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
 
 
 def _latest_git_version_tag_on_branches(
-        repo: git.Repo, assume_if_none: bool, commit: git.Commit, commit_distance: int,
-        skip_commits: t.Set[git.Commit]) -> t.Union[int, t.Tuple[
-            git.Commit, t.Optional[git.TagReference], t.Optional[Version], int]]:
+        repo: git.Repo, assume_if_none: bool, commit: git.objects.Commit, commit_distance: int,
+        skip_commits: t.Set[git.objects.Commit]) -> t.Union[int, t.Tuple[
+            t.Optional[git.objects.Commit], t.Optional[git.TagReference], t.Optional[Version],
+            int]]:
     _LOG.log(logging.NOTSET, 'entering %i branches...', len(commit.parents))
     results = []
     main_commit_distance = None
@@ -51,10 +52,10 @@ def _latest_git_version_tag_on_branches(
         try:
             result = _latest_git_version_tag(
                 repo, assume_if_none, parent, commit_distance, skip_commits)
-            if main_commit_distance is None:
-                main_commit_distance = result[3]
         except ValueError:
             continue
+        if main_commit_distance is None:
+            main_commit_distance = result[3]
         if result[2] is not None:
             results.append(result)
     if not results:
@@ -72,17 +73,17 @@ MAX_COMMIT_DISTANCE = 999
 
 
 def _latest_git_version_tag(
-        repo: git.Repo, assume_if_none: bool = False, base_commit: git.Commit = None,
-        commit_distance: int = 0, skip_commits: t.Set[git.Commit] = None) -> t.Tuple[
-            git.Commit, t.Optional[git.TagReference], t.Optional[Version], int]:
-    """Retrun (commit, tag at that commit if any, latest version, distance from the version)."""
+        repo: git.Repo, assume_if_none: bool = False, base_commit: git.objects.Commit = None,
+        commit_distance: int = 0, skip_commits: t.Set[git.objects.Commit] = None) -> t.Tuple[
+            t.Optional[git.objects.Commit], t.Optional[git.TagReference], t.Optional[Version], int]:
+    """Return (commit, tag at that commit if any, latest version, distance from the version)."""
     version_tags = _git_version_tags(repo)
-    version_tag_commits: t.Dict[git.Commit, set] = {}
+    version_tag_commits: t.Dict[git.objects.Commit, set] = {}
     for tag, version in version_tags.items():
-        commit = tag.commit
-        if commit not in version_tag_commits:
-            version_tag_commits[commit] = set()
-        version_tag_commits[commit].add(tag)
+        _commit = tag.commit
+        if _commit not in version_tag_commits:
+            version_tag_commits[_commit] = set()
+        version_tag_commits[_commit].add(tag)
     current_version_tags = {}
     commit = None
     if skip_commits is None:
@@ -120,7 +121,8 @@ def _latest_git_version_tag(
 
 
 def _upcoming_git_version_tag(repo: git.Repo, ignore_untracked_files: bool = True) -> t.Tuple[
-        git.Commit, t.Optional[git.TagReference], Version, int, bool]:
+        t.Optional[git.objects.Commit], t.Optional[git.TagReference], t.Optional[Version], int,
+        bool]:
     commit, tag, version, commit_distance = _latest_git_version_tag(repo, True)
     is_repo_dirty = repo.is_dirty(untracked_files=not ignore_untracked_files)
     return commit, tag, version, commit_distance, is_repo_dirty
@@ -131,13 +133,16 @@ def query_git_repo(repo_path: pathlib.Path, search_parent_directories: bool = Tr
     _LOG.debug('looking for git repository in "%s"', repo_path)
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
     _LOG.debug('found git repository in "%s"', repo.working_dir)
-    return _latest_git_version_tag(repo)[2]
+    version = _latest_git_version_tag(repo)[2]
+    assert isinstance(version, Version), version
+    return version
 
 
 def predict_git_repo(repo_path: pathlib.Path, search_parent_directories: bool = True) -> Version:
     """Predict version from tags, commit history and index status of git repository."""
     repo = git.Repo(str(repo_path), search_parent_directories=search_parent_directories)
     version, commit_distance, is_repo_dirty = _upcoming_git_version_tag(repo)[2:]
+    assert isinstance(version, Version), version
     if commit_distance > 0:
         version.devel_increment(commit_distance)
         version.local = (repo.head.commit.hexsha[:8],)
