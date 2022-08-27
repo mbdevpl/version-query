@@ -12,7 +12,7 @@ import types
 import typing as t
 import unittest
 
-__version__ = '2022.08.15'
+__version__ = '2022.08.27'
 
 
 def run_program(*args, glob: bool = False) -> None:
@@ -95,6 +95,7 @@ ALL_CLASSIFIERS_VARIANTS = [
 
 LINK_EXAMPLES = [
     (None, 'setup.py', True), ('this file', 'setup.py', True), (None, 'test/test_setup.py', True),
+    (None, 'test/test_setup.py#L98', True), ('line 5 of this file', 'setup.py#L5', True),
     (None, 'http://site.com', False), (None, '../something/else', False), (None, 'no.thing', False),
     (None, '/my/abs/path', False)]
 

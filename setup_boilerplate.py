@@ -44,7 +44,7 @@ import docutils.parsers.rst
 import docutils.utils
 import setuptools
 
-__version__ = '2022.01.03'
+__version__ = '2022.08.27'
 
 _LOG = logging.getLogger(__name__)
 
@@ -197,6 +197,10 @@ class RelativeRefFinder(docutils.nodes.NodeVisitor):
         path = pathlib.Path(node.attributes['refuri'])
         if path.is_absolute():
             return
+        if '#' in path.name:
+            # reference points to a section in a file
+            # we ignore the section part when checking if file exists
+            path = path.with_name(path.name[:path.name.index('#')])
         try:
             resolved_path = path.resolve(strict=True)
         except FileNotFoundError:
@@ -225,7 +229,7 @@ def resolve_relative_rst_links(text: str, base_link: str) -> str:
     And all link of the form :target: link become :target: absolute_link.
 
     Where absolute_link is made by concatenating base_link to link with no separator added
-    in between. So in most cases base_link should and with a slash.
+    in between. So in most cases base_link should end with a slash.
     """
     document = parse_rst(text)
     finder = RelativeRefFinder(HERE, document)
