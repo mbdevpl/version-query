@@ -24,7 +24,7 @@ Zero-overhead package versioning for Python.
     :alt: test coverage from Codecov
 
 .. image:: https://api.codacy.com/project/badge/Grade/437ab82bd6324530847fe8ed833f8d78
-    :target: https://www.codacy.com/app/mbdevpl/version-query
+    :target: https://app.codacy.com/gh/mbdevpl/version-query
     :alt: grade from Codacy
 
 .. image:: https://img.shields.io/github/license/mbdevpl/version-query.svg
@@ -440,6 +440,6 @@ Python version 3.8 or later.
 
 Python libraries as specified in `<requirements.txt>`_.
 
-Building and running tests additionally requires packages listed in `<test_requirements.txt>`_.
+Building and running tests additionally requires packages listed in `<requirements_test.txt>`_.
 
 Tested on Linux, OS X and Windows.
