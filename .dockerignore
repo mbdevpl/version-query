@@ -24,7 +24,3 @@ __pycache__
 # Python: coverage
 /htmlcov
 /.coverage
-
-# Python: Jupyter notebooks
-.ipynb_checkpoints
-*-checkpoint.ipynb
