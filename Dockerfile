@@ -40,7 +40,7 @@ RUN set -Eeuxo pipefail && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-# prepare version_query for testing
+# prepare version-query for testing
 
 WORKDIR /home/user/version-query
 
