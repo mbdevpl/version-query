@@ -42,7 +42,7 @@ pipeline {
             }
             steps {
               sh """#!/usr/bin/env bash
-                set -Eeux pipefail
+                set -Eeux
                 python -m pylint ${PYTHON_MODULES} |& tee pylint.log
                 echo "\${PIPESTATUS[0]}" | tee pylint_status.log
                 python -m mypy ${PYTHON_MODULES} |& tee mypy.log
