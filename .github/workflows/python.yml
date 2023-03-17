@@ -30,7 +30,9 @@ jobs:
       - run: git clone https://github.com/python-semver/python-semver ../semver
       - run: cd ../semver && python -m build && cd -
       - run: python -m coverage run --branch --source . -m unittest -v
-      # - run: LOGGING_LEVEL=critical python -m coverage run --append --branch --source . -m unittest -v test.test_version
+      - run: python -m coverage run --append --branch --source . -m unittest -v test.test_version
+        env:
+          LOGGING_LEVEL: critical
       - run: python -m coverage report --show-missing
       - run: codecov
   publish:
