@@ -15,10 +15,10 @@ jobs:
         python-version: ['3.8', '3.9', '3.10']
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -26,12 +26,13 @@ jobs:
       - run: git clone https://github.com/PyCQA/pycodestyle ../pycodestyle
       - run: cd ../pycodestyle && python setup.py build && cd -
       - run: git clone https://github.com/mbdevpl/argunparse ../argunparse
-      - run: cd ../argunparse && pip install -r test_requirements.txt && python setup.py build && cd -
+      - run: cd ../argunparse && pip install -r requirements_test.txt && python setup.py build && cd -
       - run: git clone https://github.com/python-semver/python-semver ../semver
-      - run: cd ../semver && python setup.py build && cd -
-      - run: pip install jupyter
+      - run: cd ../semver && python -m build && cd -
       - run: python -m coverage run --branch --source . -m unittest -v
-      # - run: LOGGING_LEVEL=critical python -m coverage run --append --branch --source . -m unittest -v test.test_version
+      - run: python -m coverage run --append --branch --source . -m unittest -v test.test_version
+        env:
+          LOGGING_LEVEL: critical
       - run: python -m coverage report --show-missing
       - run: codecov
   publish:
@@ -39,10 +40,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
           architecture: x64
