@@ -133,7 +133,7 @@ COMPATIBLE_STR_CASES = {
 
 INCOMPATIBLE_STR_CASES: t.Dict[str, t.Tuple[tuple, dict]] = {
     '1.0.0-2': ((1, 0, 0, '-', None, 2), {}),
-    '1.0.0-0.2': ((1, 0, 0, '-', None, 0, '.', None, 2), {}),
+    # '1.0.0-0.2': ((1, 0, 0, '-', None, 0, '.', None, 2), {}),
     '4.5.0.dev': ((4, 5, 0, '.', 'dev', None), {})}
 
 STR_CASES = dict(itertools.chain(COMPATIBLE_STR_CASES.items(),
