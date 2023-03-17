@@ -66,7 +66,7 @@ pipeline {
 
           stage('Coverage') {
             when {
-              environment name: 'PYTHON_VERSION', value: '3.10'
+              environment name: 'PYTHON_VERSION', value: '3.11'
             }
             steps {
               sh '''#!/usr/bin/env bash
