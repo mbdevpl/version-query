@@ -28,8 +28,7 @@ jobs:
       - run: git clone https://github.com/mbdevpl/argunparse ../argunparse
       - run: cd ../argunparse && pip install -r requirements_test.txt && python setup.py build && cd -
       - run: git clone https://github.com/python-semver/python-semver ../semver
-      - run: cd ../semver && python setup.py build && cd -
-      - run: pip install jupyter
+      - run: cd ../semver && python -m build && cd -
       - run: python -m coverage run --branch --source . -m unittest -v
       # - run: LOGGING_LEVEL=critical python -m coverage run --append --branch --source . -m unittest -v test.test_version
       - run: python -m coverage report --show-missing

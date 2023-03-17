@@ -69,7 +69,7 @@ RUN set -Eeuxo pipefail && \
   cd - && \
   git clone https://github.com/python-semver/python-semver semver && \
   cd semver && \
-  python setup.py build && \
+  python -m build && \
   cd - && \
   pip install jupyter
 
