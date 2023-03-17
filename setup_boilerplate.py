@@ -44,7 +44,7 @@ import docutils.parsers.rst
 import docutils.utils
 import setuptools
 
-__version__ = '2022.08.27'
+__version__ = '2023.03.09'
 
 _LOG = logging.getLogger(__name__)
 
@@ -202,14 +202,8 @@ class RelativeRefFinder(docutils.nodes.NodeVisitor):
             # we ignore the section part when checking if file exists
             path = path.with_name(path.name[:path.name.index('#')])
         try:
-            resolved_path = path.resolve(strict=True)
+            self.root_dir.joinpath(path).resolve(strict=True)
         except FileNotFoundError:
-            return
-        try:
-            resolved_path.relative_to(self.root_dir)
-        except ValueError:
-            return
-        if not path.is_file():
             return
         _LOG.debug('RelativeRefFinder: reference points to existing file')
         self.references.append(node)
