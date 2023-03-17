@@ -24,7 +24,7 @@ def main(args=None, namespace=None) -> None:
         prog='version_query',
         description='''Tool for querying current versions of Python packages. Use LOGGING_LEVEL
         environment variable to adjust logging level.''',
-        epilog='''Copyright 2017-2022 by the contributors, Apache License 2.0,
+        epilog='''Copyright 2017-2023 by the contributors, Apache License 2.0,
         https://github.com/mbdevpl/version-query''',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-i', '--increment', action='store_true', help='''output version string for

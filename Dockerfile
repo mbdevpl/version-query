@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION="3.10"
+ARG PYTHON_VERSION="3.11"
 
 FROM python:${PYTHON_VERSION}
 
@@ -71,6 +71,6 @@ RUN set -Eeuxo pipefail && \
   cd semver && \
   python -m build && \
   cd - && \
-  pip install jupyter
+  pip install jupyter  # example package that uses metadata.json
 
 WORKDIR /home/user/version-query

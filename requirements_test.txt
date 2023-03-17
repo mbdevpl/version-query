@@ -1,6 +1,6 @@
-colorlog ~= 6.6
-docutils >= 0.18
-pip >= 21.0
-Pygments >= 2.5
-wheel >= 0.37
+colorlog ~= 6.7
+docutils ~= 0.19
+pip >= 23.0
+Pygments ~= 2.14
+wheel >= 0.40
 -r requirements.txt

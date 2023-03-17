@@ -35,7 +35,7 @@ class Tests(GitRepoTests):
             with self.assertRaises(ValueError):
                 query_git_repo(self.repo_path)
             version = predict_git_repo(self.repo_path)
-            self.assertEqual(version.to_str(), f'0.1.0.dev{i}+{self.repo_head_hexsha}')
+            self.assertEqual(version.to_str(), f'0.1.0.dev{i}+git{self.repo_head_hexsha}')
 
     def test_only_nonversion_tags(self):
         for i in range(1, 5):
@@ -44,7 +44,7 @@ class Tests(GitRepoTests):
             with self.assertRaises(ValueError):
                 query_git_repo(self.repo_path)
             version = predict_git_repo(self.repo_path)
-            self.assertEqual(version.to_str(), f'0.1.0.dev{i}+{self.repo_head_hexsha}')
+            self.assertEqual(version.to_str(), f'0.1.0.dev{i}+git{self.repo_head_hexsha}')
 
     def test_inconsistent_tag_prefix(self):
         version = Version.from_str('1.0')
@@ -70,7 +70,7 @@ class Tests(GitRepoTests):
         upcoming_version = predict_git_repo(self.repo_path)
         version.increment(VersionComponent.Patch, 1)
         version.increment(VersionComponent.DevPatch, 2)
-        version.local = (self.repo_head_hexsha,)
+        version.local = (f'git{self.repo_head_hexsha}',)
         self.assertEqual(version, upcoming_version)
 
     def test_too_long_no_tag(self):
@@ -103,7 +103,7 @@ class Tests(GitRepoTests):
         with self.assertRaises(ValueError):
             query_git_repo(self.repo_path)
         upcoming_version = predict_git_repo(self.repo_path)
-        self.assertEqual(upcoming_version.to_str(), f'0.1.0.dev6+{self.repo_head_hexsha}')
+        self.assertEqual(upcoming_version.to_str(), f'0.1.0.dev6+git{self.repo_head_hexsha}')
 
     def test_invalid_version_tags(self):
         for i in range(1, 3):
@@ -116,7 +116,7 @@ class Tests(GitRepoTests):
             self.assertEqual(current_version.to_str(), f'{i}.0.0')
             upcoming_version = predict_git_repo(self.repo_path)
             current_version.devel_increment(1)
-            current_version.local = (self.repo_head_hexsha,)
+            current_version.local = (f'git{self.repo_head_hexsha}',)
             self.assertEqual(current_version, upcoming_version)
 
     def test_dirty_repo(self):
@@ -133,9 +133,9 @@ class Tests(GitRepoTests):
             self.assertLess(version, upcoming_version)
             if new_commit:
                 current_version.devel_increment(1)
-                current_version.local = (self.repo_head_hexsha,)
+                current_version.local = (f'git{self.repo_head_hexsha}',)
                 self.assertTupleEqual(current_version.local, upcoming_version.local[:1])
-                local_prefix = f'+{self.repo_head_hexsha}.dirty'
+                local_prefix = f'+git{self.repo_head_hexsha}.dirty'
             else:
                 local_prefix = '+dirty'
             self.assertTrue(upcoming_version.local_to_str().startswith(local_prefix),
@@ -157,12 +157,12 @@ class Tests(GitRepoTests):
         current_version = query_git_repo(self.repo_path)
         self.assertEqual(current_version.to_str(), '0.1.0')
         upcoming_version = predict_git_repo(self.repo_path)
-        self.assertEqual(upcoming_version.to_str(), f'0.1.1.dev1+{self.repo_head_hexsha}')
+        self.assertEqual(upcoming_version.to_str(), f'0.1.1.dev1+git{self.repo_head_hexsha}')
         self.repo.git.checkout('devel')
         current_version = query_git_repo(self.repo_path)
         self.assertEqual(current_version.to_str(), '0.2.0')
         upcoming_version = predict_git_repo(self.repo_path)
-        self.assertEqual(upcoming_version.to_str(), f'0.2.1.dev1+{self.repo_head_hexsha}')
+        self.assertEqual(upcoming_version.to_str(), f'0.2.1.dev1+git{self.repo_head_hexsha}')
 
     def test_tags_on_merged_branches(self):
         self.git_commit_new_file()
@@ -182,7 +182,7 @@ class Tests(GitRepoTests):
         current_version = query_git_repo(self.repo_path)
         self.assertEqual(current_version.to_str(), '0.2.0')
         upcoming_version = predict_git_repo(self.repo_path)
-        self.assertEqual(upcoming_version.to_str(), f'0.2.1.dev5+{self.repo_head_hexsha}')
+        self.assertEqual(upcoming_version.to_str(), f'0.2.1.dev5+git{self.repo_head_hexsha}')
 
     def test_tag_on_merged_branch(self):
         self.git_commit_new_file()
@@ -196,7 +196,7 @@ class Tests(GitRepoTests):
         current_version = query_git_repo(self.repo_path)
         self.assertEqual(current_version.to_str(), '1.0.0')
         upcoming_version = predict_git_repo(self.repo_path)
-        self.assertEqual(upcoming_version.to_str(), f'1.0.1.dev1+{self.repo_head_hexsha}')
+        self.assertEqual(upcoming_version.to_str(), f'1.0.1.dev1+git{self.repo_head_hexsha}')
 
     def test_many_versions_on_one_commit(self):
         self.git_commit_new_file()
@@ -207,7 +207,7 @@ class Tests(GitRepoTests):
         current_version = query_git_repo(self.repo_path)
         self.assertEqual(current_version.to_str(), '0.3.0')
         upcoming_version = predict_git_repo(self.repo_path)
-        self.assertEqual(upcoming_version.to_str(), f'0.3.1.dev1+{self.repo_head_hexsha}')
+        self.assertEqual(upcoming_version.to_str(), f'0.3.1.dev1+git{self.repo_head_hexsha}')
 
     def test_version_decreased(self):
         self.git_commit_new_file()
@@ -218,4 +218,4 @@ class Tests(GitRepoTests):
         current_version = query_git_repo(self.repo_path)
         self.assertEqual(current_version.to_str(), '0.1.0')
         upcoming_version = predict_git_repo(self.repo_path)
-        self.assertEqual(upcoming_version.to_str(), f'0.1.1.dev1+{self.repo_head_hexsha}')
+        self.assertEqual(upcoming_version.to_str(), f'0.1.1.dev1+git{self.repo_head_hexsha}')

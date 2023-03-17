@@ -145,7 +145,7 @@ def predict_git_repo(repo_path: pathlib.Path, search_parent_directories: bool = 
     assert isinstance(version, Version), version
     if commit_distance > 0:
         version.devel_increment(commit_distance)
-        version.local = (repo.head.commit.hexsha[:8],)
+        version.local = (f'git{repo.head.commit.hexsha[:8]}',)
     if is_repo_dirty:
         dt_ = f'dirty{datetime.datetime.strftime(datetime.datetime.now(), "%Y%m%d%H%M%S")}'
         if version.has_local:

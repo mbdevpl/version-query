@@ -21,7 +21,7 @@ pipeline {
         axes {
           axis {
             name 'PYTHON_VERSION'
-            values '3.8', '3.9', '3.10'
+            values '3.9', '3.10', '3.11'
           }
         }
 
@@ -38,7 +38,7 @@ pipeline {
 
           stage('Lint') {
             when {
-              environment name: 'PYTHON_VERSION', value: '3.10'
+              environment name: 'PYTHON_VERSION', value: '3.11'
             }
             steps {
               sh """#!/usr/bin/env bash
@@ -66,7 +66,7 @@ pipeline {
 
           stage('Coverage') {
             when {
-              environment name: 'PYTHON_VERSION', value: '3.10'
+              environment name: 'PYTHON_VERSION', value: '3.11'
             }
             steps {
               sh '''#!/usr/bin/env bash

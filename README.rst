@@ -195,7 +195,7 @@ Examples of valid version tags:
 *   ``v1.0``
 *   ``v0.16.0``
 *   ``v1.0.dev3``
-*   ``ver0.5.1-4.0.0+a1de3012``
+*   ``ver0.5.1-4.0.0+gita1de3012``
 *   ``42.0``
 *   ``3.14-15``
 
@@ -240,8 +240,8 @@ the current commit and the most recent version tag.
 
 Additionally, the ``<patch>`` version component is incremented by ``1``.
 
-Additionally, a plus (``+``) character and the first 8 characters of SHA of the latest commit
-are appended to version identifier, e.g. ``+a3014fe0``.
+Additionally, a plus (``+``) character, word ``git`` and the first 8 characters of SHA
+of the latest commit are appended to version identifier, e.g. ``+gita3014fe0``.
 
 
 Repository index status
@@ -256,16 +256,16 @@ of the repository:
 
 *   Most recent version tag is ``v0.4.5``, there were 2 commits since,
     latest having SHA starting with ``812f12ea``.
-    Version identifier will be ``0.4.6.dev2+812f12ea``.
+    Version identifier will be ``0.4.6.dev2+git812f12ea``.
 
 *   Most recent version tag is ``ver6.0``, and there was 1 commit since
     having SHA starting with ``e10ac365``.
-    Version identifier will be ``6.0.1.dev1+e10ac365``.
+    Version identifier will be ``6.0.1.dev1+gite10ac365``.
 
 *   Most recent version tag is ``v9``, there were 40 commit since,
     latest having SHA starting with ``1ad22355``, the repository has uncommitted changes and
     version was queried at 19:52.20, 8th June 2017.
-    the result is ``9.0.1.dev40+1ad22355.dirty20170608195220``.
+    the result is ``9.0.1.dev40+git1ad22355.dirty20170608195220``.
 
 
 How exactly version numbers are compared
@@ -436,7 +436,7 @@ using version-query without any issues.
 Requirements
 ============
 
-Python version 3.8 or later.
+Python version 3.9 or later.
 
 Python libraries as specified in `<requirements.txt>`_.
 

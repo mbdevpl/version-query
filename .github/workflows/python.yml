@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.9', '3.10', '3.11']
 
     steps:
       - uses: actions/checkout@v3
@@ -29,6 +29,7 @@ jobs:
       - run: cd ../argunparse && pip install -r requirements_test.txt && python setup.py build && cd -
       - run: git clone https://github.com/python-semver/python-semver ../semver
       - run: cd ../semver && python -m build && cd -
+      - run: pip install jupyter  # example package that uses metadata.json
       - run: python -m coverage run --branch --source . -m unittest -v
       - run: python -m coverage run --append --branch --source . -m unittest -v test.test_version
         env:
@@ -45,7 +46,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
           architecture: x64
       - run: pip install -r requirements_test.txt
       - run: python setup.py bdist_wheel sdist
