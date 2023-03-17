@@ -64,7 +64,7 @@ RUN set -Eeuxo pipefail && \
   cd - && \
   git clone https://github.com/mbdevpl/argunparse argunparse && \
   cd argunparse && \
-  pip install -r test_requirements.txt && \
+  pip install -r requirements_test.txt && \
   python setup.py build && \
   cd - && \
   git clone https://github.com/python-semver/python-semver semver && \

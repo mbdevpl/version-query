@@ -26,7 +26,7 @@ jobs:
       - run: git clone https://github.com/PyCQA/pycodestyle ../pycodestyle
       - run: cd ../pycodestyle && python setup.py build && cd -
       - run: git clone https://github.com/mbdevpl/argunparse ../argunparse
-      - run: cd ../argunparse && pip install -r test_requirements.txt && python setup.py build && cd -
+      - run: cd ../argunparse && pip install -r requirements_test.txt && python setup.py build && cd -
       - run: git clone https://github.com/python-semver/python-semver ../semver
       - run: cd ../semver && python setup.py build && cd -
       - run: pip install jupyter
