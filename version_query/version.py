@@ -12,6 +12,8 @@ import semver
 
 _LOG = logging.getLogger(__name__)
 
+PY_PRE_RELEASE_INDICATORS = {'a', 'b', 'c', 'rc'}
+
 
 @enum.unique
 class VersionComponent(enum.IntEnum):
@@ -168,8 +170,8 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         elif ver.pre:
             pre_ver = ver.pre
         if pre_ver:
-            pre_release = [('.', pre_ver[0] if len(pre_ver) > 0 else None,
-                            pre_ver[1] if len(pre_ver) > 1 else None)]
+            prefix_dot = None if pre_ver[0] in PY_PRE_RELEASE_INDICATORS else '.'
+            pre_release = [(prefix_dot, pre_ver[0], pre_ver[1] if len(pre_ver) > 1 else None)]
         if ver.local:
             local = tuple(itertools.chain.from_iterable(
                 (dot, str(_)) for dot, _ in zip('.' * len(ver.local), ver.local)))[1:]
@@ -502,6 +504,8 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
             return '{}{}'.format(*version_tuple[:2])
         if _version_tuple_checker(version_tuple, (True, False, True)):
             return f'{version_tuple[0]}{version_tuple[2]}'
+        if _version_tuple_checker(version_tuple, (False, True, True)):
+            return '{}{}'.format(*version_tuple[1:])
         if _version_tuple_checker(version_tuple, (True, True, True)):
             return '{}{}{}'.format(*version_tuple)
         raise ValueError(f'cannot generate valid version string from {repr(self)}')
