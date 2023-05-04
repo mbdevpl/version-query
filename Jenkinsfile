@@ -92,6 +92,26 @@ pipeline {
             }
           }
 
+          stage('Release') {
+            when {
+              environment name: 'PYTHON_VERSION', value: '3.11'
+              buildingTag()
+            }
+            environment {
+              PACKAGE_NAME = 'version-query'
+              VERSION = sh(script: 'python3 -m version_query .', returnStdout: true).trim()
+            }
+            steps {
+              script {
+                githubUtils.createRelease([
+                  "dist/${PACKAGE_NAME.replace('-', '_')}-${VERSION}-py3-none-any.whl",
+                  "dist/${PACKAGE_NAME}-${VERSION}.tar.gz",
+                  "dist/${PACKAGE_NAME}-${VERSION}.zip"
+                  ])
+              }
+            }
+          }
+
         }
 
       }
