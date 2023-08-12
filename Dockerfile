@@ -25,7 +25,7 @@ ARG GROUP_ID=1000
 ARG AUX_GROUP_IDS=""
 
 RUN set -Eeuxo pipefail && \
-  addgroup --gid "${GROUP_ID}" user && \
+  (addgroup --gid "${GROUP_ID}" user || echo "group ${GROUP_ID} already exists, so not adding it") && \
   adduser --disabled-password --gecos "User" --uid "${USER_ID}" --gid "${GROUP_ID}" user && \
   echo ${AUX_GROUP_IDS} | xargs -n1 echo | xargs -I% addgroup --gid % group% && \
   echo ${AUX_GROUP_IDS} | xargs -n1 echo | xargs -I% usermod --append --groups group% user
@@ -40,20 +40,18 @@ RUN set -Eeuxo pipefail && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-# prepare version-query for testing
-
 WORKDIR /home/user/version-query
 
 COPY --chown=${USER_ID}:${GROUP_ID} requirements*.txt ./
 
 RUN set -Eeuxo pipefail && \
-  pip3 install -r requirements_ci.txt
+  pip3 install --no-cache-dir -r requirements_ci.txt
+
+# prepare version-query for testing
 
 USER user
 
 WORKDIR /home/user
-
-VOLUME ["/home/user/version-query"]
 
 ENV EXAMPLE_PROJECTS_PATH="/home/user"
 
@@ -74,3 +72,5 @@ RUN set -Eeuxo pipefail && \
   pip install jupyter  # example package that uses metadata.json
 
 WORKDIR /home/user/version-query
+
+VOLUME ["/home/user/version-query"]
