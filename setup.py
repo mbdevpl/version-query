@@ -1,9 +1,9 @@
 """Setup script for version_query package."""
 
-import setup_boilerplate
+import boilerplates.setup
 
 
-class Package(setup_boilerplate.Package):
+class Package(boilerplates.setup.Package):
     """Package metadata."""
 
     name = 'version-query'

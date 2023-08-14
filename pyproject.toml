@@ -1,5 +1,10 @@
 [build-system]
-requires = ['docutils', 'GitPython', 'packaging', 'semver', 'setuptools', 'wheel']
+requires = [
+    'boilerplates[setup] ~= 0.1',
+    'GitPython ~= 3.1',
+    'packaging >= 23.0',
+    'semver ~= 2.13'
+]
 
 [tool.flake8]
 max-line-length = 100
