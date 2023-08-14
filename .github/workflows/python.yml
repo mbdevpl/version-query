@@ -1,4 +1,4 @@
-name: tests
+name: actions
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
 
     steps:
       - uses: actions/checkout@v3
@@ -48,8 +48,7 @@ jobs:
         with:
           python-version: '3.11'
           architecture: x64
-      - run: pip install -r requirements_test.txt
-      - run: python setup.py bdist_wheel sdist
+      - run: python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
