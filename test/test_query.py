@@ -10,6 +10,8 @@ import sys
 import tempfile
 import unittest
 
+from boilerplates.packaging_tests import run_module
+
 from version_query.version import VersionComponent, Version
 from version_query.git_query import query_git_repo, predict_git_repo
 from version_query.py_query import query_metadata_json, query_pkg_info, query_package_folder
@@ -18,7 +20,6 @@ from version_query.query import \
 from .examples import \
     PY_LIB_DIR, GIT_REPO_EXAMPLES, METADATA_JSON_EXAMPLE_PATHS, PKG_INFO_EXAMPLE_PATHS, \
     PACKAGE_FOLDER_EXAMPLES
-from .test_setup import run_module
 
 _LOG = logging.getLogger(__name__)
 
