@@ -1,3 +1,4 @@
 -r requirements.txt
 boilerplates[packaging_tests] ~= 0.1
 colorlog ~= 6.7
+setuptools >= 67.4

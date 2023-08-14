@@ -79,7 +79,7 @@ pipeline {
         }
       }
       environment {
-        PACKAGE_NAME = 'ingit'
+        PACKAGE_NAME = 'version-query'
         VERSION = sh(script: 'python3 -m version_query --predict .', returnStdout: true).trim()
         PYPI_AUTH = credentials('mbdev-pypi-auth')
         TWINE_USERNAME = "${PYPI_AUTH_USR}"

@@ -46,7 +46,8 @@ def _latest_git_version_tag_on_branches(
             t.Optional[git.objects.Commit], t.Optional[git.TagReference], t.Optional[Version],
             int]]:
     _LOG.log(logging.NOTSET, 'entering %i branches...', len(commit.parents))
-    results = []
+    results: t.List[t.Tuple[
+        t.Optional[git.objects.Commit], t.Optional[git.TagReference], Version, int]] = []
     main_commit_distance = None
     for parent in commit.parents:
         try:
@@ -57,7 +58,7 @@ def _latest_git_version_tag_on_branches(
         if main_commit_distance is None:
             main_commit_distance = result[3]
         if result[2] is not None:
-            results.append(result)
+            results.append(result)  # type: ignore
     if not results:
         if main_commit_distance is None:
             raise ValueError(f'reached max commit distance {MAX_COMMIT_DISTANCE}'
@@ -73,8 +74,9 @@ MAX_COMMIT_DISTANCE = 999
 
 
 def _latest_git_version_tag(
-        repo: git.Repo, assume_if_none: bool = False, base_commit: git.objects.Commit = None,
-        commit_distance: int = 0, skip_commits: t.Set[git.objects.Commit] = None) -> t.Tuple[
+        repo: git.Repo, assume_if_none: bool = False,
+        base_commit: t.Optional[git.objects.Commit] = None, commit_distance: int = 0,
+        skip_commits: t.Optional[t.Set[git.objects.Commit]] = None) -> t.Tuple[
             t.Optional[git.objects.Commit], t.Optional[git.TagReference], t.Optional[Version], int]:
     """Return (commit, tag at that commit if any, latest version, distance from the version)."""
     version_tags = _git_version_tags(repo)

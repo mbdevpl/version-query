@@ -6,3 +6,4 @@ mypy ~= 1.5
 pydocstyle ~= 6.3
 pylint ~= 2.17
 twine ~= 4.0
+types-setuptools >= 67.4
