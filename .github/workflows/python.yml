@@ -48,6 +48,7 @@ jobs:
         with:
           python-version: '3.11'
           architecture: x64
+      - run: pip install build
       - run: python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
