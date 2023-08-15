@@ -2,6 +2,8 @@
 
 import itertools
 import logging
+import platform
+import unittest
 
 import boilerplates.git_repo_tests
 
@@ -11,6 +13,9 @@ from version_query.git_query import query_git_repo, predict_git_repo
 _LOG = logging.getLogger(__name__)
 
 
+@unittest.skipIf(
+    platform.system() == 'Windows' and platform.python_implementation() == 'PyPy',
+    'skipping as these tests fail on Windows with PyPy')
 class Tests(boilerplates.git_repo_tests.GitRepoTests):
     """Test suite for automated tests of generated git repositories.
 
