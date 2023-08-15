@@ -2,18 +2,16 @@
 
 import itertools
 import logging
-# import unittest
 
-# import git
+import boilerplates.git_repo_tests
 
 from version_query.version import VersionComponent, Version
 from version_query.git_query import query_git_repo, predict_git_repo
-from .test_with_git_repo import GitRepoTests
 
 _LOG = logging.getLogger(__name__)
 
 
-class Tests(GitRepoTests):
+class Tests(boilerplates.git_repo_tests.GitRepoTests):
     """Test suite for automated tests of generated git repositories.
 
     Each case is executed in a fresh empty repository.
