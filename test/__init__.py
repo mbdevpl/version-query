@@ -15,5 +15,3 @@ logging.getLogger('version_query').setLevel(
     getattr(logging, os.environ.get('LOGGING_LEVEL', 'debug').upper()))
 logging.getLogger('test').setLevel(logging.DEBUG)
 
-if 'EXAMPLE_PROJECTS_PATH' not in os.environ:
-    os.environ['EXAMPLE_PROJECTS_PATH'] = '..'

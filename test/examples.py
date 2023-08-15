@@ -11,7 +11,7 @@ from version_query.version import VersionComponent
 
 _HERE = pathlib.Path(__file__).resolve().parent
 
-_GIT_REPOS_ROOT = pathlib.Path(os.environ['EXAMPLE_PROJECTS_PATH']).absolute()
+_GIT_REPOS_ROOT = pathlib.Path(os.environ.get('EXAMPLE_PROJECTS_PATH', '..')).resolve()
 
 GIT_REPO_EXAMPLES = list(_ for _ in _GIT_REPOS_ROOT.glob('**/.git') if _.is_dir())
 
