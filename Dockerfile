@@ -45,7 +45,8 @@ WORKDIR /home/user/version-query
 COPY --chown=${USER_ID}:${GROUP_ID} requirements*.txt ./
 
 RUN set -Eeuxo pipefail && \
-  pip3 install --no-cache-dir -r requirements_ci.txt
+  pip3 install --no-cache-dir -r requirements_ci.txt && \
+  pip3 uninstall -y version-query
 
 # prepare version-query for testing
 
