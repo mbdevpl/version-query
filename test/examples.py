@@ -21,16 +21,21 @@ def python_lib_dir() -> pathlib.Path:
 
     Currently works only for CPython and PyPy.
     """
-    lib_dir_parts = [getattr(sys, 'real_prefix', sys.prefix)]
+    lib_dir = pathlib.Path(getattr(sys, 'real_prefix', sys.prefix))
+    assert lib_dir.is_dir(), lib_dir
     if platform.python_implementation() == 'CPython':
-        lib_dir_parts.append('lib')
+        lib_dir /= 'lib'
+        assert lib_dir.is_dir(), lib_dir
         if platform.system() != 'Windows':
-            lib_dir_parts.append('python{}.{}'.format(*sys.version_info[:2]))
+            lib_dir /= f'python{sys.version_info[0]}.{sys.version_info[1]}'
     else:
         assert platform.python_implementation() == 'PyPy'
-        lib_dir_parts += ['lib-python', '{}'.format(*sys.version_info[:1])]
+        # lib_dir /= 'lib-python'
+        lib_dir /= 'lib'
+        assert lib_dir.is_dir(), lib_dir
+        # lib_dir /= f'{sys.version_info[0]}'
+        lib_dir /= f'pypy{sys.version_info[0]}.{sys.version_info[1]}'
 
-    lib_dir = pathlib.Path(*lib_dir_parts)
     assert lib_dir.is_dir(), lib_dir
     return lib_dir
 
