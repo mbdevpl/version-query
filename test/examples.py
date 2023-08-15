@@ -17,25 +17,19 @@ GIT_REPO_EXAMPLES = list(_ for _ in _GIT_REPOS_ROOT.glob('**/.git') if _.is_dir(
 
 
 def python_lib_dir() -> pathlib.Path:
-    """Get root folder of currently running Python libraries.
-
-    Currently works only for CPython and PyPy.
-    """
+    """Get root folder of currently running Python libraries."""
     lib_dir = pathlib.Path(getattr(sys, 'real_prefix', sys.prefix))
     assert lib_dir.is_dir(), lib_dir
-    if platform.python_implementation() == 'CPython':
-        lib_dir /= 'lib'
-        assert lib_dir.is_dir(), lib_dir
-        if platform.system() != 'Windows':
-            lib_dir /= f'python{sys.version_info[0]}.{sys.version_info[1]}'
+    if platform.system() == 'Windows':
+        lib_dir /= 'Lib'
     else:
-        assert platform.python_implementation() == 'PyPy'
-        # lib_dir /= 'lib-python'
+        # currently implemented only for CPython and PyPy
+        implementation_dir_prefix = {
+            'CPython': 'python',
+            'PyPy': 'pypy'}.get(platform.python_implementation())
         lib_dir /= 'lib'
         assert lib_dir.is_dir(), lib_dir
-        # lib_dir /= f'{sys.version_info[0]}'
-        lib_dir /= f'pypy{sys.version_info[0]}.{sys.version_info[1]}'
-
+        lib_dir /= f'{implementation_dir_prefix}{sys.version_info[0]}.{sys.version_info[1]}'
     assert lib_dir.is_dir(), lib_dir
     return lib_dir
 
