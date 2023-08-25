@@ -1,7 +1,6 @@
 """Initialization of tests of version_query package."""
 
 import logging
-import os
 
 from version_query.__main__ import Logging
 
@@ -12,4 +11,4 @@ class TestsLogging(Logging):
     level_package = logging.DEBUG
 
 
-TestsLogging.configure_basic()
+TestsLogging.configure()

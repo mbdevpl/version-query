@@ -8,6 +8,10 @@ pipeline {
     ansiColor('xterm')
   }
 
+  environment {
+    PYTHON_PACKAGE = 'version-query'
+  }
+
   agent {
     dockerfile {
       additionalBuildArgs '--build-arg USER_ID=${USER_ID} --build-arg GROUP_ID=${GROUP_ID}' \
@@ -20,7 +24,7 @@ pipeline {
 
     stage('Lint') {
       environment {
-        PYTHON_MODULES = 'version_query test *.py'
+        PYTHON_MODULES = "${env.PYTHON_PACKAGE.replace('-', '_')} test *.py"
       }
       steps {
         sh """#!/usr/bin/env bash
@@ -79,7 +83,6 @@ pipeline {
         }
       }
       environment {
-        PACKAGE_NAME = 'version-query'
         VERSION = sh(script: 'python3 -m version_query --predict .', returnStdout: true).trim()
         PYPI_AUTH = credentials('mbdev-pypi-auth')
         TWINE_USERNAME = "${PYPI_AUTH_USR}"
@@ -90,9 +93,9 @@ pipeline {
         sh """#!/usr/bin/env bash
           set -Eeuxo pipefail
           python3 -m twine upload \
-            dist/${PACKAGE_NAME.replace('-', '_')}-${VERSION}-py3-none-any.whl \
-            dist/${PACKAGE_NAME}-${VERSION}.tar.gz \
-            dist/${PACKAGE_NAME}-${VERSION}.zip
+            dist/${PYTHON_PACKAGE.replace('-', '_')}-${VERSION}-py3-none-any.whl \
+            dist/${PYTHON_PACKAGE}-${VERSION}.tar.gz \
+            dist/${PYTHON_PACKAGE}-${VERSION}.zip
         """
       }
     }
@@ -102,15 +105,14 @@ pipeline {
         buildingTag()
       }
       environment {
-        PACKAGE_NAME = 'version-query'
         VERSION = sh(script: 'python3 -m version_query .', returnStdout: true).trim()
       }
       steps {
         script {
           githubUtils.createRelease([
-            "dist/${PACKAGE_NAME.replace('-', '_')}-${VERSION}-py3-none-any.whl",
-            "dist/${PACKAGE_NAME}-${VERSION}.tar.gz",
-            "dist/${PACKAGE_NAME}-${VERSION}.zip"
+            "dist/${PYTHON_PACKAGE.replace('-', '_')}-${VERSION}-py3-none-any.whl",
+            "dist/${PYTHON_PACKAGE}-${VERSION}.tar.gz",
+            "dist/${PYTHON_PACKAGE}-${VERSION}.zip"
             ])
         }
       }

@@ -15,5 +15,5 @@ class Logging(boilerplates.logging.Logging):
 
 
 if __name__ == '__main__':
-    Logging().configure_basic()
+    Logging.configure()
     main()

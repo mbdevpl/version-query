@@ -31,8 +31,8 @@ class Package(boilerplates.setup.Package):
         'Topic :: Utilities',
         'Typing :: Typed']
     keywords = [
-        'automation', 'continous integration', 'git', 'releasing', 'semantic versioning', 'tagging',
-        'versioning']
+        'automation', 'continuous integration', 'git', 'releasing', 'semantic versioning',
+        'tagging', 'versioning']
 
 
 if __name__ == '__main__':
