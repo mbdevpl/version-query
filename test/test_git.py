@@ -6,6 +6,7 @@ import platform
 import unittest
 
 import boilerplates.git_repo_tests
+import git
 
 from version_query.version import VersionComponent, Version
 from version_query.git_query import query_git_repo, predict_git_repo
@@ -24,6 +25,8 @@ class Tests(boilerplates.git_repo_tests.GitRepoTests):
 
     def setUp(self):
         super().setUp()
+        self.default_branch_name = git.GitConfigParser(
+            read_only=True).get_value('init', 'defaultBranch', default='master')
         self.git_init()
 
     def test_empty_repo(self):
@@ -99,7 +102,7 @@ class Tests(boilerplates.git_repo_tests.GitRepoTests):
         self.repo.git.checkout('devel')
         self.git_commit_new_file()
         self.repo.create_tag('error')
-        self.repo.git.checkout('master')
+        self.repo.git.checkout(self.default_branch_name)
         self.repo.git.merge('devel')
         self.repo.git.merge('experimental')
         self.git_commit_new_file()
@@ -156,7 +159,7 @@ class Tests(boilerplates.git_repo_tests.GitRepoTests):
         self.git_commit_new_file()
         self.repo.create_tag('v0.2.0')
         self.git_commit_new_file()
-        self.repo.git.checkout('master')
+        self.repo.git.checkout(self.default_branch_name)
         current_version = query_git_repo(self.repo_path)
         self.assertEqual(current_version.to_str(), '0.1.0')
         upcoming_version = predict_git_repo(self.repo_path)
@@ -179,7 +182,7 @@ class Tests(boilerplates.git_repo_tests.GitRepoTests):
         self.git_commit_new_file()
         self.repo.create_tag('v0.1.0')
         self.git_commit_new_file()
-        self.repo.git.checkout('master')
+        self.repo.git.checkout(self.default_branch_name)
         self.repo.git.merge('devel')
         self.git_commit_new_file()
         current_version = query_git_repo(self.repo_path)
@@ -194,7 +197,7 @@ class Tests(boilerplates.git_repo_tests.GitRepoTests):
         self.repo.git.checkout('devel')
         self.git_commit_new_file()
         self.repo.create_tag('v1.0.0')
-        self.repo.git.checkout('master')
+        self.repo.git.checkout(self.default_branch_name)
         self.repo.git.merge('devel')
         current_version = query_git_repo(self.repo_path)
         self.assertEqual(current_version.to_str(), '1.0.0')
