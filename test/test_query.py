@@ -9,6 +9,7 @@ import pathlib
 import sys
 import tempfile
 import unittest
+import unittest.mock
 
 from boilerplates.packaging_tests import run_module
 
@@ -184,12 +185,12 @@ class Tests(unittest.TestCase):
         _LOG.info('%s', sio.getvalue())
 
     def test_here(self):
-        sio = io.StringIO()
-        with contextlib.redirect_stdout(sio):
-            with preserve_logger_level('version_query'):
+        with temporarily_set_logger_level('version_query', logging.INFO):
+            sio = io.StringIO()
+            with contextlib.redirect_stdout(sio):
                 run_module('version_query', '.')
-        self.assertEqual(sio.getvalue().rstrip(), query_caller().to_str())
-        self.assertEqual(sio.getvalue().rstrip(), query_version_str())
+            self.assertEqual(sio.getvalue().rstrip(), query_caller().to_str())
+            self.assertEqual(sio.getvalue().rstrip(), query_version_str())
 
     def test_increment_here(self):
         sio = io.StringIO()
@@ -200,9 +201,9 @@ class Tests(unittest.TestCase):
                          query_caller().increment(VersionComponent.Patch).to_str())
 
     def test_predict_here(self):
-        sio = io.StringIO()
-        with contextlib.redirect_stdout(sio):
-            with preserve_logger_level('version_query'):
+        with temporarily_set_logger_level('version_query', logging.INFO):
+            sio = io.StringIO()
+            with contextlib.redirect_stdout(sio):
                 run_module('version_query', '-p', '.')
-        self.assertEqual(sio.getvalue().rstrip(), predict_caller().to_str())
-        self.assertEqual(sio.getvalue().rstrip(), predict_version_str())
+            self.assertEqual(sio.getvalue().rstrip(), predict_caller().to_str())
+            self.assertEqual(sio.getvalue().rstrip(), predict_version_str())
