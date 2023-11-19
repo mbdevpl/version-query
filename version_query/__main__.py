@@ -11,7 +11,7 @@ class Logging(boilerplates.logging.Logging):
     """Logging configuration."""
 
     packages = ['version_query']
-    level_package = logging.INFO
+    level_global = logging.INFO
 
 
 if __name__ == '__main__':
