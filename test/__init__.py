@@ -8,7 +8,7 @@ from version_query.__main__ import Logging
 class TestsLogging(Logging):
     """Logging configuration."""
 
-    level_package = logging.DEBUG
+    level_global = logging.DEBUG
 
 
 TestsLogging.configure()
