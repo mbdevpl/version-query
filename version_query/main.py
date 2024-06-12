@@ -2,7 +2,8 @@
 
 import argparse
 import pathlib
-import sys
+
+from boilerplates.cli import make_copyright_notice, add_version_option
 
 from ._version import VERSION
 from .version import VersionComponent
@@ -18,17 +19,17 @@ def main(args=None, namespace=None) -> None:
         prog='version_query',
         description='''Tool for querying current versions of Python packages. Use LOGGING_LEVEL
         environment variable to adjust logging level.''',
-        epilog='''Copyright 2017-2023 by the contributors, Apache License 2.0,
-        https://github.com/mbdevpl/version-query''',
+        epilog=make_copyright_notice(
+            2017, 2024, author='the contributors', url='https://github.com/mbdevpl/version-query'),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    add_version_option(parser, VERSION)
+
     parser.add_argument('-i', '--increment', action='store_true', help='''output version string for
                         next patch release, i.e. if version is 1.0.3, output 1.0.4''')
     parser.add_argument('-p', '--predict', action='store_true', help='''operate in prediction mode,
                         i.e. assume existence of git repository and infer current version from
                         its tags, history and working tree status''')
     parser.add_argument('path', type=pathlib.Path)
-    parser.add_argument('--version', action='version',
-                        version=f'{parser.prog} {VERSION},\nPython {sys.version}')
     parsed_args = parser.parse_args(args=args, namespace=namespace)
     if parsed_args.predict and parsed_args.increment:
         raise ValueError(

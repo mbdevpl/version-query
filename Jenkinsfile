@@ -9,7 +9,7 @@ pipeline {
   }
 
   environment {
-    PYTHON_PACKAGE = 'version-query'
+    PYTHON_PACKAGE = 'version_query'
   }
 
   agent {
@@ -24,7 +24,7 @@ pipeline {
 
     stage('Lint') {
       environment {
-        PYTHON_MODULES = "${env.PYTHON_PACKAGE.replace('-', '_')} test *.py"
+        PYTHON_MODULES = "${env.PYTHON_PACKAGE} test *.py"
       }
       steps {
         sh """#!/usr/bin/env bash
@@ -93,7 +93,7 @@ pipeline {
         sh """#!/usr/bin/env bash
           set -Eeuxo pipefail
           python3 -m twine upload \
-            dist/${PYTHON_PACKAGE.replace('-', '_')}-${VERSION}-py3-none-any.whl \
+            dist/${PYTHON_PACKAGE}-${VERSION}-py3-none-any.whl \
             dist/${PYTHON_PACKAGE}-${VERSION}.tar.gz \
             dist/${PYTHON_PACKAGE}-${VERSION}.zip
         """
@@ -110,7 +110,7 @@ pipeline {
       steps {
         script {
           githubUtils.createRelease([
-            "dist/${PYTHON_PACKAGE.replace('-', '_')}-${VERSION}-py3-none-any.whl",
+            "dist/${PYTHON_PACKAGE}-${VERSION}-py3-none-any.whl",
             "dist/${PYTHON_PACKAGE}-${VERSION}.tar.gz",
             "dist/${PYTHON_PACKAGE}-${VERSION}.zip"
             ])
