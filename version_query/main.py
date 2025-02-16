@@ -20,7 +20,7 @@ def main(args=None, namespace=None) -> None:
         description='''Tool for querying current versions of Python packages. Use LOGGING_LEVEL
         environment variable to adjust logging level.''',
         epilog=make_copyright_notice(
-            2017, 2024, author='the contributors', url='https://github.com/mbdevpl/version-query'),
+            2017, 2025, author='the contributors', url='https://github.com/mbdevpl/version-query'),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     add_version_option(parser, VERSION)
 
