@@ -32,7 +32,7 @@ def query_package_folder(path: pathlib.Path, search_parent_directories: bool = F
     paths = [path]
     if search_parent_directories:
         paths += path.parents
-    metadata_json_paths, pkg_info_paths = None, None
+    global_metadata_json_paths, global_pkg_info_paths = [], []
     for pth in paths:
         metadata_json_paths = list(pth.parent.glob(f'{pth.name}*.dist-info/metadata.json'))
         pkg_info_paths = list(pth.parent.glob(f'{pth.name}*.egg-info/PKG-INFO'))
@@ -41,4 +41,13 @@ def query_package_folder(path: pathlib.Path, search_parent_directories: bool = F
             return query_metadata_json(metadata_json_paths[0])
         if not metadata_json_paths and len(pkg_info_paths) == 1:
             return query_pkg_info(pkg_info_paths[0])
-    raise ValueError(paths, metadata_json_paths, pkg_info_paths)
+        _LOG.debug(
+            'in %s found %i JSON metadata: %s and %i PKG-INFO metadata: %s'
+            ' - unable to infer package metadata, continuing search',
+            pth, len(metadata_json_paths), metadata_json_paths, len(pkg_info_paths), pkg_info_paths)
+        global_metadata_json_paths.extend(metadata_json_paths)
+        global_pkg_info_paths.extend(pkg_info_paths)
+    raise ValueError(
+        f'unable to infer package metadata from the following paths {paths} '
+        f'- found {len(global_metadata_json_paths)} JSON metadata: {global_metadata_json_paths}'
+        f' and {len(global_pkg_info_paths)} PKG-INFO metadata: {global_pkg_info_paths}')
