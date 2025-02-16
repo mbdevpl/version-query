@@ -5,5 +5,5 @@ flake518 ~= 1.6
 mypy ~= 1.5
 pydocstyle ~= 6.3
 pylint ~= 3.1
-twine ~= 5.1
+twine ~= 6.1
 types-setuptools >= 67.4
