@@ -51,6 +51,8 @@ jobs:
       - run: python -m coverage run --append --branch --source . -m unittest -v test.test_version
         env:
           LOGGING_LEVEL: critical
+      - run: python -m pip install -e .
+      - run: python -m coverage run --append --branch --source . -m pip install --no-build-isolation --no-binary ebrains-drive ebrains-drive==0.6.0
       - run: python -m coverage report --show-missing
       - run: codecov
   publish:
