@@ -2,8 +2,8 @@
 requires = [
     'boilerplates[setup] ~= 1.0',
     'GitPython ~= 3.1',
-    'packaging >= 23.0',
-    'semver ~= 2.13'
+    'packaging >= 24.0',
+    'semver ~= 2.13, < 3.1'
 ]
 
 [tool.flake8]
