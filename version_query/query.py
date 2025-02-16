@@ -19,7 +19,7 @@ def _caller_folder(stack_level: int = 1) -> pathlib.Path:
     caller_path = frame_info[1]  # frame_info.filename
 
     here = pathlib.Path(caller_path).absolute().resolve()
-    assert here.is_file(), here
+    assert here.is_file() or here.name == '<string>', here
     here = here.parent
     assert here.is_dir(), here
     _LOG.debug('found directory "%s"', here)
