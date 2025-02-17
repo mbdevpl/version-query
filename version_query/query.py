@@ -18,9 +18,9 @@ def _caller_folder(stack_level: int = 1) -> pathlib.Path:
     frame_info = inspect.getouterframes(inspect.currentframe())[stack_level]
     caller_path = frame_info[1]  # frame_info.filename
 
-    here = pathlib.Path(caller_path).absolute().resolve()
-    assert here.is_file() or here.name == '<string>', here
-    here = here.parent
+    here = pathlib.Path(caller_path).absolute()
+    assert here.name == '<string>' or here.is_file(), here
+    here = here.parent.resolve()
     assert here.is_dir(), here
     _LOG.debug('found directory "%s"', here)
 
