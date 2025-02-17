@@ -147,13 +147,13 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         """Create version from a standard Python version object."""
         if not isinstance(py_version, packaging.version.Version):
             _LOG.warning('attempting to parse %s as packaging.version.Version...', type(py_version))
-        ver = py_version._version
+        ver = py_version._version  # pylint: disable = protected-access
         major, minor, patch = [ver.release[i] if len(ver.release) > i
                                else None for i in range(3)]
         pre_release: t.Optional[t.Sequence[
             t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]] = None
         local = None
-        pre_ver: t.Optional[t.Tuple[None, int]]
+        pre_ver: t.Optional[t.Tuple[str | None, int]]
         if len(ver.release) == 4:
             pre_ver = (None, ver.release[3])
         elif len(ver.release) > 4:
@@ -176,12 +176,14 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
             local = tuple(itertools.chain.from_iterable(
                 (dot, str(_)) for dot, _ in zip('.' * len(ver.local), ver.local)))[1:]
         _LOG.debug('parsing %s %s', type(py_version), py_version)
+        assert major is not None
         return cls(major, minor, patch, pre_release=pre_release, local=local)
 
     @classmethod
     def from_sem_version(cls, sem_version: t.Union[dict, semver.VersionInfo]):
         """Create version from semantic version object."""
         _LOG.debug('parsing %s %s', type(sem_version), sem_version)
+        local: str | tuple | None
         if isinstance(sem_version, semver.VersionInfo):
             major, minor, patch = sem_version.major, sem_version.minor, sem_version.patch
             pre_release = sem_version.prerelease
@@ -202,15 +204,15 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
 
     def __init__(
             self, major: int, minor: t.Optional[int] = None, patch: t.Optional[int] = None, *args,
-            pre_release: t.Sequence[
-                t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]] = None,
-            local: t.Union[str, tuple] = None):
+            pre_release: t.Optional[t.Sequence[
+                t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]] = None,
+            local: t.Union[str, tuple, None] = None):
         self._major: t.Optional[int] = None
         self._minor: t.Optional[int] = None
         self._patch: t.Optional[int] = None
         self._pre_release: t.Optional[
             t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]] = None
-        self._local: t.Optional[t.Sequence[str]] = None
+        self._local: t.Optional[t.Tuple[str, ...]] = None
 
         self.release = major, minor, patch
 
@@ -224,7 +226,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
                 args = args[consumed_args:]
             else:
                 pre_release = None
-        self.pre_release = pre_release
+        self.pre_release = pre_release if pre_release is None else list(pre_release)
 
         if args and local is not None:
             raise ValueError(f'args={args} and local={local} are present at the same time'
@@ -258,7 +260,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
                 raise ValueError(f'pre-release segment arg={arg} (index {i} in args={args}'
                                  f' in {repr(self)}) must be a 3-tuple')
         else:
-            accumulated: t.List[t.Union[int, str]] = []
+            accumulated: t.List[t.Union[int, str, None]] = []
             for i, arg in enumerate(args):
                 if not accumulated:
                     if arg in (None, '.', '-'):
@@ -312,7 +314,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
 
     @property
     def pre_release(self) -> t.Optional[
-            t.Sequence[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]]:
+            t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]]:
         """Pre-release version component."""
         if self._pre_release is None:
             return None
