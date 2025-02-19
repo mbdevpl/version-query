@@ -172,35 +172,51 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
 
     def _get_pre_release_from_args(self, args) -> t.Tuple[
             t.Sequence[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]], int]:
+        """Get pre-release version component from args."""
+        if args and isinstance(args[0], tuple):
+            return self._get_prerelease_from_tuples(args)
+
         pre_release: t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]] = []
         consumed_args = 0
-        if args and isinstance(args[0], tuple):
-            for i, arg in enumerate(args):
-                if not isinstance(arg, tuple):
+        accumulated: t.List[t.Union[int, str, None]] = []
+        for i, arg in enumerate(args):
+            if not accumulated:
+                if arg in (None, '.', '-'):
+                    if len(args) < i + 3:
+                        raise ValueError(
+                            'expected 3 consecutive values'
+                            f' from index {i} in args={args} in {repr(self)}')
+                else:
                     break
-                if len(arg) == 3 and arg[0] in (None, '.', '-'):
-                    pre_release.append(arg)
-                    consumed_args += 1
-                    continue
-                if i == len(args) - 1:
-                    break
-                raise ValueError(f'pre-release segment arg={arg} (index {i} in args={args}'
-                                 f' in {repr(self)}) must be a 3-tuple')
-        else:
-            accumulated: t.List[t.Union[int, str, None]] = []
-            for i, arg in enumerate(args):
-                if not accumulated:
-                    if arg in (None, '.', '-'):
-                        if len(args) < i + 3:
-                            raise ValueError(f'expected 3 consecutive values from index {i}'
-                                             f' in args={args} in {repr(self)}')
-                    else:
-                        break
-                accumulated.append(arg)
+            accumulated.append(arg)
+            consumed_args += 1
+            if len(accumulated) == 3:
+                _separator, _type, _patch = \
+                    accumulated  # pylint: disable = unbalanced-tuple-unpacking
+                assert _separator is None or isinstance(_separator, str), _separator
+                assert _type is None or isinstance(_type, str), _type
+                assert _patch is None or isinstance(_patch, int), _patch
+                pre_release.append((_separator, _type, _patch))
+                accumulated = []
+        return pre_release, consumed_args
+
+    def _get_prerelease_from_tuples(self, args) -> t.Tuple[
+            t.Sequence[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]], int]:
+        """Get pre-release version component from args, assuming they are sequence of tuples."""
+        pre_release: t.List[t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]] = []
+        consumed_args = 0
+        for i, arg in enumerate(args):
+            if not isinstance(arg, tuple):
+                break
+            if len(arg) == 3 and arg[0] in (None, '.', '-'):
+                pre_release.append(arg)
                 consumed_args += 1
-                if len(accumulated) == 3:
-                    pre_release.append(tuple(accumulated))
-                    accumulated = []
+                continue
+            if i == len(args) - 1:
+                break
+            raise ValueError(
+                f'pre-release segment arg={arg} (index {i} in args={args} in {repr(self)})'
+                ' must be a 3-tuple')
         return pre_release, consumed_args
 
     @property
