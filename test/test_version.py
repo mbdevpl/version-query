@@ -25,19 +25,21 @@ class Tests(unittest.TestCase):
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
 
                 py_version = \
-                    pkg_resources.parse_version(version_str)  # type: packaging.version.Version
-                # self.assertIsInstance(
-                #     py_version, packaging.version.Version, msg=(type(py_version), py_version))
+                    pkg_resources.parse_version(version_str)
                 _LOG.debug('packaging parsed version string %s into %s: %s',
                            repr(version_str), type(py_version), py_version)
+                # self.assertIsInstance(
+                #     py_version, packaging.version.Version, msg=(type(py_version), py_version))
 
                 try:
-                    sem_version = semver.VersionInfo.parse(version_str)  # type: semver.VersionInfo
+                    sem_version = semver.VersionInfo.parse(version_str)
                 except ValueError:
                     _LOG.debug('semver could not parse version string %s', repr(version_str))
                 else:
                     _LOG.debug('semver parsed version string %s into %s: %s',
                                repr(version_str), type(sem_version), sem_version)
+                # self.assertIsInstance(
+                #     sem_version, semver.VersionInfo, msg=(type(sem_version), sem_version))
 
                 self.assertEqual(Version.from_str(version_str).to_tuple(), version_tuple)
 
@@ -76,7 +78,7 @@ class Tests(unittest.TestCase):
             version_tuple = case_to_version_tuple(args, kwargs)
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
                 try:
-                    sem_version = semver.VersionInfo.parse(version_str)  # type: semver.VersionInfo
+                    sem_version = semver.VersionInfo.parse(version_str)
                 except ValueError:
                     continue
                 else:
