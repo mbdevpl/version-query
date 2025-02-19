@@ -125,6 +125,7 @@ class Tests(unittest.TestCase):
                     self.assertIsInstance(version.local, tuple)
 
     def test_init_bad(self):
+        # pylint: disable = redefined-variable-type
         for (args, kwargs), exception in BAD_INIT_CASES.items():
             with self.subTest(args=args, kwargs=kwargs, exception=exception):
                 with self.assertRaises(exception):

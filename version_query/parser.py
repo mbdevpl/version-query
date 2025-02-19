@@ -32,8 +32,7 @@ def parse_pre_release_str(pre_release: str) -> t.Sequence[
         t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]:
     """Parse a pre-release string into a sequence of tuples."""
     parts = patterns.PRE_RELEASE.findall(pre_release)
-    _LOG.debug('parsed pre-release string %s into %s',
-                repr(pre_release), parts)
+    _LOG.debug('parsed pre-release string %s into %s', repr(pre_release), parts)
     tuples = []
     for part in parts:
         match = patterns.PRE_RELEASE_PART.fullmatch(part)
@@ -51,4 +50,4 @@ def parse_local_str(local: str) -> tuple:
     """Parse a local version suffix string into a sequence."""
     match = patterns.LOCAL.fullmatch(local)
     assert match is not None
-    return tuple([_ for _ in match.groups() if _ is not None])
+    return tuple(_ for _ in match.groups() if _ is not None)
