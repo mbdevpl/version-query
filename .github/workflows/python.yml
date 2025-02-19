@@ -54,7 +54,7 @@ jobs:
       - run: python -m pip install -e .
       - run: python -m coverage run --append --branch --source . -m pip install --no-build-isolation --no-binary ebrains-drive ebrains-drive==0.6.0
       - run: python -m coverage report --show-missing
-      - run: codecov
+      - run: python -m codecov --token ${{ secrets.CODECOV_TOKEN }}
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
