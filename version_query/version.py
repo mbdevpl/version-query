@@ -18,6 +18,7 @@ PY_PRE_RELEASE_INDICATORS = {'a', 'b', 'c', 'rc'}
 @enum.unique
 class VersionComponent(enum.IntEnum):
     """Enumeration of standard version components."""
+    # pylint: disable = invalid-name
 
     Major = 1 << 1
     Minor = 1 << 2
@@ -29,10 +30,10 @@ class VersionComponent(enum.IntEnum):
 
 
 def _version_tuple_checker(version_tuple, flags):
-    return all([(_ is not None if flag else _ is None) for _, flag in zip(version_tuple, flags)])
+    return all((_ is not None if flag else _ is None) for _, flag in zip(version_tuple, flags))
 
 
-class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-methods
+class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-methods, too-many-instance-attributes
     """For storing and manipulating version information.
 
     Definitions of acceptable version formats are provided in readme.
@@ -202,7 +203,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     def from_version(cls, version: 'Version'):
         return cls.from_dict(version.to_dict())
 
-    def __init__(
+    def __init__(  # pylint: disable = keyword-arg-before-vararg, too-many-arguments
             self, major: int, minor: t.Optional[int] = None, patch: t.Optional[int] = None, *args,
             pre_release: t.Optional[t.Sequence[
                 t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]] = None,
@@ -503,13 +504,13 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         assert self._pre_release is not None
         version_tuple = self._pre_release[segment]
         if _version_tuple_checker(version_tuple, (True, True, False)):
-            return '{}{}'.format(*version_tuple[:2])
+            return '{}{}'.format(*version_tuple[:2])  # pylint: disable = consider-using-f-string
         if _version_tuple_checker(version_tuple, (True, False, True)):
             return f'{version_tuple[0]}{version_tuple[2]}'
         if _version_tuple_checker(version_tuple, (False, True, True)):
-            return '{}{}'.format(*version_tuple[1:])
+            return '{}{}'.format(*version_tuple[1:])  # pylint: disable = consider-using-f-string
         if _version_tuple_checker(version_tuple, (True, True, True)):
-            return '{}{}{}'.format(*version_tuple)
+            return '{}{}{}'.format(*version_tuple)  # pylint: disable = consider-using-f-string
         raise ValueError(f'cannot generate valid version string from {repr(self)}')
 
     def pre_release_to_str(self) -> str:
