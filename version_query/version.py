@@ -4,11 +4,13 @@ import collections.abc
 import enum
 import itertools
 import logging
-import re
 import typing as t
 
 import packaging.version
 import semver
+
+from . import patterns
+from .parser import parse_release_str, parse_pre_release_str, parse_local_str
 
 _LOG = logging.getLogger(__name__)
 
@@ -18,6 +20,7 @@ PY_PRE_RELEASE_INDICATORS = {'a', 'b', 'c', 'rc'}
 @enum.unique
 class VersionComponent(enum.IntEnum):
     """Enumeration of standard version components."""
+
     # pylint: disable = invalid-name
 
     Major = 1 << 1
@@ -39,87 +42,10 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
     Definitions of acceptable version formats are provided in readme.
     """
 
-    _re_number = r'(?:0|[123456789][0123456789]*)'
-    # _re_sha = r'[0123456789abcdef]+'
-    _re_letters = r'(?:[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)'
-    _pattern_letters = re.compile(_re_letters)
-    _re_alphanumeric = r'(?:[0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)'
-    _pattern_alphanumeric = re.compile(_re_alphanumeric)
-    _re_sep = r'(?:[\.-])'
-
-    _re_release_parts = \
-        r'(?P<major>{n})(?:\.(?P<minor>{n}))?(?:\.(?P<patch>{n}))?'.format(n=_re_number)
-    _pattern_release = re.compile(_re_release_parts)
-
-    @classmethod
-    def _parse_release_str(cls, release: str) -> tuple:
-        match = cls._pattern_release.fullmatch(release)
-        assert match is not None
-        major_match = match.group('major')
-        assert major_match is not None
-        major = int(major_match)
-        minor_match = match.group('minor')
-        if minor_match is not None:
-            minor = int(minor_match)
-        else:
-            minor = None
-        patch_match = match.group('patch')
-        if patch_match is not None:
-            patch = int(patch_match)
-        else:
-            patch = None
-        return major, minor, patch
-
-    _re_pre_separator = rf'(?P<preseparator>{_re_sep})'
-    _re_pre_type = rf'(?P<pretype>{_re_letters})'
-    _re_pre_patch = rf'(?P<prepatch>{_re_number})'
-    _re_pre_release_part = rf'{_re_pre_separator}?{_re_pre_type}?{_re_pre_patch}?'
-    _pattern_pre_release_part = re.compile(_re_pre_release_part)
-    _re_pre_release_parts = r'(?:{0}{2})|(?:{0}?{1}{2}?)'.format(_re_sep, _re_letters, _re_number)
-    _pattern_pre_release = re.compile(_re_pre_release_parts)
-    _pattern_pre_release_check = re.compile(rf'(?:{_re_pre_release_parts})+')
-
-    @classmethod
-    def _parse_pre_release_str(cls, pre_release: str) -> t.Sequence[
-            t.Tuple[t.Optional[str], t.Optional[str], t.Optional[int]]]:
-        parts = cls._pattern_pre_release.findall(pre_release)
-        _LOG.debug('parsed pre-release string %s into %s',
-                   repr(pre_release), parts)
-        tuples = []
-        for part in parts:
-            match = cls._pattern_pre_release_part.fullmatch(part)
-            assert match is not None
-            pre_patch_match = match.group('prepatch')
-            if pre_patch_match is not None:
-                pre_patch = int(pre_patch_match)
-            else:
-                pre_patch = None
-            tuples.append((match.group('preseparator'), match.group('pretype'), pre_patch))
-        return tuples
-
-    _re_local_separator = rf'({_re_sep})'
-    _re_local_part = rf'({_re_alphanumeric})'
-    _re_local_parts = rf'\+{_re_local_part}(?:{_re_local_separator}{_re_local_part})*'
-    _pattern_local = re.compile(_re_local_parts)
-
-    @classmethod
-    def _parse_local_str(cls, local: str) -> tuple:
-        match = cls._pattern_local.fullmatch(local)
-        assert match is not None
-        return tuple([_ for _ in match.groups() if _ is not None])
-
-    _re_release = r'(?P<release>{n}(?:\.{n})?(?:\.{n})?)'.format(n=_re_number)
-    _re_pre_release = r'(?P<prerelease>(?:(?:{0}{2})|(?:{0}?{1}{2}?))+)'.format(
-        _re_sep, _re_letters, _re_number)
-    _re_local = r'(?P<local>\+{0}([\.-]{0})*)'.format(_re_alphanumeric)
-    # _re_named_parts_count = 3 + 3
-    _re_version = rf'{_re_release}{_re_pre_release}?{_re_local}?'
-    _pattern_version = re.compile(_re_version)
-
     @classmethod
     def from_str(cls, version_str: str):
         """Create version from string."""
-        match = cls._pattern_version.fullmatch(version_str)  # type: t.Optional[t.Match[str]]
+        match = patterns.VERSION.fullmatch(version_str)  # type: t.Optional[t.Match[str]]
         if match is None:
             raise ValueError(f'version string {repr(version_str)} is invalid')
         _LOG.debug('version_query parsed version string %s into %s: %s %s',
@@ -129,9 +55,9 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         _pre_release = match.group('prerelease')
         _local = match.group('local')
 
-        major, minor, patch = cls._parse_release_str(_release)
-        pre_release = None if _pre_release is None else cls._parse_pre_release_str(_pre_release)
-        local = None if _local is None else cls._parse_local_str(_local)
+        major, minor, patch = parse_release_str(_release)
+        pre_release = None if _pre_release is None else parse_pre_release_str(_pre_release)
+        local = None if _local is None else parse_local_str(_local)
 
         return cls(major=major, minor=minor, patch=patch, pre_release=pre_release, local=local)
 
@@ -196,7 +122,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         if pre_release is not None:
             raise NotImplementedError(sem_version)
         if local is not None:
-            local = cls._parse_local_str(f'+{local}')
+            local = parse_local_str(f'+{local}')
         return cls(major, minor, patch, pre_release=pre_release, local=local)
 
     @classmethod
@@ -357,7 +283,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
         if pre_type is not None and not isinstance(pre_type, str):
             raise TypeError(
                 f'pre_type={repr(pre_type)} is of wrong type {type(pre_type)} in {repr(self)}')
-        if pre_type is not None and type(self)._pattern_letters.fullmatch(pre_type) is None:
+        if pre_type is not None and patterns.LETTERS.fullmatch(pre_type) is None:
             raise ValueError(f'pre_type={repr(pre_type)} has wrong value in {repr(self)}')
         if pre_patch is not None and not isinstance(pre_patch, int):
             raise TypeError(
@@ -396,7 +322,7 @@ class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-me
                 raise TypeError(f'local_part or local_separator {repr(part)} is of wrong type'
                                 f' {type(part)} in {repr(self)}')
             if i % 2 == 0:
-                if type(self)._pattern_alphanumeric.fullmatch(part) is None:
+                if patterns.ALPHANUMERIC.fullmatch(part) is None:
                     raise ValueError(f'local_part={repr(part)} has wrong value in {repr(self)}')
             elif part not in ('-', '.'):
                 raise ValueError(f'local_separator={repr(part)} has wrong value in {repr(self)}')
