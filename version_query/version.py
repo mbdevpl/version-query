@@ -36,11 +36,13 @@ def _version_tuple_checker(version_tuple, flags):
     return all((_ is not None if flag else _ is None) for _, flag in zip(version_tuple, flags))
 
 
-class Version(collections.abc.Hashable):  # pylint: disable = too-many-public-methods, too-many-instance-attributes
+class Version(collections.abc.Hashable):
     """For storing and manipulating version information.
 
     Definitions of acceptable version formats are provided in readme.
     """
+
+    # pylint: disable = too-many-public-methods, too-many-instance-attributes
 
     @classmethod
     def from_str(cls, version_str: str):
