@@ -308,9 +308,9 @@ Incrementing any version component clears all existing following components.
 Examples of how version is incremented:
 
 *   for ``1.5``, incrementing ``<major>`` results in ``2.0``;
-*   for ``1.5.1-2.4``, ``<minor>``++ results in ``1.6``;
-*   ``1.5.1-2.4``, ``<patch>``++, ``1.5.2``;
-*   ``1.5.1``, ``<major>``+=3, ``4.0.0``.
+*   for ``1.5.1-2.4``, ``<minor>`` ++ results in ``1.6``;
+*   ``1.5.1-2.4``, ``<patch>`` ++, ``1.5.2``;
+*   ``1.5.1``, ``<major>`` += 3, ``4.0.0``.
 
 
 API details

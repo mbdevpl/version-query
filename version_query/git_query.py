@@ -40,6 +40,17 @@ def _git_version_tags(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
     return versions
 
 
+def _git_version_tag_commits(
+        version_tags: t.Iterable[git.Tag]) -> t.Mapping[git.objects.Commit, t.Set[git.Tag]]:
+    version_tag_commits: t.Dict[git.objects.Commit, t.Set[git.Tag]] = {}
+    for tag in version_tags:
+        _commit = tag.commit
+        if _commit not in version_tag_commits:
+            version_tag_commits[_commit] = set()
+        version_tag_commits[_commit].add(tag)
+    return version_tag_commits
+
+
 def _latest_git_version_tag_on_branches(
         repo: git.Repo, assume_if_none: bool, commit: git.objects.Commit, commit_distance: int,
         skip_commits: t.Set[git.objects.Commit]) -> t.Union[int, t.Tuple[
@@ -80,12 +91,7 @@ def _latest_git_version_tag(
             t.Optional[git.objects.Commit], t.Optional[git.TagReference], t.Optional[Version], int]:
     """Return (commit, tag at that commit if any, latest version, distance from the version)."""
     version_tags = _git_version_tags(repo)
-    version_tag_commits: t.Dict[git.objects.Commit, set] = {}
-    for tag, version in version_tags.items():
-        _commit = tag.commit
-        if _commit not in version_tag_commits:
-            version_tag_commits[_commit] = set()
-        version_tag_commits[_commit].add(tag)
+    version_tag_commits = _git_version_tag_commits(version_tags.keys())
     current_version_tags = {}
     commit = None
     if skip_commits is None:
