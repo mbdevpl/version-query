@@ -185,7 +185,7 @@ class Tests(unittest.TestCase):
         _LOG.info('%s', sio.getvalue())
 
     def test_here(self):
-        with temporarily_set_logger_level('version_query', logging.INFO):
+        with temporarily_set_logger_level('version_query', logging.ERROR):
             sio = io.StringIO()
             with contextlib.redirect_stdout(sio):
                 run_module('version_query', '.')
@@ -193,15 +193,16 @@ class Tests(unittest.TestCase):
             self.assertEqual(sio.getvalue().rstrip(), query_version_str())
 
     def test_increment_here(self):
-        sio = io.StringIO()
-        with contextlib.redirect_stdout(sio):
-            with preserve_logger_level('version_query'):
-                run_module('version_query', '-i', '.')
-        self.assertEqual(sio.getvalue().rstrip(),
-                         query_caller().increment(VersionComponent.Patch).to_str())
+        with temporarily_set_logger_level('version_query', logging.ERROR):
+            sio = io.StringIO()
+            with contextlib.redirect_stdout(sio):
+                with preserve_logger_level('version_query'):
+                    run_module('version_query', '-i', '.')
+            self.assertEqual(sio.getvalue().rstrip(),
+                            query_caller().increment(VersionComponent.Patch).to_str())
 
     def test_predict_here(self):
-        with temporarily_set_logger_level('version_query', logging.INFO):
+        with temporarily_set_logger_level('version_query', logging.ERROR):
             sio = io.StringIO()
             with contextlib.redirect_stdout(sio):
                 run_module('version_query', '-p', '.')
