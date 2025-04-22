@@ -1,3 +1,2 @@
 -r requirements.txt
-boilerplates[git-repo-tests,packaging-tests] ~= 1.0
-setuptools >= 67.4
+boilerplates[git-repo-tests,packaging-tests] ~= 1.2
