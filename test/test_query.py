@@ -21,8 +21,6 @@ from .test_cli import preserve_logger_level
 
 _LOG = logging.getLogger(__name__)
 
-IGNORED_FOLDER_NAMES = ['opencv']
-
 
 class Tests(unittest.TestCase):
 
@@ -44,8 +42,6 @@ class Tests(unittest.TestCase):
 
     def _query_test_case(self, paths, query_function):
         for path in paths:
-            if any(_ in path.parts for _ in IGNORED_FOLDER_NAMES) or not path.exists():
-                continue
             with self.subTest(path=path, query_function=query_function):
                 _LOG.debug('testing %s() on %s', query_function.__name__, path)
                 try:
