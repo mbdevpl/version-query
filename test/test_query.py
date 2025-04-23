@@ -1,46 +1,25 @@
 """Tests of querying tools."""
 
-import contextlib
 import importlib
-import io
 import logging
 import os
 import pathlib
 import sys
 import tempfile
 import unittest
-import unittest.mock
 
 from boilerplates.packaging_tests import run_module
 
-from version_query.version import VersionComponent, Version
+from version_query.version import Version
 from version_query.git_query import query_git_repo, predict_git_repo
 from version_query.py_query import query_metadata_json, query_pkg_info, query_package_folder
-from version_query.query import \
-    query_folder, query_caller, query_version_str, predict_caller, predict_version_str
+from version_query.query import query_folder, query_caller
 from .examples import \
     PY_LIB_DIR, GIT_REPO_EXAMPLES, METADATA_JSON_EXAMPLE_PATHS, PKG_INFO_EXAMPLE_PATHS, \
     PACKAGE_FOLDER_EXAMPLES
+from .test_cli import preserve_logger_level
 
 _LOG = logging.getLogger(__name__)
-
-IGNORED_FOLDER_NAMES = ['opencv']
-
-
-@contextlib.contextmanager
-def temporarily_set_logger_level(logger_name: str, level: int):
-    """Change logger level on enter and restore on exit of this context."""
-    logger = logging.getLogger(logger_name)
-    level_ = logger.level
-    logger.setLevel(level)
-    try:
-        yield
-    finally:
-        logger.setLevel(level_)
-
-
-def preserve_logger_level(logger_name: str):
-    return temporarily_set_logger_level(logger_name, logging.getLogger(logger_name).level)
 
 
 class Tests(unittest.TestCase):
@@ -63,8 +42,6 @@ class Tests(unittest.TestCase):
 
     def _query_test_case(self, paths, query_function):
         for path in paths:
-            if any(_ in path.parts for _ in IGNORED_FOLDER_NAMES) or not path.exists():
-                continue
             with self.subTest(path=path, query_function=query_function):
                 _LOG.debug('testing %s() on %s', query_function.__name__, path)
                 try:
@@ -164,46 +141,3 @@ class Tests(unittest.TestCase):
         version = query_caller()
         _LOG.debug('caller: %s', version)
         self.assertIsInstance(version, Version)
-
-    def test_not_as_main(self):  # pylint: disable = no-self-use
-        run_module('version_query', run_name=None)
-
-    def test_help(self):
-        sio = io.StringIO()
-        with contextlib.redirect_stderr(sio):
-            with preserve_logger_level('version_query'):
-                with self.assertRaises(SystemExit):
-                    run_module('version_query')
-        _LOG.info('%s', sio.getvalue())
-
-    def test_bad_usage(self):
-        sio = io.StringIO()
-        with contextlib.redirect_stderr(sio):
-            with preserve_logger_level('version_query'):
-                with self.assertRaises(ValueError):
-                    run_module('version_query', '-p', '-i', '.')
-        _LOG.info('%s', sio.getvalue())
-
-    def test_here(self):
-        with temporarily_set_logger_level('version_query', logging.INFO):
-            sio = io.StringIO()
-            with contextlib.redirect_stdout(sio):
-                run_module('version_query', '.')
-            self.assertEqual(sio.getvalue().rstrip(), query_caller().to_str())
-            self.assertEqual(sio.getvalue().rstrip(), query_version_str())
-
-    def test_increment_here(self):
-        sio = io.StringIO()
-        with contextlib.redirect_stdout(sio):
-            with preserve_logger_level('version_query'):
-                run_module('version_query', '-i', '.')
-        self.assertEqual(sio.getvalue().rstrip(),
-                         query_caller().increment(VersionComponent.Patch).to_str())
-
-    def test_predict_here(self):
-        with temporarily_set_logger_level('version_query', logging.INFO):
-            sio = io.StringIO()
-            with contextlib.redirect_stdout(sio):
-                run_module('version_query', '-p', '.')
-            self.assertEqual(sio.getvalue().rstrip(), predict_caller().to_str())
-            self.assertEqual(sio.getvalue().rstrip(), predict_version_str())
