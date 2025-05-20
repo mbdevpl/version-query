@@ -133,7 +133,7 @@ Versioning scheme
 
 Version scheme used by version-query is a relaxed mixture of:
 
-*   `Semantic Versioning 2.0.0 <http://semver.org/>`_ and
+*   `Semantic Versioning 2.0.0 <http://semver.org/>`__ and
 
 *   `PEP 440 -- Version Identification and Dependency Specification <https://www.python.org/dev/peps/pep-0440/>`_.
 
@@ -318,7 +318,7 @@ The base specification of the comparison scheme is:
 
 *   `PEP 508 -- Dependency specification for Python Software Packages <https://www.python.org/dev/peps/pep-0508/>`_ as well as
 
-*   `Semantic Versioning 2.0.0 <http://semver.org/>`_.
+*   `Semantic Versioning 2.0.0 <http://semver.org/>`__.
 
 With the notable difference to both that all version components are taken into account when
 establishing version precedence.
@@ -416,7 +416,7 @@ The Version objects are mutable, hashable and comparable.
     version = version_query.query_caller(stack_level=1)
     version = version_query.predict_caller(2)
 
-Version object can be obtained for any supported path, as well as for any python code
+Version object can be obtained for any supported path, as well as for any Python code
 currently being executed -- as long as it is located in a supported location.
 
 
