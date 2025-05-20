@@ -96,7 +96,7 @@ Using at build time
 This is the way to go if you want to use version-query only as a dependency when building
 the package, in such case it's not necessary to to add it to runtime dependencies.
 
-There are many build systems avialable for Python, and version-query may not be compatible
+There are many build systems available for Python, and version-query may not be compatible
 with all of them. Below are some examples.
 
 setuptools with ``setup.py`` script
@@ -108,9 +108,11 @@ In such setup, you just need to add the following to your ``setup.py`` file:
 
 .. code:: python
 
+    import setuptools
     from version_query import predict_version_str
 
-    setup(
+
+    setuptools.setup(
         ...,
         version=predict_version_str()
     )
@@ -121,9 +123,12 @@ you may instead reuse the same constant in your ``setup.py`` file:
 
 .. code:: python
 
+    import setuptools
+
     from my_package import VERSION
 
-    setup(
+
+    setuptools.setup(
         ...,
         version=VERSION
     )
@@ -133,10 +138,10 @@ dynamic version attribute in ``pyproject.toml``
 
 A more modern approach in Python is to use ``pyproject.toml`` for building packages.
 
-Some build systems that use ``pyproject.toml`` allow setting the version dynamically
+Some build systems that use ``pyproject.toml`` support setting the version dynamically
 by allowing users to point to an attribute of some module in order to get the version.
 
-One of such packages is setuptools. When using it, one can use the following:
+One of such packages is setuptools. When using it, one can do the following:
 
 .. code:: toml
 
