@@ -128,6 +128,39 @@ you may instead reuse the same constant in your ``setup.py`` file:
         version=VERSION
     )
 
+dynamic version attribute in ``pyproject.toml``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A more modern approach in Python is to use ``pyproject.toml`` for building packages.
+
+Some build systems that use ``pyproject.toml`` allow setting the version dynamically
+by allowing users to point to an attribute of some module in order to get the version.
+
+One of such packages is setuptools. When using it, one can use the following:
+
+.. code:: toml
+
+    [project]
+    dynamic = ["version"]
+    ...
+
+    [build-system]
+    requires = ["setuptools >= 70.0"]
+    build-backend = "setuptools.build_meta"
+
+    [tool.setuptools.dynamic]
+    version = {attr = "version_query.local_git_version.PREDICTED"}
+
+Depending on how you build your package, the build system may copy files to a temporary folder
+when building. In such case, you need to set ``PROJECT_FOLDER`` environment variable
+to the current working directory before running the build command.
+
+For example, when using ``build`` package:
+
+.. code:: bash
+
+    PROJECT_FOLDER=$(pwd) python3 -m build
+
 Versioning scheme
 =================
 
