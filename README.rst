@@ -41,25 +41,9 @@ for easier development, testing and pre-release deployment?!
 
 Search no more!
 
-As long as you mark your releases using git tags, instead of hardcoding:
-
-.. code:: python
-
-    __version__ = '1.5.0.dev2'
-
-You can do:
-
-.. code:: python
-
-    from version_query import predict_version_str
-
-    __version__ = predict_version_str()
+As long as you use git and you mark your releases using git tags, version-query will do the rest.
 
 It's 21st century, stop hardcoding version numbers!
-
-This will set the version to release version when you really release a new version,
-and it will automatically generate a suitable development version at development/pre-release phase.
-
 
 .. contents::
     :backlinks: none
@@ -68,7 +52,32 @@ and it will automatically generate a suitable development version at development
 Overview
 ========
 
-At development time, the current version number is automatically generated based on:
+There are two main ways of using version-query - at runtime or at build time.
+
+Using at runtime
+----------------
+
+When using this way, version-query is needed as a runtime dependency of your package.
+
+If, for example, you have a constant storing the version of your package in some Python module:
+
+.. code:: python
+
+    VERSION = '1.5.0.dev2'
+
+You can do the following instead of hardcoding it:
+
+.. code:: python
+
+    from version_query import predict_version_str
+
+    VERSION = predict_version_str()
+
+This will set the version to release version when you really release a new version,
+and it will automatically generate a suitable development version at development/pre-release phase.
+
+When your package is imported while running from inside the repository, such as during development,
+the current version number is automatically generated based on:
 
 *   tags
 *   current commit SHA
@@ -81,9 +90,43 @@ or at runtime) then the script relies on metadata generated at packaging time.
 That's why, regardless if package is installed from PyPI (from source or wheel distribution)
 or cloned from GitHub, the version query will work.
 
-Additionally, version numbers in version-query are mutable objects and they can be conveniently
-incremented, compared with each other, as well as converted to/from other popular
-versioning formats.
+Using at build time
+-------------------
+
+This is the way to go if you want to use version-query only as a dependency when building
+the package, in such case it's not necessary to to add it to runtime dependencies.
+
+There are many build systems avialable for Python, and version-query may not be compatible
+with all of them. Below are some examples.
+
+setuptools with ``setup.py`` script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is a legacy way of building Python packages, but it is still widely used.
+
+In such setup, you just need to add the following to your ``setup.py`` file:
+
+.. code:: python
+
+    from version_query import predict_version_str
+
+    setup(
+        ...,
+        version=predict_version_str()
+    )
+
+If you are already using version-query at runtime in your package to set a constant
+(for example ``my_package.VERSION``, please see "Using at runtime" section above for details),
+you may instead reuse the same constant in your ``setup.py`` file:
+
+.. code:: python
+
+    from my_package import VERSION
+
+    setup(
+        ...,
+        version=VERSION
+    )
 
 Versioning scheme
 =================
