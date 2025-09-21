@@ -23,6 +23,15 @@ _LOG = logging.getLogger(__name__)
 
 
 class Tests(unittest.TestCase):
+    """Test querying tools from several modules.
+
+    Note:
+
+    Tests that run setup script directly fail due to conflict between distutils used internally
+    by setuptools and distutils used internally by pip. For more information, see:
+    - https://github.com/pypa/setuptools/issues/3297
+    - https://github.com/pypa/pip/issues/8761
+    """
 
     def _check_examples_count(self, description, examples):
         lvl = logging.WARNING if len(examples) < 10 else logging.INFO
@@ -87,6 +96,7 @@ class Tests(unittest.TestCase):
 
     @unittest.skipUnless(
             os.environ.get('TEST_PACKAGING') or os.environ.get('CI'), 'skipping packaging test')
+    @unittest.skipIf(sys.version_info < (3, 12), 'requires Python 3.12+')
     def test_query_pkg_info_current(self):
         with preserve_logger_level('version_query'):
             run_module('setup', 'build')
@@ -120,6 +130,7 @@ class Tests(unittest.TestCase):
 
     @unittest.skipUnless(
             os.environ.get('TEST_PACKAGING') or os.environ.get('CI'), 'skipping packaging test')
+    @unittest.skipIf(sys.version_info < (3, 12), 'requires Python 3.12+')
     def test_query_package_folder_current(self):
         with preserve_logger_level('version_query'):
             run_module('setup', 'build')
