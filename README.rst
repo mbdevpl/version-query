@@ -41,25 +41,9 @@ for easier development, testing and pre-release deployment?!
 
 Search no more!
 
-As long as you mark your releases using git tags, instead of hardcoding:
-
-.. code:: python
-
-    __version__ = '1.5.0.dev2'
-
-You can do:
-
-.. code:: python
-
-    from version_query import predict_version_str
-
-    __version__ = predict_version_str()
+As long as you use git and you mark your releases using git tags, version-query will do the rest.
 
 It's 21st century, stop hardcoding version numbers!
-
-This will set the version to release version when you really release a new version,
-and it will automatically generate a suitable development version at development/pre-release phase.
-
 
 .. contents::
     :backlinks: none
@@ -68,7 +52,32 @@ and it will automatically generate a suitable development version at development
 Overview
 ========
 
-At development time, the current version number is automatically generated based on:
+There are two main ways of using version-query - at runtime or at build time.
+
+Using at runtime
+----------------
+
+When using this way, version-query is needed as a runtime dependency of your package.
+
+If, for example, you have a constant storing the version of your package in some Python module:
+
+.. code:: python
+
+    VERSION = '1.5.0.dev2'
+
+You can do the following instead of hardcoding it:
+
+.. code:: python
+
+    from version_query import predict_version_str
+
+    VERSION = predict_version_str()
+
+This will set the version to release version when you really release a new version,
+and it will automatically generate a suitable development version at development/pre-release phase.
+
+When your package is imported while running from inside the repository, such as during development,
+the current version number is automatically generated based on:
 
 *   tags
 *   current commit SHA
@@ -81,16 +90,88 @@ or at runtime) then the script relies on metadata generated at packaging time.
 That's why, regardless if package is installed from PyPI (from source or wheel distribution)
 or cloned from GitHub, the version query will work.
 
-Additionally, version numbers in version-query are mutable objects and they can be conveniently
-incremented, compared with each other, as well as converted to/from other popular
-versioning formats.
+Using at build time
+-------------------
+
+This is the way to go if you want to use version-query only as a dependency when building
+the package, in such case it's not necessary to to add it to runtime dependencies.
+
+There are many build systems available for Python, and version-query may not be compatible
+with all of them. Below are some examples.
+
+setuptools with ``setup.py`` script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is a legacy way of building Python packages, but it is still widely used.
+
+In such setup, you just need to add the following to your ``setup.py`` file:
+
+.. code:: python
+
+    import setuptools
+    from version_query import predict_version_str
+
+
+    setuptools.setup(
+        ...,
+        version=predict_version_str()
+    )
+
+If you are already using version-query at runtime in your package to set a constant
+(for example ``my_package.VERSION``, please see "Using at runtime" section above for details),
+you may instead reuse the same constant in your ``setup.py`` file:
+
+.. code:: python
+
+    import setuptools
+
+    from my_package import VERSION
+
+
+    setuptools.setup(
+        ...,
+        version=VERSION
+    )
+
+dynamic version attribute in ``pyproject.toml``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A more modern approach in Python is to use ``pyproject.toml`` for building packages.
+
+Some build systems that use ``pyproject.toml`` support setting the version dynamically
+by allowing users to point to an attribute of some module in order to get the version.
+
+One of such packages is setuptools. When using it, one can do the following:
+
+.. code:: toml
+
+    [project]
+    dynamic = ["version"]
+    ...
+
+    [build-system]
+    requires = ["setuptools >= 70.0"]
+    build-backend = "setuptools.build_meta"
+
+    [tool.setuptools.dynamic]
+    version = {attr = "version_query.local_git_version.PREDICTED"}
+
+Depending on how you build your package, the build system may copy files to a temporary folder
+when building. In such case, you need to set ``PROJECT_FOLDER`` environment variable
+to the current working directory before running the build command.
+
+For example, when using ``build`` package:
+
+.. code:: bash
+
+    PROJECT_FOLDER=$(pwd) python3 -m build
 
 Versioning scheme
 =================
 
 Version scheme used by version-query is a relaxed mixture of:
 
-*   `Semantic Versioning 2.0.0 <http://semver.org/>`_ and
+*   `Semantic Versioning 2.0.0 <http://semver.org/>`__ and
 
 *   `PEP 440 -- Version Identification and Dependency Specification <https://www.python.org/dev/peps/pep-0440/>`_.
 
@@ -275,7 +356,7 @@ The base specification of the comparison scheme is:
 
 *   `PEP 508 -- Dependency specification for Python Software Packages <https://www.python.org/dev/peps/pep-0508/>`_ as well as
 
-*   `Semantic Versioning 2.0.0 <http://semver.org/>`_.
+*   `Semantic Versioning 2.0.0 <http://semver.org/>`__.
 
 With the notable difference to both that all version components are taken into account when
 establishing version precedence.
@@ -373,7 +454,7 @@ The Version objects are mutable, hashable and comparable.
     version = version_query.query_caller(stack_level=1)
     version = version_query.predict_caller(2)
 
-Version object can be obtained for any supported path, as well as for any python code
+Version object can be obtained for any supported path, as well as for any Python code
 currently being executed -- as long as it is located in a supported location.
 
 
