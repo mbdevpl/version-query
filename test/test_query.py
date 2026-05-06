@@ -60,8 +60,11 @@ class Tests(unittest.TestCase):
                 else:
                     _LOG.debug('%s: %s', path, version)
 
+    @unittest.skipUnless(
+        os.environ.get('TEST_LONG') or os.environ.get('CI'), 'skipping long test')
     def test_query_git_repo(self):
         self._check_examples_count('git repo', GIT_REPO_EXAMPLES)
+        _LOG.debug('testing query_git_repo() on %i repositories', len(GIT_REPO_EXAMPLES))
         self._query_test_case(GIT_REPO_EXAMPLES, query_git_repo)
 
     def test_predict_caller_bad(self):
@@ -81,7 +84,10 @@ class Tests(unittest.TestCase):
             _LOG.warning('removed %s from sys.path', project_path_str)
             project_file_path.unlink()
 
+    @unittest.skipUnless(
+        os.environ.get('TEST_LONG') or os.environ.get('CI'), 'skipping long test')
     def test_predict_git_repo(self):
+        _LOG.debug('testing predict_git_repo() on %i repositories', len(GIT_REPO_EXAMPLES))
         self._query_test_case(GIT_REPO_EXAMPLES, predict_git_repo)
 
     @unittest.skipIf(not METADATA_JSON_EXAMPLE_PATHS, 'no "metadata.json" files found')

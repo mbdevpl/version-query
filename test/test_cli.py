@@ -3,6 +3,7 @@
 import contextlib
 import io
 import logging
+import os
 import runpy
 import sys
 import unittest
@@ -42,6 +43,9 @@ class Tests(unittest.TestCase):
     def test_not_as_main(self):  # pylint: disable = no-self-use
         run_module('version_query', run_name='__not_main__')
 
+    @unittest.skipUnless(
+        os.environ.get('TEST_CLI') or os.environ.get('CI'),
+        'skipping CLI test which breaks test logging')
     def test_help(self):
         sio = io.StringIO()
         with contextlib.redirect_stderr(sio), preserve_logger_level('version_query'), \
@@ -49,6 +53,9 @@ class Tests(unittest.TestCase):
             run_module('version_query')
         _LOG.info('%s', sio.getvalue())
 
+    @unittest.skipUnless(
+        os.environ.get('TEST_CLI') or os.environ.get('CI'),
+        'skipping CLI test which breaks test logging')
     def test_bad_usage(self):
         sio = io.StringIO()
         with contextlib.redirect_stderr(sio), preserve_logger_level('version_query'), \
@@ -56,6 +63,9 @@ class Tests(unittest.TestCase):
             run_module('version_query', '-p', '-i', '.')
         _LOG.info('%s', sio.getvalue())
 
+    @unittest.skipUnless(
+        os.environ.get('TEST_CLI') or os.environ.get('CI'),
+        'skipping CLI test which breaks test logging')
     def test_here(self):
         sio = io.StringIO()
         with temporarily_set_logger_level('version_query', logging.ERROR), \
@@ -64,6 +74,9 @@ class Tests(unittest.TestCase):
         self.assertEqual(sio.getvalue().rstrip(), query_caller().to_str())
         self.assertEqual(sio.getvalue().rstrip(), query_version_str())
 
+    @unittest.skipUnless(
+        os.environ.get('TEST_CLI') or os.environ.get('CI'),
+        'skipping CLI test which breaks test logging')
     def test_increment_here(self):
         sio = io.StringIO()
         with temporarily_set_logger_level('version_query', logging.ERROR), \
@@ -72,6 +85,9 @@ class Tests(unittest.TestCase):
         self.assertEqual(sio.getvalue().rstrip(),
                          query_caller().increment(VersionComponent.Patch).to_str())
 
+    @unittest.skipUnless(
+        os.environ.get('TEST_CLI') or os.environ.get('CI'),
+        'skipping CLI test which breaks test logging')
     def test_predict_here(self):
         sio = io.StringIO()
         with temporarily_set_logger_level('version_query', logging.ERROR), \

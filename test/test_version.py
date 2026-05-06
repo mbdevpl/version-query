@@ -4,7 +4,6 @@ import logging
 import unittest
 
 import packaging.version
-import pkg_resources
 import semver
 
 from version_query.version import VersionComponent, Version
@@ -23,13 +22,12 @@ class Tests(unittest.TestCase):
         for version_str, (args, kwargs) in STR_CASES.items():
             version_tuple = case_to_version_tuple(args, kwargs)
             with self.subTest(version_str=version_str, version_tuple=version_tuple):
-
                 py_version = \
-                    pkg_resources.parse_version(version_str)
+                    packaging.version.parse(version_str)
                 _LOG.debug('packaging parsed version string %s into %s: %s',
                            repr(version_str), type(py_version), py_version)
-                # self.assertIsInstance(
-                #     py_version, packaging.version.Version, msg=(type(py_version), py_version))
+                self.assertIsInstance(
+                    py_version, packaging.version.Version, msg=(type(py_version), py_version))
 
                 try:
                     sem_version = semver.VersionInfo.parse(version_str)
@@ -38,8 +36,8 @@ class Tests(unittest.TestCase):
                 else:
                     _LOG.debug('semver parsed version string %s into %s: %s',
                                repr(version_str), type(sem_version), sem_version)
-                # self.assertIsInstance(
-                #     sem_version, semver.VersionInfo, msg=(type(sem_version), sem_version))
+                    self.assertIsInstance(
+                        sem_version, semver.VersionInfo, msg=(type(sem_version), sem_version))
 
                 self.assertEqual(Version.from_str(version_str).to_tuple(), version_tuple)
 
@@ -59,7 +57,7 @@ class Tests(unittest.TestCase):
                 py_version = packaging.version.Version(version_str)
                 self.assertEqual(Version.from_py_version(py_version).to_tuple(),
                                  version_tuple, py_version)
-                py_version_setuptools = pkg_resources.parse_version(version_str)
+                py_version_setuptools = packaging.version.parse(version_str)
                 self.assertEqual(Version.from_py_version(py_version_setuptools).to_tuple(),
                                  version_tuple, py_version_setuptools)
 
@@ -71,7 +69,6 @@ class Tests(unittest.TestCase):
                 py_version = packaging.version.Version(version_str)
                 self.assertEqual(version.to_py_version(), py_version,
                                  msg=(version.to_py_version(), py_version))
-                # py_version_setuptools = pkg_resources.parse_version(version_str)
 
     def test_from_sem_version(self):
         for version_str, (args, kwargs) in COMPATIBLE_STR_CASES.items():
