@@ -14,20 +14,22 @@ _LOG = logging.getLogger(__name__)
 
 def preprocess_git_version_tag(tag: str):
     """Remove a prefix from a version tag."""
-    if tag.startswith('ver'):
+    if tag.startswith('ver') and len(tag) > 3:
         return tag[3:]
-    if tag.startswith('v'):
+    if tag.startswith('v') and len(tag) > 1:
         return tag[1:]
     if tag and tag[0] in ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'):
         return tag
-    raise ValueError(f'given tag "{tag}" does not appear to be a version tag')
+    raise ValueError(f'the tag "{tag}" does not appear to be a version tag')
 
 
 def _git_version_tags(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
     versions = {}
     for tag in repo.tags:
+        if tag.name is None or not tag.name:
+            continue
         try:
-            tag_str = preprocess_git_version_tag(str(tag))
+            tag_str = preprocess_git_version_tag(tag.name)
         except ValueError:
             _LOG.debug('%s: ignoring non-version tag %s', repo, tag)
             continue
@@ -35,7 +37,7 @@ def _git_version_tags(repo: git.Repo) -> t.Mapping[git.Tag, Version]:
             versions[tag] = Version.from_str(tag_str)
         except ValueError:
             # except packaging.version.InvalidVersion:
-            _LOG.warning('%s: failed to convert %s to version', repo, tag_str)
+            _LOG.warning('%s: failed to convert %s (%r) to version', repo, tag.name, tag_str)
             continue
     return versions
 
