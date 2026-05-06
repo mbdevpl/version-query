@@ -12,3 +12,6 @@ class TestsLogging(Logging):
 
 
 TestsLogging.configure()
+logging.getLogger('version_query.git_query').setLevel(logging.INFO)
+logging.getLogger('version_query.parser').setLevel(logging.INFO)
+logging.getLogger('version_query.version').setLevel(logging.INFO)
