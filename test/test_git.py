@@ -81,7 +81,7 @@ class Tests(boilerplates.git_repo_tests.GitRepoTests):
         self.assertEqual(version, upcoming_version)
 
     @unittest.skipUnless(
-        os.environ.get('TEST_LONG', False) or os.environ.get('CI'), 'skipping long test')
+        os.environ.get('TEST_LONG') or os.environ.get('CI'), 'skipping long test')
     def test_too_long_no_tag(self):
         self.git_commit_new_file()
         self.repo.create_tag('v4.0.0')

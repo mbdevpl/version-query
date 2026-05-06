@@ -45,7 +45,7 @@ class Tests(unittest.TestCase):
 
     @unittest.skipUnless(
         os.environ.get('TEST_CLI') or os.environ.get('CI'),
-        'skipping CLI test which affects logging')
+        'skipping CLI test which breaks test logging')
     def test_help(self):
         sio = io.StringIO()
         with contextlib.redirect_stderr(sio), preserve_logger_level('version_query'), \
@@ -55,7 +55,7 @@ class Tests(unittest.TestCase):
 
     @unittest.skipUnless(
         os.environ.get('TEST_CLI') or os.environ.get('CI'),
-        'skipping CLI test which affects logging')
+        'skipping CLI test which breaks test logging')
     def test_bad_usage(self):
         sio = io.StringIO()
         with contextlib.redirect_stderr(sio), preserve_logger_level('version_query'), \
@@ -65,7 +65,7 @@ class Tests(unittest.TestCase):
 
     @unittest.skipUnless(
         os.environ.get('TEST_CLI') or os.environ.get('CI'),
-        'skipping CLI test which affects logging')
+        'skipping CLI test which breaks test logging')
     def test_here(self):
         sio = io.StringIO()
         with temporarily_set_logger_level('version_query', logging.ERROR), \
@@ -76,7 +76,7 @@ class Tests(unittest.TestCase):
 
     @unittest.skipUnless(
         os.environ.get('TEST_CLI') or os.environ.get('CI'),
-        'skipping CLI test which affects logging')
+        'skipping CLI test which breaks test logging')
     def test_increment_here(self):
         sio = io.StringIO()
         with temporarily_set_logger_level('version_query', logging.ERROR), \
@@ -87,7 +87,7 @@ class Tests(unittest.TestCase):
 
     @unittest.skipUnless(
         os.environ.get('TEST_CLI') or os.environ.get('CI'),
-        'skipping CLI test which affects logging')
+        'skipping CLI test which breaks test logging')
     def test_predict_here(self):
         sio = io.StringIO()
         with temporarily_set_logger_level('version_query', logging.ERROR), \

@@ -61,7 +61,7 @@ class Tests(unittest.TestCase):
                     _LOG.debug('%s: %s', path, version)
 
     @unittest.skipUnless(
-        os.environ.get('TEST_LONG', False) or os.environ.get('CI'), 'skipping long test')
+        os.environ.get('TEST_LONG') or os.environ.get('CI'), 'skipping long test')
     def test_query_git_repo(self):
         self._check_examples_count('git repo', GIT_REPO_EXAMPLES)
         _LOG.debug('testing query_git_repo() on %i repositories', len(GIT_REPO_EXAMPLES))
@@ -85,7 +85,7 @@ class Tests(unittest.TestCase):
             project_file_path.unlink()
 
     @unittest.skipUnless(
-        os.environ.get('TEST_LONG', False) or os.environ.get('CI'), 'skipping long test')
+        os.environ.get('TEST_LONG') or os.environ.get('CI'), 'skipping long test')
     def test_predict_git_repo(self):
         _LOG.debug('testing predict_git_repo() on %i repositories', len(GIT_REPO_EXAMPLES))
         self._query_test_case(GIT_REPO_EXAMPLES, predict_git_repo)
