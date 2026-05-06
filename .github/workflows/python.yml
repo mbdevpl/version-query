@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.10', '3.11', 'pypy3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', 'pypy3.11', '3.12', '3.13', '3.14']
         exclude:
           - os: macos-latest
             python-version: '3.10'
@@ -50,7 +50,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.14'
       - run: pip install build~=1.2
       - run: python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
