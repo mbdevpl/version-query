@@ -2,6 +2,7 @@
 
 import itertools
 import logging
+import os
 import platform
 import unittest
 
@@ -79,6 +80,8 @@ class Tests(boilerplates.git_repo_tests.GitRepoTests):
         version.local = (f'git{self.repo_head_hexsha}',)
         self.assertEqual(version, upcoming_version)
 
+    @unittest.skipUnless(
+        os.environ.get('TEST_LONG', False) or os.environ.get('CI'), 'skipping long test')
     def test_too_long_no_tag(self):
         self.git_commit_new_file()
         self.repo.create_tag('v4.0.0')
