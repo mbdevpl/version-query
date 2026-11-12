@@ -46,6 +46,9 @@ requires = [
     'semver >= 2.13, < 3.2'
 ]
 
+[tool.setuptools.dynamic]
+version = {attr = "version_query.local_version.PREDICTED"}
+
 [tool.flake8]
 max-line-length = 100
 max-doc-length = 100
