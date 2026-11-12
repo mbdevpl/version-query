@@ -31,9 +31,10 @@ def query_package_folder(path: pathlib.Path, search_parent_directories: bool = F
     """Get version from Python package folder."""
     global_metadata_json_paths, global_pkg_info_paths = [], []
     if path.joinpath('pyproject.toml').exists() or path.joinpath('setup.py').exists():
-        metadata_json_paths = list(path.glob('*.dist-info/metadata.json'))
-        pkg_info_paths = list(path.glob('*.egg-info/PKG-INFO'))
-        pkg_info_paths += list(path.glob('*.dist-info/METADATA'))
+        metadata_json_paths = [*path.glob('metadata.json'), *path.glob('*.dist-info/metadata.json')]
+        pkg_info_paths = [
+            *path.glob('PKG-INFO'), *path.glob('*.egg-info/PKG-INFO'),
+            *path.glob('METADATA'), *path.glob('*.dist-info/METADATA')]
         if len(metadata_json_paths) == 1 and not pkg_info_paths:
             return query_metadata_json(metadata_json_paths[0])
         if not metadata_json_paths and len(pkg_info_paths) == 1:
@@ -50,9 +51,10 @@ def query_package_folder(path: pathlib.Path, search_parent_directories: bool = F
     if search_parent_directories:
         paths += path.parents
     for pth in paths:
-        metadata_json_paths = list(pth.parent.glob(f'{pth.name}*.dist-info/metadata.json'))
-        pkg_info_paths = list(pth.parent.glob(f'{pth.name}*.egg-info/PKG-INFO'))
-        pkg_info_paths += list(pth.parent.glob(f'{pth.name}*.dist-info/METADATA'))
+        metadata_json_paths = [*pth.parent.glob(f'{pth.name}*.dist-info/metadata.json')]
+        pkg_info_paths = [
+            *pth.parent.glob(f'{pth.name}*.egg-info/PKG-INFO'),
+            *pth.parent.glob(f'{pth.name}*.dist-info/METADATA')]
         if len(metadata_json_paths) == 1 and not pkg_info_paths:
             return query_metadata_json(metadata_json_paths[0])
         if not metadata_json_paths and len(pkg_info_paths) == 1:
