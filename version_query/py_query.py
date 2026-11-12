@@ -85,11 +85,15 @@ def query_package_folder(path: pathlib.Path, search_parent_directories: bool = F
     if search_parent_directories:
         paths += path.parents
     for pth in paths:
-        metadata_json_paths = [*pth.parent.glob(f'{pth.name}*.dist-info/metadata.json')]
+        metadata_json_paths = [
+            *pth.parent.glob(f'{pth.name}.dist-info/metadata.json'),
+            *pth.parent.glob(f'{pth.name}-*.dist-info/metadata.json')]
         metadata_json_path = _pick_metadata_json_path(*metadata_json_paths)
         pkg_info_paths = [
-            *pth.parent.glob(f'{pth.name}*.egg-info/PKG-INFO'),
-            *pth.parent.glob(f'{pth.name}*.dist-info/METADATA')]
+            *pth.parent.glob(f'{pth.name}.egg-info/PKG-INFO'),
+            *pth.parent.glob(f'{pth.name}-*.egg-info/PKG-INFO'),
+            *pth.parent.glob(f'{pth.name}.dist-info/METADATA'),
+            *pth.parent.glob(f'{pth.name}-*.dist-info/METADATA')]
         pkg_info_path = _pick_pkg_info_path(*pkg_info_paths)
         if metadata_json_path is not None and pkg_info_path is None:
             return query_metadata_json(metadata_json_path)
