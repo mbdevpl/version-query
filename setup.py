@@ -30,9 +30,6 @@ class Package(boilerplates.setup.Package):
         'Topic :: System :: Software Distribution',
         'Topic :: Utilities',
         'Typing :: Typed']
-    keywords = [
-        'automation', 'continuous integration', 'git', 'releasing', 'semantic versioning',
-        'tagging', 'versioning']
 
 
 if __name__ == '__main__':
