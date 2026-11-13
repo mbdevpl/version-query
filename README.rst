@@ -15,7 +15,7 @@ Zero-overhead package versioning for Python.
     :target: https://pypi.org/project/version-query
     :alt: package version from PyPI
 
-.. image:: https://github.com/mbdevpl/version-query/actions/workflows/python.yml/badge.svg?branch=main
+.. image:: https://github.com/mbdevpl/version-query/actions/workflows/test.yml/badge.svg?branch=main
     :target: https://github.com/mbdevpl/version-query/actions
     :alt: build status from GitHub
 
