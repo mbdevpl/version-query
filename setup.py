@@ -30,6 +30,8 @@ class Package(boilerplates.setup.Package):
         'Topic :: System :: Software Distribution',
         'Topic :: Utilities',
         'Typing :: Typed']
+    version = None
+    install_requires = []
 
 
 if __name__ == '__main__':

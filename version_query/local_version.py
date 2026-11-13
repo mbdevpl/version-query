@@ -11,7 +11,6 @@ dynamic = ["version"]
 version = {attr = "version_query.local_version.PREDICTED"}
 """
 
-import os
 import pathlib
 
 from .query import query_folder, predict_folder
