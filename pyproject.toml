@@ -45,7 +45,7 @@ requires = [
 ]
 
 [tool.setuptools.dynamic]
-version = {attr = "version_query.local_version.PREDICTED"}
+version = {attr = 'version_query.local_version.PREDICTED'}
 
 [tool.flake8]
 max-line-length = 100

@@ -146,15 +146,15 @@ One of such packages is setuptools. When using it, one can do the following:
 .. code:: toml
 
     [project]
-    dynamic = ["version"]
+    dynamic = ['version']
     ...
 
     [build-system]
-    requires = ["setuptools >= 70.0"]
-    build-backend = "setuptools.build_meta"
+    requires = ['setuptools >= 70.0']
+    build-backend = 'setuptools.build_meta'
 
     [tool.setuptools.dynamic]
-    version = {attr = "version_query.local_version.PREDICTED"}
+    version = {attr = 'version_query.local_version.PREDICTED'}
 
 There's also an option to use ``version_query.local_git_version.PREDICTED``, however that depends
 on the build happening in a Git repository, and depending on how you build your package,

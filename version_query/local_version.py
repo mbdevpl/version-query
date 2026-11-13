@@ -4,11 +4,11 @@ For example, when using setuptools in pyproject.toml,
 one can set the version dynamically as follows:
 
 [project]
-dynamic = ["version"]
+dynamic = ['version']
 ...
 
 [tool.setuptools.dynamic]
-version = {attr = "version_query.local_version.PREDICTED"}
+version = {attr = 'version_query.local_version.PREDICTED'}
 """
 
 import pathlib
