@@ -1,0 +1,84 @@
+name: test
+
+on:
+  push:
+  pull_request:
+    branches:
+      - $default-branch
+
+permissions:
+  contents: read
+
+jobs:
+  test-build:
+    name: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11', 'pypy3.11', '3.12', '3.13', '3.14']
+        exclude:
+          - os: macos-latest
+            python-version: '3.10'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --no-install-workspace --group publish
+      - run: uv run -m build
+  test-unittest:
+    name: unittest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11', 'pypy3.11', '3.12', '3.13', '3.14']
+        exclude:
+          - os: macos-latest
+            python-version: '3.10'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --group test
+      - run: git clone https://github.com/PyCQA/pycodestyle ../pycodestyle
+      - if: matrix.os != 'windows-latest'
+        run: |
+          set -Eeuo pipefail
+          source .venv/bin/activate
+          cd ../pycodestyle
+          python -m pip install setuptools
+          python setup.py build
+          cd -
+      - run: git clone https://github.com/mbdevpl/argunparse ../argunparse
+      - if: matrix.os != 'windows-latest'
+        run: |
+          set -Eeuo pipefail
+          source .venv/bin/activate
+          cd ../argunparse
+          python -m pip install -r requirements_test.txt
+          python setup.py build
+          cd -
+      - run: git clone https://github.com/python-semver/python-semver ../semver
+      - if: matrix.os != 'windows-latest'
+        run: |
+          set -Eeuo pipefail
+          source .venv/bin/activate
+          cd ../semver
+          python -m build
+          cd -
+      - if: matrix.os != 'windows-latest'
+        run: uv run -m pip install --no-deps jupyter==1.0.0  # example package that uses metadata.json
+      - run: uv run -m coverage run --branch --source . -m unittest -v
+      - run: uv run -m coverage run --append --branch --source . -m unittest -v test.test_version
+        env:
+          LOGGING_LEVEL: critical
+      - run: uv run -m coverage run --append --branch --source . -m pip install --no-build-isolation --no-binary ebrains-drive ebrains-drive==0.6.0
+      - run: uv run -m coverage report --show-missing
+      - run: uv run -m codecov --token ${{ secrets.CODECOV_TOKEN }}

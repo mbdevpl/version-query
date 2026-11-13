@@ -1,2 +1,0 @@
--r requirements.txt
-boilerplates[git-repo-tests,packaging-tests] ~= 1.2

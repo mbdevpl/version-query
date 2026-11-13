@@ -1,10 +1,51 @@
-[build-system]
-requires = [
-    'boilerplates[setup] ~= 1.2',
+[project]
+name = 'version-query'
+requires-python = '>=3.10,<4'
+keywords = [
+    'automation', 'continuous integration', 'git', 'releasing', 'semantic versioning',
+    'tagging', 'versioning'
+]
+dependencies = [
+    'boilerplates[cli,logging] ~= 1.2',
     'GitPython ~= 3.1',
     'packaging >= 24.0',
     'semver >= 2.13, < 3.2'
 ]
+dynamic = ['authors', 'classifiers', 'description', 'license', 'maintainers', 'readme', 'version']
+
+[dependency-groups]
+flake518 = [
+    'flake518~=1.6'
+]
+mypy = [
+    'mypy~=2.4',
+    'types-setuptools>=67.4'
+]
+publish = [
+    'build~=1.6',
+    'twine~=7.0'
+]
+pydocstyle = [
+    'pydocstyle~=6.3'
+]
+pylint = [
+    'pylint~=4.1'
+]
+test = [
+    'boilerplates[git-repo-tests,packaging-tests]~=1.2',
+    'codecov~=2.1',
+    'coverage~=7.2'
+]
+
+[build-system]
+build-backend = 'setuptools.build_meta'
+requires = [
+    'boilerplates[setup] ~= 1.2',
+    'version-query ~= 1.6'
+]
+
+[tool.setuptools.dynamic]
+version = {attr = 'version_query.local_version.PREDICTED'}
 
 [tool.flake8]
 max-line-length = 100

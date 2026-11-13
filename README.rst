@@ -15,7 +15,7 @@ Zero-overhead package versioning for Python.
     :target: https://pypi.org/project/version-query
     :alt: package version from PyPI
 
-.. image:: https://github.com/mbdevpl/version-query/actions/workflows/python.yml/badge.svg?branch=main
+.. image:: https://github.com/mbdevpl/version-query/actions/workflows/test.yml/badge.svg?branch=main
     :target: https://github.com/mbdevpl/version-query/actions
     :alt: build status from GitHub
 
@@ -146,25 +146,19 @@ One of such packages is setuptools. When using it, one can do the following:
 .. code:: toml
 
     [project]
-    dynamic = ["version"]
+    dynamic = ['version']
     ...
 
     [build-system]
-    requires = ["setuptools >= 70.0"]
-    build-backend = "setuptools.build_meta"
+    requires = ['setuptools >= 70.0']
+    build-backend = 'setuptools.build_meta'
 
     [tool.setuptools.dynamic]
-    version = {attr = "version_query.local_git_version.PREDICTED"}
+    version = {attr = 'version_query.local_version.PREDICTED'}
 
-Depending on how you build your package, the build system may copy files to a temporary folder
-when building. In such case, you need to set ``PROJECT_FOLDER`` environment variable
-to the current working directory before running the build command.
-
-For example, when using ``build`` package:
-
-.. code:: bash
-
-    PROJECT_FOLDER=$(pwd) python3 -m build
+There's also an option to use ``version_query.local_git_version.PREDICTED``, however that depends
+on the build happening in a Git repository, and depending on how you build your package,
+the build system may copy files to a temporary folder which is not a repository.
 
 Versioning scheme
 =================
