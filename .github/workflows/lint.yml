@@ -1,0 +1,49 @@
+name: lint
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-flake518:
+    name: flake518
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: '3.14'
+      - run: uv sync --no-install-workspace --group flake518
+      - run: uv run -m flake518 --exclude .venv,build --verbose
+  lint-mypy:
+    name: mypy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: '3.14'
+      - run: uv sync --no-install-workspace --group mypy
+      - run: uv run -m mypy --exclude .venv --exclude build .
+  lint-pydocstyle:
+    name: pydocstyle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: '3.14'
+      - run: uv sync --no-install-workspace --group pydocstyle
+      - run: uv run -m pydocstyle --verbose .
+  lint-pylint:
+    name: pylint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: '3.14'
+      - run: uv sync --no-install-workspace --group pylint
+      - run: uv run -m pylint --ignore-paths=.venv,build .
