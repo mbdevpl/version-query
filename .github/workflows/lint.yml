@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.14'
       - run: uv sync --no-install-workspace --group flake518
-      - run: uv run -m flake518 --exclude .venv,build --verbose
+      - run: uv run --no-sync -m flake518 --exclude .venv,build --verbose
   lint-mypy:
     name: mypy
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: '3.14'
       - run: uv sync --no-install-workspace --group mypy
-      - run: uv run -m mypy --exclude .venv --exclude build .
+      - run: uv run --no-sync -m mypy --exclude .venv --exclude build .
   lint-pydocstyle:
     name: pydocstyle
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
         with:
           python-version: '3.14'
       - run: uv sync --no-install-workspace --group pydocstyle
-      - run: uv run -m pydocstyle --verbose .
+      - run: uv run --no-sync -m pydocstyle --verbose .
   lint-pylint:
     name: pylint
     runs-on: ubuntu-latest
@@ -46,4 +46,4 @@ jobs:
         with:
           python-version: '3.14'
       - run: uv sync --no-install-workspace --group pylint
-      - run: uv run -m pylint --ignore-paths=.venv,build .
+      - run: uv run --no-sync -m pylint --ignore-paths=.venv,build .
