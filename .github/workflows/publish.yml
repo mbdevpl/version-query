@@ -9,6 +9,27 @@ permissions:
   contents: read
 
 jobs:
+  publish-github-release:
+    name: github release
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: '3.14'
+      - run: uv sync --no-install-workspace --only-group publish
+      - run: uv run -m build
+      - uses: softprops/action-gh-release@v3.0.4
+        with:
+          prerelease: ${{ contains(github.ref, '.dev') || contains(github.ref, 'rc') }}
+          files: |
+            dist/*.tar.gz
+            dist/*.whl
+          generate_release_notes: true
   publish-pypi:
     name: pypi
     runs-on: ubuntu-latest
