@@ -1,9 +1,7 @@
 """Tests of local_git_version module."""
 
 import logging
-
 import unittest
-
 
 from version_query.local_git_version import QUERIED, PREDICTED
 

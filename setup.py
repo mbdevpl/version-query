@@ -1,6 +1,16 @@
 """Setup script for version_query package."""
 
+import pathlib
+import sys
+
 import boilerplates.setup
+
+_HERE = pathlib.Path(__file__).parent.resolve()
+
+
+def allow_local_version_query() -> None:
+    """Add folder of this setup.py to Python path to use packaged code when building the package."""
+    sys.path.insert(0, str(_HERE))
 
 
 class Package(boilerplates.setup.Package):
@@ -30,9 +40,12 @@ class Package(boilerplates.setup.Package):
         'Topic :: System :: Software Distribution',
         'Topic :: Utilities',
         'Typing :: Typed']
-    version = None
     install_requires = []
 
 
 if __name__ == '__main__':
+    allow_local_version_query()
+    # pylint: disable = wrong-import-position
+    from version_query._version import VERSION
+    Package.version = VERSION
     Package.setup()
