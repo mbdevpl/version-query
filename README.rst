@@ -1,10 +1,3 @@
-.. role:: bash(code)
-    :language: bash
-
-.. role:: python(code)
-    :language: python
-
-
 =============
 version-query
 =============
@@ -146,12 +139,15 @@ One of such packages is setuptools. When using it, one can do the following:
 .. code:: toml
 
     [project]
+    # ...
     dynamic = ['version']
-    ...
 
     [build-system]
-    requires = ['setuptools >= 70.0']
     build-backend = 'setuptools.build_meta'
+    requires = [
+        'setuptools~=84.2',
+        'version-query~=1.8'
+    ]
 
     [tool.setuptools.dynamic]
     version = {attr = 'version_query.local_version.PREDICTED'}
@@ -511,10 +507,8 @@ using version-query without any issues.
 Requirements
 ============
 
-Python version 3.10 or later.
+Python version 3.11 or later.
 
-Python libraries as specified in `<requirements.txt>`_.
-
-Building and running tests additionally requires packages listed in `<requirements_test.txt>`_.
+Dependencies are listed in `<pyproject.toml>`_.
 
 Tested on Linux, macOS and Windows.

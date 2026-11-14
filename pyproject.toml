@@ -1,15 +1,15 @@
 [project]
 name = 'version-query'
-requires-python = '>=3.10,<4'
+requires-python = '>=3.11,<4'
 keywords = [
     'automation', 'continuous integration', 'git', 'releasing', 'semantic versioning',
     'tagging', 'versioning'
 ]
 dependencies = [
-    'boilerplates[cli,logging] ~= 1.2',
-    'GitPython ~= 3.1',
-    'packaging >= 24.0',
-    'semver >= 2.13, < 3.2'
+    'boilerplates[cli,logging]~=1.2',
+    'GitPython~=3.2',
+    'packaging>=26.3',
+    'semver>=3.1.1'
 ]
 dynamic = ['authors', 'classifiers', 'description', 'license', 'maintainers', 'readme', 'version']
 
@@ -40,8 +40,8 @@ test = [
 [build-system]
 build-backend = 'setuptools.build_meta'
 requires = [
-    'boilerplates[setup] ~= 1.2',
-    'version-query ~= 1.6'
+    'boilerplates[setup]~=1.2',
+    'version-query~=1.7'
 ]
 
 [tool.setuptools.dynamic]
