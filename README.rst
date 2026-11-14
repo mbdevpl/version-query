@@ -1,10 +1,3 @@
-.. role:: bash(code)
-    :language: bash
-
-.. role:: python(code)
-    :language: python
-
-
 =============
 version-query
 =============
@@ -146,8 +139,8 @@ One of such packages is setuptools. When using it, one can do the following:
 .. code:: toml
 
     [project]
+    # ...
     dynamic = ['version']
-    ...
 
     [build-system]
     requires = ['setuptools >= 70.0']
