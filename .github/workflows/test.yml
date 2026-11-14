@@ -44,7 +44,7 @@ jobs:
       - run: git clone https://github.com/PyCQA/pycodestyle ../pycodestyle
       - if: matrix.os != 'windows-latest'
         run: |
-          set -Eeuo pipefail
+          set -Eeuxo pipefail
           source .venv/bin/activate
           cd ../pycodestyle
           python -m pip install setuptools
@@ -53,7 +53,7 @@ jobs:
       - run: git clone https://github.com/mbdevpl/argunparse ../argunparse
       - if: matrix.os != 'windows-latest'
         run: |
-          set -Eeuo pipefail
+          set -Eeuxo pipefail
           source .venv/bin/activate
           cd ../argunparse
           python -m pip install -r requirements_test.txt
@@ -62,7 +62,7 @@ jobs:
       - run: git clone https://github.com/python-semver/python-semver ../semver
       - if: matrix.os != 'windows-latest'
         run: |
-          set -Eeuo pipefail
+          set -Eeuxo pipefail
           source .venv/bin/activate
           cd ../semver
           python -m build
