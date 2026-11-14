@@ -1,6 +1,6 @@
 [project]
 name = 'version-query'
-requires-python = '>=3.10,<4'
+requires-python = '>=3.11,<4'
 keywords = [
     'automation', 'continuous integration', 'git', 'releasing', 'semantic versioning',
     'tagging', 'versioning'
