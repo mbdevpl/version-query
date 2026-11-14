@@ -100,11 +100,11 @@ wheels = [
 
 [[package]]
 name = "boilerplates"
-version = "1.2.7"
+version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/20/9e/2c6eca0642992c2d28243e43956aa4e50c9136eac4b40f9cf6a081ec1190/boilerplates-1.2.7.tar.gz", hash = "sha256:62045c8cf3cfc79ee265be59a26abf92fa4fb9c194128dab256ecc120b1f53d0", size = 42040, upload-time = "2026-11-13T11:45:26.719Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/22/ea/0bdbebe952eaf82574c79b295b58826d20e5b9ccd30748a6bd8d7c24d300/boilerplates-1.3.0.tar.gz", hash = "sha256:839502f677872b9a8b74ba1dfa9b76e09e3619a2b86380df76eb2ce64a490fac", size = 42844, upload-time = "2026-11-14T17:03:29.854Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/33/7b/882368574d39f7578e68f5e221ddd8286bdd1b080639ff5a4e6a02fcd8b9/boilerplates-1.2.7-py3-none-any.whl", hash = "sha256:a4bc59dd3eb26532930455471180534526bed00bb088548e23842d1d025d241c", size = 36911, upload-time = "2026-11-13T11:45:25.64Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/e7/fc26ddacf3813454ae517a41b24482080163f097858760bdddf668522ce7/boilerplates-1.3.0-py3-none-any.whl", hash = "sha256:91fd0d8a67530643b4b0589c5e2d0d820201e0dce5b91bfd8612fda0f379a752", size = 37502, upload-time = "2026-11-14T17:03:28.178Z" },
 ]
 
 [package.optional-dependencies]
@@ -1355,7 +1355,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "boilerplates", extras = ["cli", "logging"], specifier = "~=1.2" },
+    { name = "boilerplates", extras = ["cli", "logging"], specifier = "~=1.3" },
     { name = "gitpython", specifier = "~=3.2" },
     { name = "packaging", specifier = ">=26.3" },
     { name = "semver", specifier = ">=3.1.1" },
@@ -1374,7 +1374,7 @@ publish = [
 pydocstyle = [{ name = "pydocstyle", specifier = "~=6.3" }]
 pylint = [{ name = "pylint", specifier = "~=4.1" }]
 test = [
-    { name = "boilerplates", extras = ["git-repo-tests", "packaging-tests"], specifier = "~=1.2" },
+    { name = "boilerplates", extras = ["git-repo-tests", "packaging-tests"], specifier = "~=1.3" },
     { name = "codecov", specifier = "~=2.1" },
     { name = "coverage", specifier = "~=7.2" },
 ]
