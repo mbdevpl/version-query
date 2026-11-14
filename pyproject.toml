@@ -7,9 +7,9 @@ keywords = [
 ]
 dependencies = [
     'boilerplates[cli,logging]~=1.3',
-    'GitPython~=3.2',
-    'packaging>=26.3',
-    'semver>=3.1.1'
+    'GitPython~=3.1',
+    'packaging~=26.3',
+    'semver~=3.0'
 ]
 dynamic = ['authors', 'classifiers', 'description', 'license', 'maintainers', 'readme', 'version']
 
@@ -41,11 +41,10 @@ test = [
 build-backend = 'setuptools.build_meta'
 requires = [
     'boilerplates[setup]~=1.3',
-    'version-query~=1.7'
+    'GitPython~=3.1',
+    'packaging~=26.3',
+    'semver~=3.0'
 ]
-
-[tool.setuptools.dynamic]
-version = {attr = 'version_query.local_version.PREDICTED'}
 
 [tool.flake8]
 max-line-length = 100
