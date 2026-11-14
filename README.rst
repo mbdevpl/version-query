@@ -513,8 +513,6 @@ Requirements
 
 Python version 3.11 or later.
 
-Python libraries as specified in `<requirements.txt>`_.
-
-Building and running tests additionally requires packages listed in `<requirements_test.txt>`_.
+Dependencies are listed in `<pyproject.toml>`_.
 
 Tested on Linux, macOS and Windows.
