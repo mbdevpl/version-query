@@ -25,7 +25,7 @@ jobs:
       - run: uv run -m build
       - uses: softprops/action-gh-release@v3.0.4
         with:
-          prerelease: ${{ contains(github.ref, '.dev') || contains(github.ref, '.rc') }}
+          prerelease: ${{ contains(github.ref, '.dev') || contains(github.ref, 'rc') }}
           files: |
             dist/*.tar.gz
             dist/*.whl
