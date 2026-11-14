@@ -1,18 +1,18 @@
 version: 2
 updates:
-  - package-ecosystem: docker
-    directory: /
-    schedule:
-      interval: monthly
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: monthly
-  - package-ecosystem: pip
+      interval: weekly
+    cooldown:
+      default-days: 7
+  - package-ecosystem: uv
     directory: /
     schedule:
-      interval: monthly
-    versioning-strategy: increase-if-necessary
+      interval: weekly
+    cooldown:
+      default-days: 7
+    versioning-strategy: increase
     ignore:
       - dependency-name: >-
           *
