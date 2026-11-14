@@ -5,9 +5,6 @@ on:
     tags:
       - v*
 
-permissions:
-  contents: read
-
 jobs:
   publish-github-release:
     name: github release
@@ -32,6 +29,9 @@ jobs:
           generate_release_notes: true
   publish-pypi:
     name: pypi
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -43,5 +43,3 @@ jobs:
       - run: uv sync --no-install-workspace --only-group publish
       - run: uv run -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
