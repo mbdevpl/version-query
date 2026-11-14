@@ -143,8 +143,11 @@ One of such packages is setuptools. When using it, one can do the following:
     dynamic = ['version']
 
     [build-system]
-    requires = ['setuptools >= 70.0']
     build-backend = 'setuptools.build_meta'
+    requires = [
+        'setuptools~=84.2',
+        'version-query~=1.8'
+    ]
 
     [tool.setuptools.dynamic]
     version = {attr = 'version_query.local_version.PREDICTED'}

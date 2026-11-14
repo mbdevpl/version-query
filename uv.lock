@@ -1356,9 +1356,9 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "boilerplates", extras = ["cli", "logging"], specifier = "~=1.2" },
-    { name = "gitpython", specifier = "~=3.1" },
-    { name = "packaging", specifier = ">=24.0" },
-    { name = "semver", specifier = ">=2.13,<3.2" },
+    { name = "gitpython", specifier = "~=3.2" },
+    { name = "packaging", specifier = ">=26.3" },
+    { name = "semver", specifier = ">=3.1.1" },
 ]
 
 [package.metadata.requires-dev]
