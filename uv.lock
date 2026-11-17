@@ -1330,10 +1330,16 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
+coverage = [
+    { name = "boilerplates", extra = ["git-repo-tests", "packaging-tests"] },
+    { name = "codecov" },
+    { name = "coverage" },
+]
 flake518 = [
     { name = "flake518" },
 ]
 mypy = [
+    { name = "boilerplates", extra = ["git-repo-tests", "packaging-tests"] },
     { name = "mypy" },
     { name = "types-setuptools" },
 ]
@@ -1345,12 +1351,11 @@ pydocstyle = [
     { name = "pydocstyle" },
 ]
 pylint = [
+    { name = "boilerplates", extra = ["git-repo-tests", "packaging-tests"] },
     { name = "pylint" },
 ]
 test = [
     { name = "boilerplates", extra = ["git-repo-tests", "packaging-tests"] },
-    { name = "codecov" },
-    { name = "coverage" },
 ]
 
 [package.metadata]
@@ -1362,8 +1367,14 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+coverage = [
+    { name = "boilerplates", extras = ["git-repo-tests", "packaging-tests"], specifier = "~=1.3" },
+    { name = "codecov", specifier = "~=2.1" },
+    { name = "coverage", specifier = "~=7.2" },
+]
 flake518 = [{ name = "flake518", specifier = "~=1.6" }]
 mypy = [
+    { name = "boilerplates", extras = ["git-repo-tests", "packaging-tests"], specifier = "~=1.3" },
     { name = "mypy", specifier = "~=2.4" },
     { name = "types-setuptools", specifier = ">=67.4" },
 ]
@@ -1372,12 +1383,11 @@ publish = [
     { name = "twine", specifier = "~=7.0" },
 ]
 pydocstyle = [{ name = "pydocstyle", specifier = "~=6.3" }]
-pylint = [{ name = "pylint", specifier = "~=4.1" }]
-test = [
+pylint = [
     { name = "boilerplates", extras = ["git-repo-tests", "packaging-tests"], specifier = "~=1.3" },
-    { name = "codecov", specifier = "~=2.1" },
-    { name = "coverage", specifier = "~=7.2" },
+    { name = "pylint", specifier = "~=4.1" },
 ]
+test = [{ name = "boilerplates", extras = ["git-repo-tests", "packaging-tests"], specifier = "~=1.3" }]
 
 [[package]]
 name = "wheel"

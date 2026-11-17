@@ -21,7 +21,7 @@ jobs:
       - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: ${{ matrix.python-version }}
-      - run: uv sync --no-install-workspace --group publish
+      - run: uv sync --only-group publish
       - run: uv run -m build
   test-unittest:
     name: unittest
@@ -37,7 +37,7 @@ jobs:
       - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: ${{ matrix.python-version }}
-      - run: uv sync --group test
+      - run: uv sync --group coverage
       - run: git clone https://github.com/PyCQA/pycodestyle ../pycodestyle
       - if: matrix.os != 'windows-latest'
         run: |

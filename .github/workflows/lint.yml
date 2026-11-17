@@ -12,16 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: '3.15'
-      - run: uv sync --no-install-workspace --group flake518
+      - run: uv sync --only-group flake518
       - run: uv run --no-sync -m flake518 --exclude .venv,build --verbose
   lint-mypy:
     name: mypy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: '3.15'
@@ -32,16 +36,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: '3.15'
-      - run: uv sync --no-install-workspace --group pydocstyle
+      - run: uv sync --only-group pydocstyle
       - run: uv run --no-sync -m pydocstyle --verbose .
   lint-pylint:
     name: pylint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: '3.15'
