@@ -33,6 +33,18 @@ def query_folder(path: pathlib.Path, search_parent_directories: bool = False) ->
         return query_git_repo(path, search_parent_directories=search_parent_directories)
     except git.InvalidGitRepositoryError:
         pass
+    except git.GitCommandError as err:
+        try:
+            shallow_repo_present = git.Repo(
+                path, search_parent_directories=search_parent_directories
+            ).git.rev_parse(is_shallow_repository=True)
+        except (git.InvalidGitRepositoryError, git.GitCommandError):
+            pass
+        else:
+            if shallow_repo_present:
+                raise ValueError(
+                    f'git repository found at {path} but it is shallow, please fetch'
+                    ' the full history to be able to use version-query') from err
     return query_package_folder(path, search_parent_directories=search_parent_directories)
 
 
@@ -58,6 +70,7 @@ def query_version_str() -> str:
 
 def predict_folder(path: pathlib.Path, search_parent_directories: bool = True) -> Version:
     """Predict version of code residing in a given folder."""
+    # pylint: disable = too-complex
     priority_cutoff = 2
     paths = [path] + (list(path.parents)[:priority_cutoff] if search_parent_directories else [])
     for pth in paths:
@@ -65,6 +78,10 @@ def predict_folder(path: pathlib.Path, search_parent_directories: bool = True) -
             return predict_git_repo(pth, search_parent_directories=False)
         except git.InvalidGitRepositoryError:
             pass
+        except git.GitCommandError:
+            _LOG.debug(
+                'found git repository at %s but there was a git command error',
+                path, exc_info=True)
     try:
         return query_package_folder(path, search_parent_directories=False)
     except ValueError:
@@ -73,6 +90,18 @@ def predict_folder(path: pathlib.Path, search_parent_directories: bool = True) -
         return predict_git_repo(path, search_parent_directories=search_parent_directories)
     except git.InvalidGitRepositoryError:
         pass
+    except git.GitCommandError as err:
+        try:
+            shallow_repo_present = git.Repo(
+                path, search_parent_directories=search_parent_directories
+            ).git.rev_parse(is_shallow_repository=True)
+        except (git.InvalidGitRepositoryError, git.GitCommandError):
+            pass
+        else:
+            if shallow_repo_present:
+                raise ValueError(
+                    f'git repository found at {path} but it is shallow, please fetch'
+                    ' the full history to be able to use version-query') from err
     return query_folder(path, search_parent_directories=search_parent_directories)
 
 

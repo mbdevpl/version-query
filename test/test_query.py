@@ -1,19 +1,23 @@
 """Tests of querying tools."""
 
+import contextlib
 import importlib
 import logging
 import os
 import pathlib
+import platform
 import sys
 import tempfile
 import unittest
 
+import boilerplates.git_repo_tests
 from boilerplates.packaging_tests import run_module
+import git
 
 from version_query.version import Version
 from version_query.git_query import query_git_repo, predict_git_repo
 from version_query.py_query import query_metadata_json, query_pkg_info, query_package_folder
-from version_query.query import query_folder, query_caller
+from version_query.query import query_folder, query_caller, predict_folder
 from .examples import \
     PY_LIB_DIR, GIT_REPO_EXAMPLES, METADATA_JSON_EXAMPLE_PATHS, PKG_INFO_EXAMPLE_PATHS, \
     PACKAGE_FOLDER_EXAMPLES
@@ -158,3 +162,44 @@ class Tests(unittest.TestCase):
         version = query_caller()
         _LOG.debug('caller: %s', version)
         self.assertIsInstance(version, Version)
+
+
+@unittest.skipIf(platform.system() == 'Windows', 'skipping as these tests fail on Windows')
+class GitRepoTests(boilerplates.git_repo_tests.GitRepoTests):
+
+    @contextlib.contextmanager
+    def repo_clone(self, **kwargs):
+        """Context with a clone of the test repo."""
+        assert self.repo_path is not None
+        with tempfile.TemporaryDirectory() as temporary_folder:
+            yield git.Repo.clone_from(
+                f'file://{self.repo_path / ".git"}', temporary_folder, **kwargs)
+
+    def prepare_valid_repo(self):
+        """Prepare a dummy repository in which version-query can run."""
+        self.git_init()
+        self.git_commit_new_file()
+        self.repo.git.tag('v1.0')
+        self.git_commit_new_file()
+        self.git_commit_new_file()
+
+    def test_query_shallow_repo(self):
+        self.prepare_valid_repo()
+        version = query_folder(self.repo_path, False)
+        _LOG.debug('queried dummy version: %s', version)
+        with self.repo_clone(depth=1) as clone:
+            self.assertEqual(len(list(clone.iter_commits())), 1)
+            with self.assertRaises(ValueError):
+                query_folder(pathlib.Path(clone.working_tree_dir), False)
+
+    def test_predict_shallow_repo(self):
+        self.prepare_valid_repo()
+        version = predict_folder(self.repo_path, False)
+        _LOG.debug('predicted dummy version: %s', version)
+        with self.repo_clone(depth=1) as clone:
+            self.assertEqual(len(list(clone.iter_commits())), 1)
+            shallow_version = predict_folder(pathlib.Path(clone.working_tree_dir), False)
+            _LOG.debug('predicted shallow clone version: %s', shallow_version)
+            # git sha is the same, but shallow clone version is earlier
+            self.assertTupleEqual(shallow_version.local_to_tuple(), version.local_to_tuple())
+            self.assertLess(shallow_version, version)

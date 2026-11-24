@@ -78,7 +78,7 @@ the current version number is automatically generated based on:
 
 in your git repository. Therefore the package can be built and shipped to PyPI based only on status
 of the git repository. When there is no git repository (this might be the case at installation time
-or at runtime) then the script relies on metadata generated at packaging time.
+or at runtime) then version-query relies on metadata generated at packaging time.
 
 That's why, regardless if package is installed from PyPI (from source or wheel distribution)
 or cloned from GitHub, the version query will work.
@@ -481,24 +481,100 @@ the tag is probably a version tag.
 Limitations
 ===========
 
-Either git repository or metadata file must be present for the script to work. When, for example,
+Either git repository or metadata file must be present for version-query to work. When, for example,
 zipped version of repository is downloaded from GitHub, the resulting archive contains neither
 metadata files nor repository data.
 
-It is unclear what happens if the queried repository is bare.
+Additionally, even if git repository is present, version-query may fail if repo has unexpected format, such as:
 
-The implementation is not fully compatible with Python versioning. Especially,
-in current implementation at most one of:
-alpha ``a`` / beta ``b`` / release candidate ``rc`` / development ``dev`` suffixes
-can be used in a version identifier.
+*   Shallow clones. This is typically seen in CI/CD pipelines which may in many cases clone repositories
+    without git history. For example, in case of ``actions/checkout`` on GitHub/Forgejo actions,
+    please add ``fetch-depth: 0``.
 
-And the format in which
-alpha ``a``, beta ``b`` and release candidate ``rc`` suffixes
-are to be used does not match exactly the conditions defined in PEP 440.
+    .. code:: yaml
 
-Script might feel a bit slow when attempting to find a version tag in a git repository with a very
-large history and no version tags. It is designed towards packages with short release cycles
--- in long release cycles the overhead of manual versioning is small anyway.
+        - uses: actions/checkout@...
+          with:
+            fetch-depth: 0
+
+*   Bare repositories. It is technically possible run version-query inside bare repositories, but
+    such repositories are not supported. Bare repositories don't have a working tree so there's
+    no current version to be determined. However, such repositories still have ``HEAD`` reference,
+    so version-query is able to say what would be the current commit if the repository was checked out.
+    Unless you are sure about your bare repository configuration, the results from
+    version-query may not make much sense to you.
+
+The implementation is largely interoperable with Python versioning, but not fully. The differences
+are small, but depending on your use case you may run into them. To highlight some examples:
+
+*   PEP 440 versions are subject to normalisation, version-query versions are not.
+
+    .. code:: python
+
+        import packaging.version
+        import version_query
+
+        packaging.version.Version('1.0b1')  # 1.0b1
+        packaging.version.Version('1.0beta1')  # normalised to 1.0b1
+        packaging.version.Version('1.0.beta1')  # also normalised to 1.0b1
+        version_query.Version.from_str('1.0b1').to_tuple()  # (1, 0, None, None, 'b', 1)
+        version_query.Version.from_str('1.0beta1').to_tuple()  # (1, 0, None, None, 'beta', 1)
+        version_query.Version.from_str('1.0.beta1').to_tuple()  # (1, 0, None, '.', 'beta', 1)
+
+*   PEP 440 post-releases (``.post``) are treated as pre-releases by version-query. This suffix has
+    special meaning in Python and puts such version after the corresponding release. In version-query,
+    every suffix is allowed and all text suffixes are treated as pre-releases, therefore a post-release
+    using such suffix is put before the corresponding release.
+
+    .. code:: python
+
+        packaging.version.Version('1.2.3.post1') > packaging.version.Version('1.2.3')  # True
+        version_query.Version.from_str('1.2.3.post1') > version_query.Version.from_str('1.2.3')  # False
+
+    However, if a pre-release segment without any text is used, it is considered as normal release,
+    and is put after the corresponding release. Incidentally, in PEP 440 a segment with just a dash
+    (``-``) is considered as a post release, and normalised to a post-release. Therefore one can use
+    post releases and have them ordered correctly by version query as follows:
+
+    .. code:: python
+
+        packaging.version.Version('1.2.3-1')  #  normalised to 1.2.3.post1
+        version_query.Version.from_str('1.2.3-1') > version_query.Version.from_str('1.2.3')  # True
+
+*   Although version-query supports arbitrary number of pre-release segments and is quite forgiving
+    about their format, PEP 440 puts strict limitations on them.
+
+    In Python at most one of alpha ``a`` / beta ``b`` / release candidate ``rc`` suffixes can be used.
+
+    .. code:: python
+
+        packaging.version.Version('1.0a1b2')  # error
+        version_query.Version.from_str('1.0a1b2')  # OK
+
+    Also, PEP 440 defines strict conditions on the format of pre-release segments. Arbitrary pre-release
+    names such as ``prealpha`` or ``GA`` or others are not allowed.
+
+    .. code:: python
+
+        packaging.version.Version('1.0.prealpha1')  # error
+        version_query.Version.from_str('1.0.prealpha1')  # OK
+
+*   PEP 440 epoch (``!``) is not supported by version-query.
+
+    .. code:: python
+
+        version_query.Version.from_str('1!1.0')  # error
+        packaging.version.Version('1!1.0')  # OK
+
+    As a side note, as of January 2026
+    `latest Python specification on version specifiers <https://packaging.python.org/en/latest/specifications/version-specifiers/#version-epochs>`_
+    discourages use of epochs, but still they are allowed.
+
+Querying or predicting versions might feel a bit slow when attempting to find a version tag
+in a git repository with a very large history and no version tags. It is designed towards packages
+with relatively short release cycles. Performance issues were only seen in benchmarks and
+never reported (yet) by any actual user, but if you notice any slowdowns, please submit
+`an issue <https://github.com/mbdevpl/ingit/issues/new/choose>`_.
 
 Despite above limitations, version-query itself (as well as growing number of other packages) are
 using version-query without any issues.
