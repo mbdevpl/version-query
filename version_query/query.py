@@ -70,6 +70,7 @@ def query_version_str() -> str:
 
 def predict_folder(path: pathlib.Path, search_parent_directories: bool = True) -> Version:
     """Predict version of code residing in a given folder."""
+    # pylint: disable = too-complex
     priority_cutoff = 2
     paths = [path] + (list(path.parents)[:priority_cutoff] if search_parent_directories else [])
     for pth in paths:
@@ -79,7 +80,7 @@ def predict_folder(path: pathlib.Path, search_parent_directories: bool = True) -
             pass
         except git.GitCommandError:
             _LOG.debug(
-                'found git repository at %s but there was a git command error %s',
+                'found git repository at %s but there was a git command error',
                 path, exc_info=True)
     try:
         return query_package_folder(path, search_parent_directories=False)
